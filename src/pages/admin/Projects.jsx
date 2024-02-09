@@ -90,6 +90,7 @@ export default function Projects() {
               id="topbar-search"
               className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
               placeholder="Title"
+              value={search.title}
               onChange={(e) => {
                 setSearch((prev) => {
                   return { ...prev, title: e.target.value };
@@ -172,10 +173,8 @@ export default function Projects() {
             className="bg-gray-500  border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-[200px] p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:hover:bg-gray-800"
           >
             <option value="">Filter by status...</option>
-            <option value="On Hold">On Hold</option>
             <option value="In Progress">In Progress</option>
             <option value="Completed">Completed</option>
-            <option value="Not Started">Not Started</option>
           </select>
         </section>
 
@@ -224,31 +223,46 @@ export default function Projects() {
           <div
             key={project.id}
             onClick={() => navigate(`/admin/project/detail/${project.id}`)}
-            className=" rounded text-black  max-h-[370px]   transition transform cursor-pointer bg-gray-400 hover:bg-white hover:-translate-y-2 hover:border hover:border-white"
+            className={`text-gray-900 rounded   max-h-[370px]     bg-gray-400    ${
+              project.status === "Completed"
+                ? ""
+                : "transition  transform hover:bg-white hover:-translate-y-2 hover:border hover:border-white cursor-pointer"
+            }`}
           >
-            <section className="flex justify-center w-full h-[230px] rounded ">
+            <section className="flex justify-center w-full h-[230px] rounded relative">
+              <section
+                className={`${
+                  project.status === "Completed" ? "visible" : "hidden"
+                }`}
+              >
+                <div class="absolute inset-0 bg-black opacity-70"></div>
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <p class="text-white text-2xl font-bold">Completed</p>
+                </div>
+              </section>
               <img
                 src={project.imageURL}
-                className="w-full h-full rounded"
+                className={`w-full h-full rounded`}
                 alt=""
               />
             </section>
             <section className="px-3 py-3">
-              <span className="text-gray-800 font-bold text-2xl">
-                {project.title}
-              </span>
+              <span className={` font-bold text-2xl `}>{project.title}</span>
               <section className="text-base">
-                Start Date:
+                <span className="text-gray-900 mr-2">Start Date:</span>
                 <span className="font-bold">{project.startDate}</span>{" "}
               </section>
               <section className="text-sm">
-                End Date: <span className="font-bold">{project.endDate}</span>{" "}
+                <span className="text-gray-900 mr-2">End Date:</span>
+                <span className="font-bold">{project.endDate}</span>{" "}
               </section>
               <section className="text-sm">
-                Status: <span className="font-bold">{project.status}</span>{" "}
+                <span className="text-gray-900 mr-2">Status:</span>
+                <span className="font-bold">{project.status}</span>{" "}
               </section>
               <section className="text-sm">
-                Priority: <span className="font-bold">{project.priority}</span>{" "}
+                <span className="text-gray-900 mr-2">Priority:</span>
+                <span className="font-bold">{project.priority}</span>{" "}
               </section>
               {/* <p className="text-center text-sm text-gray-600 mt-2">
                 {project.overview.length > 360
@@ -303,10 +317,9 @@ export default function Projects() {
                 className="mb-4 sm:mb-0 mr-12 inline-flex items-center text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-4 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
               >
                 <option value="">Filter by status</option>
-                <option value="On Hold">On Hold</option>
+
                 <option value="In Progress">In Progress</option>
                 <option value="Completed">Completed</option>
-                <option value="Not Started">Not Started</option>
               </select>
               <section className="flex gap-x-2 items-center">
                 <label htmlFor="start" className="text-gray-400 text-sm">
@@ -483,7 +496,9 @@ export default function Projects() {
                         }
                         className="cursor-pointer"
                       >
-                        <td class="p-4 text-sm  text-gray-900 whitespace-nowrap dark:text-white font-semibold">
+                        <td
+                          className={`p-4 text-sm   whitespace-nowrap  font-semibold`}
+                        >
                           {project.title}
                         </td>
                         <td class="p-4 text-sm font-normal text-gray-500 whitespace-nowrap dark:text-gray-400">
@@ -511,24 +526,7 @@ export default function Projects() {
                           >
                             Completed
                           </span>
-                          <span
-                            class={`bg-green-100 text-white text-xs font-medium mr-2 px-2.5 py-0.5 rounded-md dark:bg-gray-700  border border-gray-400  ${
-                              project.status === "Not Started"
-                                ? "inline-block"
-                                : "hidden"
-                            }`}
-                          >
-                            Not Started
-                          </span>
-                          <span
-                            class={`bg-green-100 text-red-900 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-md dark:bg-gray-700  border border-red-900  ${
-                              project.status === "On Hold"
-                                ? "inline-block"
-                                : "hidden"
-                            }`}
-                          >
-                            On Hold
-                          </span>
+
                           <span
                             class={`bg-green-100 text-orange-300 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-md dark:bg-gray-700  border border-orange-300  ${
                               project.status === "In Progress"

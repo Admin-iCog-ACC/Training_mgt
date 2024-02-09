@@ -256,8 +256,6 @@ function ProjectDetail() {
                   >
                     <option value="Completed">Completed</option>
                     <option value="In Progress">In Progress</option>
-                    <option value="On Hold">On Hold</option>
-                    <option value="Not Started">Not Started</option>
                   </select>
                 </div>
                 <div class="col-span-2 sm:col-span-1">
