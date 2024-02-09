@@ -12,8 +12,14 @@ const connectToDB = async () => {
   try {
     await sequelize.authenticate();
     // Many-Many
-    Trainer.belongsToMany(Project, { through: TrainerProjects });
-    Project.belongsToMany(Trainer, { through: TrainerProjects });
+    Trainer.belongsToMany(Project, {
+      through: { model: TrainerProjects },
+      onDelete: "CASCADE",
+    });
+    Project.belongsToMany(Trainer, {
+      through: TrainerProjects,
+      onDelete: "CASCADE",
+    });
 
     // One-Many
     Admin.hasMany(Project, {

@@ -3,8 +3,10 @@ const express = require("express");
 const cors = require("cors");
 const projectRouter = require("./routes/project");
 const adminRouter = require("./routes/admin");
+const trainersProjects = require("./models/TrainersProjects");
 const trainerRouter = require("./routes/trainer");
 const authRouter = require("./routes/auth");
+const applicationRouter = require("./routes/application");
 const { deleteFile } = require("./cloudinary");
 const sendEmail = require("./Email");
 const connectToDB = require("./DBconnection");
@@ -17,6 +19,7 @@ app.use("/api/project", projectRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/trainer", trainerRouter);
 app.use("/api/auth", authRouter);
+app.use("/api/application", applicationRouter);
 app.delete("/api/deleteFile/:id", async (req, res) => {
   const { id } = req.params;
   try {
@@ -46,4 +49,16 @@ app.get("/api/announceProject/:id", async (req, res) => {
 });
 
 connectToDB();
+
+const dd = async () => {
+  try {
+    // console.log("-----------------------Creating-----------------------------");
+    await trainersProjects.create({ TrainerId: 3, ProjectId: 10 });
+  } catch (error) {
+    console.log(error);
+  }
+};
+// console.log("-----------------------Creating-----------------------------");
+
 app.listen(3000, () => console.log("App running on port 3000"));
+// dd();

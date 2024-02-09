@@ -40,7 +40,7 @@ const Project = sequelize.define("Project", {
     allowNull: true,
   },
   status: {
-    type: DataTypes.ENUM("On Hold", "In Progress", "Completed", "Not Started"),
+    type: DataTypes.ENUM("In Progress", "Completed"),
     allowNull: false,
   },
   priority: {
@@ -54,6 +54,10 @@ const Project = sequelize.define("Project", {
   span: {
     type: DataTypes.STRING,
     allowNull: false,
+  },
+  days: {
+    type: DataTypes.ARRAY(DataTypes.JSON),
+    defaultValue: [],
   },
 });
 

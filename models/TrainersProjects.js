@@ -6,8 +6,14 @@ const sequelize = new Sequelize(
   "postgres://postgres:password@localhost:5432/Trainers"
 );
 const TrainersProjects = sequelize.define("TrainersProjects", {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
   TrainerId: {
     type: DataTypes.INTEGER,
+
     references: {
       model: Trainer,
       key: "id",

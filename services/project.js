@@ -2,6 +2,7 @@ const { sendEmail } = require("../Email");
 const { deleteFile, uploadFile } = require("../cloudinary");
 const ProjectModel = require("../models/ProjectModel");
 const Trainer = require("../models/TrainerModel");
+const Admin = require("../models/AdminModel");
 require("dotenv").config();
 
 const uploadProjectImageService = async (req, res) => {
@@ -35,7 +36,9 @@ const getAllProjectsServices = async (req, res) => {
 
 const getProjectServices = async (req, res) => {
   const { id } = req.params;
-  const project = await ProjectModel.findByPk(id, { include: Trainer });
+  const project = await ProjectModel.findByPk(id, {
+    include: [Trainer, Admin],
+  });
 
   if (!project) {
     return res
@@ -49,8 +52,9 @@ const getProjectServices = async (req, res) => {
 const createProjectServices = async (req, res) => {
   const data = req.body;
   try {
+    console.log(data);
     const { public_id, secure_url } = await uploadFile(data.imageURL);
-    console.log(req.admin.id);
+    console.log(secure_url);
     const project = await ProjectModel.create({
       ...data,
       imageURL: secure_url,
@@ -58,7 +62,7 @@ const createProjectServices = async (req, res) => {
       AdminId: req.admin.id,
     });
 
-    await sendEmail(project);
+    console.log(project);
     return res.status(200).json({ project: project });
   } catch (error) {
     console.log(error);
