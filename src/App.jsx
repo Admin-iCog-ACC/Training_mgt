@@ -7,6 +7,7 @@ import Projects from "./pages/admin/Projects";
 import Login from "./pages/admin/Login";
 import Profile from "./pages/admin/Profile";
 import Trainers from "./pages/admin/Trainers";
+import ProjectDetail from "./pages/admin/ProjectDetail";
 // import ECommerce from "./pages/Dashboard/ECommerce";
 
 function App() {
@@ -14,10 +15,11 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="login" element={<Login />} />
-        <Route path="/" element={<AdminHeader />}>
+        <Route path="/admin" element={<AdminHeader />}>
           <Route path="projects" element={<Projects />} />
           <Route path="profile" element={<Profile />} />
           <Route path="trainers" element={<Trainers />} />
+          <Route path="project/detail/:id" element={<ProjectDetail />} />
 
           {/* <Route path="*" element={<Error />} /> */}
         </Route>

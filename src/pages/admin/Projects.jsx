@@ -2,12 +2,13 @@ import { Translate } from "@material-ui/icons";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import ReactPaginate from "react-paginate";
-import { useOutletContext } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 
 export default function Projects() {
   const [projects, setProjects] = useState(null);
   const [display, setDisplay] = useState("other");
   const { showDrawer } = useOutletContext();
+  const navigate = useNavigate();
 
   const [search, setSearch] = useState({
     title: "",
@@ -47,10 +48,7 @@ export default function Projects() {
 
     return filteredProjects;
   };
-  console.log(
-    "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Eligendi, eveniet? Nisi odio quod sequi nam vitae. Eius mollitia vitae minima accusantium, unde in. Quisquam, culpa obcaecati blanditiis illo tenetur nesciunt a est asperiores mollitia provident, sequi amet, explicabo expedita doloribus. A vitae dolorum labore dignissimos non quidem esse libero magnam!"
-      .length
-  );
+
   useEffect(() => {
     fetchProjects();
   }, [showDrawer]);
@@ -155,6 +153,7 @@ export default function Projects() {
                 return { ...prev, priority: e.target.value };
               });
             }}
+            value={search.priority}
             className="bg-gray-50  border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-[200px] p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:hover:bg-gray-800"
           >
             <option value="">Filter by priority...</option>
@@ -169,6 +168,7 @@ export default function Projects() {
                 return { ...prev, status: e.target.value };
               });
             }}
+            value={search.status}
             className="bg-gray-500  border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-[200px] p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:hover:bg-gray-800"
           >
             <option value="">Filter by status...</option>
@@ -194,6 +194,7 @@ export default function Projects() {
                 return { ...prev, start: e.target.value };
               });
             }}
+            value={search.start}
           />
           <span>to</span>
           <label htmlFor="end" className="text-gray-400 text-sm">
@@ -210,6 +211,7 @@ export default function Projects() {
                 return { ...prev, end: e.target.value };
               });
             }}
+            value={search.end}
           />
         </section>
       </section>
@@ -221,6 +223,7 @@ export default function Projects() {
         {filterProjects(projects)?.map((project) => (
           <div
             key={project.id}
+            onClick={() => navigate(`/admin/project/detail/${project.id}`)}
             className=" rounded text-black  max-h-[370px]   transition transform cursor-pointer bg-gray-400 hover:bg-white hover:-translate-y-2 hover:border hover:border-white"
           >
             <section className="flex justify-center w-full h-[230px] rounded ">
@@ -235,7 +238,7 @@ export default function Projects() {
                 {project.title}
               </span>
               <section className="text-base">
-                Start Date:{" "}
+                Start Date:
                 <span className="font-bold">{project.startDate}</span>{" "}
               </section>
               <section className="text-sm">
@@ -280,6 +283,7 @@ export default function Projects() {
                 }}
                 name="status"
                 id="status"
+                value={search.priority}
                 className="mb-4 sm:mb-0 mr-4 inline-flex items-center text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-4 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
               >
                 <option value="">Filter by priority </option>
@@ -295,6 +299,7 @@ export default function Projects() {
                 }}
                 name="status"
                 id="status"
+                value={search.status}
                 className="mb-4 sm:mb-0 mr-12 inline-flex items-center text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-4 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
               >
                 <option value="">Filter by status</option>
@@ -418,10 +423,10 @@ export default function Projects() {
             </div>
           </div>
         </div>
-        <div class="flex flex-col mt-6">
+        <div class="flex flex-col mt-6 ">
           <div class="overflow-x-auto rounded-lg">
             <div class="inline-block min-w-full align-middle">
-              <div class="overflow-hidden shadow sm:rounded-lg">
+              <div class="shadow sm:rounded-lg  overflow-y-auto  h-[650px]">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
                   <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
@@ -471,7 +476,13 @@ export default function Projects() {
                   </thead>
                   <tbody class="bg-white dark:bg-gray-800">
                     {filterProjects(projects)?.map((project) => (
-                      <tr key={project.id}>
+                      <tr
+                        key={project.id}
+                        onClick={() =>
+                          navigate(`/admin/project/detail/${project.id}`)
+                        }
+                        className="cursor-pointer"
+                      >
                         <td class="p-4 text-sm  text-gray-900 whitespace-nowrap dark:text-white font-semibold">
                           {project.title}
                         </td>
@@ -491,8 +502,41 @@ export default function Projects() {
                           {project.budget}
                         </td>
                         <td class="p-4 whitespace-nowrap">
-                          <span class="bg-green-100 text-green-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-md dark:bg-gray-700 dark:text-green-400 border border-green-100 dark:border-green-500">
+                          <span
+                            class={`bg-green-100 text-green-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-md dark:bg-gray-700 dark:text-green-400 border border-green-100 dark:border-green-500 ${
+                              project.status === "Completed"
+                                ? "inline-block"
+                                : "hidden"
+                            }`}
+                          >
                             Completed
+                          </span>
+                          <span
+                            class={`bg-green-100 text-white text-xs font-medium mr-2 px-2.5 py-0.5 rounded-md dark:bg-gray-700  border border-gray-400  ${
+                              project.status === "Not Started"
+                                ? "inline-block"
+                                : "hidden"
+                            }`}
+                          >
+                            Not Started
+                          </span>
+                          <span
+                            class={`bg-green-100 text-red-900 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-md dark:bg-gray-700  border border-red-900  ${
+                              project.status === "On Hold"
+                                ? "inline-block"
+                                : "hidden"
+                            }`}
+                          >
+                            On Hold
+                          </span>
+                          <span
+                            class={`bg-green-100 text-orange-300 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-md dark:bg-gray-700  border border-orange-300  ${
+                              project.status === "In Progress"
+                                ? "inline-block"
+                                : "hidden"
+                            }`}
+                          >
+                            In Progress
                           </span>
                         </td>
                       </tr>

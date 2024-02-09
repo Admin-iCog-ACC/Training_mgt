@@ -21,12 +21,50 @@ export default function AdminHeader() {
     overview: "",
     description: "",
     imageURL: "",
+    days: [],
   });
-  const [selectedRoute, setSelectedRoute] = useState({
-    name: "projects",
-  });
+
+  const [days, setDays] = useState({ day: "", hour: "", period: "" });
+  const [selectedRoute, setSelectedRoute] = useState([]);
   const [showDrawer, setShowDrawer] = useState(false);
 
+  const handleDayChange = (e) => {
+    const { name, value } = e.target;
+
+    setDays((prev) => {
+      return {
+        ...prev,
+        [name]: value,
+      };
+    });
+  };
+
+  const addDays = () => {
+    const { day, hour, period } = days;
+
+    if (!day || !hour.trim() || !period) {
+      return;
+    }
+
+    if (input.days.find((d) => d.day === day)) {
+      return;
+    }
+    setInput((prev) => {
+      return { ...prev, days: [days, ...input.days] };
+    });
+    setDays({ day: "", hour: "", period: "" });
+  };
+
+  const removeDay = (day) => {
+    if (!day) {
+      return;
+    }
+    const days = input.days.filter((d) => d.day !== day);
+
+    setInput((prev) => {
+      return { ...prev, days };
+    });
+  };
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
@@ -54,7 +92,7 @@ export default function AdminHeader() {
     reader.readAsDataURL(file);
   };
 
-  const changeRoute = ({ name }) => setSelectedRoute({ name });
+  const changeRoute = ({ name }) => setSelectedRoute((prev) => [...prev, name]);
 
   const createProject = async (e) => {
     e.preventDefault();
@@ -78,7 +116,7 @@ export default function AdminHeader() {
         theme: "dark",
         transition: Flip,
       });
-      navigate("/projects");
+      navigate("/admin/projects");
     } catch (error) {
       console.log(error);
     }
@@ -279,6 +317,7 @@ export default function AdminHeader() {
                   className="text-white bg-gray-700 p-2"
                   id="start"
                   required
+                  name="startDate"
                   onChange={handleInputChange}
                 />
               </div>
@@ -355,6 +394,126 @@ export default function AdminHeader() {
             >
               only image/jpeg, image/png, image/jpg files allowed
             </span>
+          </div>
+          <div className="mb-4">
+            <section className="flex justify-between items-end gap-x-4 ">
+              <div className="flex-2">
+                <label
+                  for="day"
+                  className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                >
+                  Day
+                </label>
+                <select
+                  onChange={handleDayChange}
+                  name="day"
+                  id="day"
+                  value={days.day}
+                  className="w-full mb-4 sm:mb-0 mr-4 inline-flex items-center text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-4 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
+                >
+                  <option value="">Select Day</option>
+                  <option value="Monday">Monday</option>
+                  <option value="Tuesday">Tuesday</option>
+                  <option value="Wednesday">Wednesday</option>
+                  <option value="Thursday">Thursday</option>
+                  <option value="Friday">Friday</option>
+                  <option value="Saturday">Saturday</option>
+                  <option value="Sunday">Sunday</option>
+                </select>
+              </div>
+              <div className="flex-2">
+                <label
+                  htmlFor="start"
+                  className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                >
+                  Hours
+                </label>
+
+                <input
+                  type="text"
+                  id="hour"
+                  name="hour"
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  placeholder="Hours per day"
+                  required
+                  onChange={handleDayChange}
+                  value={days.hour}
+                />
+              </div>
+              <div className="flex-2">
+                <label
+                  htmlFor="start"
+                  className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                >
+                  Periods
+                </label>
+
+                <select
+                  onChange={handleDayChange}
+                  name="period"
+                  id="period"
+                  value={days.period}
+                  className="w-full mb-4 sm:mb-0 mr-4 inline-flex items-center text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-4 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
+                >
+                  <option value="">Select Period</option>
+
+                  <option value="All Day">All Day</option>
+                  <option value="Morning">Morning</option>
+                  <option value="Afternoon">Afternoon</option>
+                </select>
+              </div>
+              <div className="  flex justify-center">
+                <section
+                  class="w-10 h-10 mr-2 -ml-1  bg-gray-700 rounded-full cursor-pointer hover:bg-gray-500"
+                  onClick={addDays}
+                >
+                  <svg
+                    class="w-10 h-10 "
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                      clip-rule="evenodd"
+                    ></path>
+                  </svg>
+                </section>
+              </div>
+            </section>
+          </div>
+          <div className="flex flex-col gap-y-2">
+            {input.days.map((day, index) => (
+              <section
+                key={day.day}
+                className="text-sm tracking-wide flex items-center justify-between"
+              >
+                <span>
+                  {index + 1}. {day.day} -- {day.hour} hour -- {day.period}
+                </span>
+                <span
+                  className="cursor-pointer bg-gray-700 w-6 h-6 flex items-center justify-center rounded-full hover:bg-gray-500"
+                  onClick={() => removeDay(day.day)}
+                >
+                  <svg
+                    class="w-3 h-3"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 14 14"
+                  >
+                    <path
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+                    />
+                  </svg>
+                </span>
+              </section>
+            ))}
           </div>
           <button
             type="submit"
@@ -447,9 +606,21 @@ export default function AdminHeader() {
         <div className="border-r border-gray-600 w-[256px] px-4 ">
           <section className="py-8 flex flex-col gap-y-2">
             <div
-              onClick={() => changeRoute({ name: "projects" })}
+              onClick={() => {
+                const truth = selectedRoute.find(
+                  (route) => route === "projects"
+                );
+                if (truth) {
+                  setSelectedRoute((prev) =>
+                    prev.filter((p) => p !== "projects")
+                  );
+                } else {
+                  changeRoute({ name: "projects" });
+                }
+              }}
               class={`flex items-center p-2 text-base text-gray-900 rounded-lg cursor-pointer ${
-                selectedRoute.name == "projects" && "bg-gray-700"
+                selectedRoute.find((route) => route === "projects") &&
+                "bg-gray-700"
               } group dark:text-gray-200 hover:bg-gray-700`}
             >
               <svg
@@ -462,7 +633,8 @@ export default function AdminHeader() {
 
               <div
                 class={`ml-3 flex flex-1 items-center justify-between text-white ${
-                  selectedRoute.name == "projects" && "text-white"
+                  selectedRoute.find((route) => route === "projects") &&
+                  "text-white"
                 }`}
                 sidebar-toggle-item=""
               >
@@ -483,13 +655,15 @@ export default function AdminHeader() {
             </div>
             <section
               className={`my-2 px-2 ml-3  ${
-                selectedRoute.name == "projects" ? "block" : "hidden"
+                selectedRoute.find((route) => route === "projects")
+                  ? "block"
+                  : "hidden"
               }`}
             >
               <div
                 onClick={() => {
                   setShowDrawer(false);
-                  navigate("/projects");
+                  navigate("/admin/projects");
                 }}
                 class={`px-6 py-3  text-sm text-gray-900 rounded-lg cursor-pointer hover:bg-gray-100 group dark:text-gray-200 dark:hover:bg-gray-700`}
               >
@@ -505,9 +679,21 @@ export default function AdminHeader() {
               </div>
             </section>
             <div
-              onClick={() => changeRoute({ name: "trainers" })}
+              onClick={() => {
+                const truth = selectedRoute.find(
+                  (route) => route === "trainers"
+                );
+                if (truth) {
+                  setSelectedRoute((prev) =>
+                    prev.filter((p) => p !== "trainers")
+                  );
+                } else {
+                  changeRoute({ name: "trainers" });
+                }
+              }}
               class={`flex items-center p-2 text-base text-gray-900 rounded-lg cursor-pointer hover:bg-gray-100 group dark:text-gray-200 dark:hover:bg-gray-700  ${
-                selectedRoute.name == "trainers" && "bg-gray-700"
+                selectedRoute.find((route) => route === "trainers") &&
+                "bg-gray-700"
               }`}
             >
               <svg
@@ -520,6 +706,18 @@ export default function AdminHeader() {
               <div
                 class={`ml-3 flex flex-1 items-center justify-between`}
                 sidebar-toggle-item=""
+                onClick={() => {
+                  const truth = selectedRoute.find(
+                    (route) => route === "trainers"
+                  );
+                  if (truth) {
+                    setSelectedRoute((prev) =>
+                      prev.filter((p) => p !== "trainers")
+                    );
+                  } else {
+                    changeRoute({ name: "trainers" });
+                  }
+                }}
               >
                 Trainers
                 <svg
@@ -527,7 +725,8 @@ export default function AdminHeader() {
                   viewBox="0 0 20 20"
                   // className="{ 'rotate-180': open, 'rotate-0': !open }"
                   className={`inline w-5 h-5 transition duration-100 transform cursor-pointer rounded-[50%]  ${
-                    selectedRoute.name == "trainers" && "text-white"
+                    selectedRoute.find((route) => route === "trainers") &&
+                    "text-white"
                   }`}
                 >
                   <path
@@ -538,6 +737,23 @@ export default function AdminHeader() {
                 </svg>
               </div>
             </div>
+            <section
+              className={`my-2 px-2 ml-3  ${
+                selectedRoute.find((route) => route === "trainers")
+                  ? "block"
+                  : "hidden"
+              }`}
+            >
+              <div
+                onClick={() => {
+                  setShowDrawer(false);
+                  navigate("/admin/trainers");
+                }}
+                class={`px-6 py-3  text-sm text-gray-900 rounded-lg cursor-pointer hover:bg-gray-100 group dark:text-gray-200 dark:hover:bg-gray-700`}
+              >
+                View Trainers
+              </div>
+            </section>
           </section>
         </div>
         <div className="p-3 bg-gray-800 flex-1">
