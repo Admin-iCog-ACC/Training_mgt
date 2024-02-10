@@ -8,6 +8,7 @@ import Login from "./pages/admin/Login";
 import Profile from "./pages/admin/Profile";
 import Trainers from "./pages/admin/Trainers";
 import ProjectDetail from "./pages/admin/ProjectDetail";
+import TrainerDetail from "./pages/admin/TrainerDetail";
 // import ECommerce from "./pages/Dashboard/ECommerce";
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
           <Route path="profile" element={<Profile />} />
           <Route path="trainers" element={<Trainers />} />
           <Route path="project/detail/:id" element={<ProjectDetail />} />
+          <Route path="trainer/detail/:id" element={<TrainerDetail />} />
 
           {/* <Route path="*" element={<Error />} /> */}
         </Route>
