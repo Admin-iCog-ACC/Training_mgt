@@ -9,6 +9,7 @@ import Profile from "./pages/admin/Profile";
 import Trainers from "./pages/admin/Trainers";
 import ProjectDetail from "./pages/admin/ProjectDetail";
 import TrainerDetail from "./pages/admin/TrainerDetail";
+import ChangePassword from "./pages/admin/ChangePassword";
 // import ECommerce from "./pages/Dashboard/ECommerce";
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
 
           {/* <Route path="*" element={<Error />} /> */}
         </Route>
+        <Route path="change/password" element={<ChangePassword />} />
       </Routes>
     </BrowserRouter>
   );

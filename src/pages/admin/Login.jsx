@@ -9,7 +9,7 @@ function Login() {
   const navigate = useNavigate();
   const loginUser = async (e) => {
     e.preventDefault();
-    console.log(input);
+
     try {
       const res = await axios.post(
         "http://localhost:3000/api/auth/admin/login",
@@ -17,7 +17,7 @@ function Login() {
       );
 
       localStorage.setItem("token", res.data.access_token);
-      navigate("/projects");
+      navigate("/admin/projects");
     } catch (error) {
       console.log(error);
       if (error.response?.status === 400) {

@@ -50,7 +50,7 @@ function Trainers() {
   const registerTrainer = async (e) => {
     e.preventDefault();
     setRegisterLoading(true);
-    console.log(registerLoading);
+
     try {
       const res = await axios.post("http://localhost:3000/api/trainer", input, {
         headers: {
@@ -62,7 +62,7 @@ function Trainers() {
       const newTrainer = res.data.trainer;
       //   setTimeout(() => {
       setTrainers((prev) => {
-        return [{ projects: [], ...newTrainer }, ...prev];
+        return [{ Projects: [], ...newTrainer }, ...prev];
       });
       setTrainerDrawer(false);
       setInput({
@@ -282,7 +282,7 @@ function Trainers() {
                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 placeholder="Expertise"
                 required
-                value={input.lastName}
+                value={input.AreaofExpertise}
                 onChange={handleInputChange}
               />
             </section>
@@ -360,7 +360,7 @@ function Trainers() {
             </button>
             <button
               type="submit"
-              onSubmit={(e) => registerTrainer(e, false)}
+              onSubmit={(e) => registerTrainer(e)}
               value="another"
               className="text-white bg-gray-600 mt-4 hover:bg-gray-900 flex justify-center items-center w-full focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2"
             >
@@ -698,6 +698,7 @@ function Trainers() {
                             </div>
                           </td>
                           <td class="p-4 text-base  text-gray-400 whitespace-nowrap ">
+                            {console.log(trainers)}
                             {
                               trainer.Projects.filter(
                                 (project) => project.status === "Completed"
