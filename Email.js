@@ -3,6 +3,7 @@ const transporter = require("./nodeMailer");
 const {
   NewProjectAnnouncementTemplate,
   AdminAccessEmailTemplate,
+  ForgotPasswordCodeEmailTemplate,
 } = require("./emailTemplate");
 
 const sendEmail = async (project) => {
@@ -49,5 +50,24 @@ const sendGeneratedPassword = async (trainer, newPassword) => {
     return false;
   }
 };
+const sendRecoveryCode = async (email, user, code) => {
+  try {
+    await transporter.sendMail({
+      from: "tessemayenoh94@gmail.com",
+      to: email,
+      subject: "Password Recovery Code",
+      html: ForgotPasswordCodeEmailTemplate(user, code),
+    });
+    return true;
+  } catch (err) {
+    console.log(err);
+    return false;
+  }
+};
 
-module.exports = { sendEmail, sendGeneratedPassword, generatePassword };
+module.exports = {
+  sendEmail,
+  sendGeneratedPassword,
+  generatePassword,
+  sendRecoveryCode,
+};

@@ -36,6 +36,14 @@ const Admin = sequelize.define("Admin", {
     type: DataTypes.STRING,
     defaultValue: "Project Lead",
   },
+  recoveryDigits: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  time: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
 });
 
 module.exports = Admin;

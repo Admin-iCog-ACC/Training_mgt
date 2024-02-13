@@ -4,7 +4,9 @@ const AdminModel = require("../models/AdminModel");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { verifyRequest } = require("../auth");
+const { verifyRequest, generateCode } = require("../auth");
+const { NewReleasesSharp } = require("@material-ui/icons");
+const { sendRecoveryCode } = require("../Email");
 
 router.route("/trainer/login").post(async (req, res) => {
   try {
@@ -96,6 +98,68 @@ router.route("/verify").get(async (req, res) => {
   }
   console.log(value);
   return res.status(200).json({ ...value, admin });
+});
+
+router.route("/send_password_code").get(async (req, res) => {
+  const { status, value, admin } = await verifyRequest(req, res);
+  if (status === 401) {
+    return res.status(401).json({ msg: "Unauthorized" });
+  }
+  const { id } = value;
+  const code = await generateCode();
+
+  const time = new Date();
+  if (admin) {
+    await AdminModel.update(
+      { recoveryDigits: code, time },
+      {
+        where: {
+          id,
+        },
+        returning: true,
+      }
+    );
+
+    await sendRecoveryCode(value.email, value, code);
+  } else {
+    await TrainerModel.update(
+      { recoveryDigits: code, time },
+      {
+        where: {
+          id,
+        },
+        returning: true,
+      }
+    );
+    await sendRecoveryCode(value.email, value, code);
+  }
+  return res.status(201).json({ msg: "Code sent" });
+});
+
+router.route("/change/password").post(async (req, res) => {
+  const { password, recoveryDigits } = req.body;
+  const { status, value, admin } = await verifyRequest(req, res);
+  console.log(status, value);
+  if (status === 401) {
+    return res.status(401).json({ msg: "Unauthorized" });
+  }
+
+  if (value.recoveryDigits !== recoveryDigits) {
+    return res.status(401).json({ msg: "Invalid code" });
+  }
+
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
+  const updatedAdmin = await AdminModel.update(
+    { password: hashedPassword, recoveryDigits: null, time: null },
+    {
+      where: {
+        id: value.id,
+      },
+    }
+  );
+
+  return res.status(201).json({ msg: "password successfully updated" });
 });
 
 module.exports = router;

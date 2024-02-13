@@ -62,6 +62,14 @@ const Trainer = sequelize.define("Trainer", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  recoveryDigits: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  time: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
 });
 
 module.exports = Trainer;

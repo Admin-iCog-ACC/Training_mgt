@@ -42,6 +42,7 @@ const Project = sequelize.define("Project", {
   status: {
     type: DataTypes.ENUM("In Progress", "Completed"),
     allowNull: false,
+    defaultValue: "In Progress",
   },
   priority: {
     type: DataTypes.ENUM("High", "Low", "Intermediate"),
