@@ -4,10 +4,6 @@ const ProjectModel = require("../models/ProjectModel");
 const bcrypt = require("bcrypt");
 const TrainersProjects = require("../models/TrainersProjects");
 const { uploadFile } = require("../cloudinary");
-const getAllAdminsServices = async (req, res) => {
-  const admins = await AdminModel.findAll({ include: ProjectModel });
-  return res.status(200).json({ admins: admins });
-};
 
 const getAdminServices = async (req, res) => {
   const { id } = req.params;
@@ -18,6 +14,15 @@ const getAdminServices = async (req, res) => {
       .status(404)
       .json({ location: "", path: "", msg: "Admin not found.", type: "" });
   }
+
+  return res.status(200).json({ admin: admin });
+};
+
+const getAllAdminsServices = async (req, res) => {
+  const admin = await AdminModel.findAll({
+    attributes: { exclude: ["password", "recoveryDigits"] },
+    include: ProjectModel,
+  });
 
   return res.status(200).json({ admin: admin });
 };

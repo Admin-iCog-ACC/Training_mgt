@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const verifyRequest = require("../auth");
+const { verifyRequest, canGetAllAdmins } = require("../auth");
 const {
   getAdminController,
   getAllAdminController,
@@ -11,7 +11,10 @@ const {
   updateAdminPasswordController,
 } = require("../controllers/admin");
 const { canUpdateDeleteAdmin } = require("../auth");
-router.route("/").get(getAllAdminController).post(createAdminController);
+router
+  .route("/")
+  .get(canGetAllAdmins, getAllAdminController)
+  .post(createAdminController);
 router
   .route("/:id")
   .get(getAdminController)

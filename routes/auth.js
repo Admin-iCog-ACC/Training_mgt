@@ -34,7 +34,7 @@ router.route("/trainer/login").post(async (req, res) => {
           admin: false,
           email: trainer.email,
         },
-        "1234"
+        `${process.env.jwt_secret}`
       );
       return res.status(200).json({ access_token: token });
     }
@@ -74,7 +74,7 @@ router.route("/admin/login").post(async (req, res) => {
           email: admin.email,
           role: admin.role,
         },
-        "1234"
+        `${process.env.jwt_secret}`
       );
       return res.status(200).json({ access_token: token });
     }
@@ -224,6 +224,7 @@ router.route("/change/password").post(async (req, res) => {
 });
 
 router.route("/delete/account").delete(async (req, res) => {
+  console.log("deleting");
   try {
     const { status, value, admin } = await verifyRequest(req, res);
     if (status === 401) {
@@ -249,6 +250,7 @@ router.route("/delete/account").delete(async (req, res) => {
     }
     return res.status(204).json();
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ msg: "Failed to delete" });
   }
 });

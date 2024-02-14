@@ -13,7 +13,7 @@ const verifyRequest = async (req, res) => {
     if (!token) {
       return { status: 401 };
     }
-    const data = jwt.verify(token, "1234");
+    const data = jwt.verify(token, `${process.env.jwt_secret}`);
 
     if (!data) {
       return { status: 401 };
@@ -55,7 +55,7 @@ const verifyRequestAccess = async (req, res, next) => {
     if (!token) {
       return res.status(401).json({ msg: "Can't proceed" });
     }
-    const data = jwt.verify(token, "1234");
+    const data = jwt.verify(token, `${process.env.jwt_secret}`);
 
     if (!data) {
       return res.status(401).json({ msg: "Can't proceed" });
@@ -181,6 +181,19 @@ const generateCode = async () => {
   return code;
 };
 
+const canGetAllAdmins = async (req, res, next) => {
+  try {
+    const { status, value, admin } = await verifyRequest(req, res);
+    console.log(value);
+    if (!admin || value.role !== "HR") {
+      return res.status(401).json({ msg: "Unauthorized" });
+    }
+    next(0);
+  } catch (error) {
+    return res.status(401).json({ msg: "Unauthorized" });
+  }
+};
+
 module.exports = {
   verifyRequest,
   canDeleteUpdateCreateProject,
@@ -191,4 +204,5 @@ module.exports = {
   canUpdateDeleteAdmin,
   canCreateTrainer,
   generateCode,
+  canGetAllAdmins,
 };

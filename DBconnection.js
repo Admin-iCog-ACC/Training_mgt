@@ -11,31 +11,38 @@ const connectToDB = async () => {
 
   try {
     await sequelize.authenticate();
-    // Many-Many
+    // Many - Many;
     Trainer.belongsToMany(Project, {
       through: { model: TrainerProjects },
-      onDelete: "CASCADE",
+      onDelete: "SET NULL",
     });
     Project.belongsToMany(Trainer, {
       through: TrainerProjects,
-      onDelete: "CASCADE",
+      onDelete: "SET NULL",
     });
 
     // One-Many
     Admin.hasMany(Project, {
       foreignKey: {
-        allowNull: false,
+        allowNull: true,
       },
-      onDelete: "NO ACTION",
+      onDelete: "SET NULL",
     });
-    Project.belongsTo(Admin);
+    Project.belongsTo(Admin, {
+      foreignKey: {
+        allowNull: true,
+        // defaultValue: null,
+      },
+      onDelete: "SET NULL",
+    });
 
     // One-Many
     Admin.hasMany(Trainer, {
       foreignKey: {
-        allowNull: false,
+        allowNull: true,
+        // defaultValue: null,
       },
-      onDelete: "NO ACTION",
+      onDelete: "SET NULL",
     });
     Trainer.belongsTo(Admin);
 

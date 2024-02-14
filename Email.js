@@ -5,13 +5,14 @@ const {
   AdminAccessEmailTemplate,
   ForgotPasswordCodeEmailTemplate,
 } = require("./emailTemplate");
+require("dotenv").config();
 
 const sendEmail = async (project) => {
   try {
     const trainers = await Trainer.findAll();
     for (let i = 0; i < trainers.length; i++) {
       await transporter.sendMail({
-        from: "tessemayenoh94@gmail.com",
+        from: `${process.env.email}`,
         to: trainers[i].email,
         subject: "New Project",
         html: NewProjectAnnouncementTemplate(project, trainers[i]),
@@ -39,7 +40,7 @@ const generatePassword = () => {
 const sendGeneratedPassword = async (trainer, newPassword) => {
   try {
     await transporter.sendMail({
-      from: "tessemayenoh94@gmail.com",
+      from: `${process.env.email}`,
       to: trainer.email,
       subject: "Your Account Has Been Successfully Approved",
       html: AdminAccessEmailTemplate(trainer, newPassword),
@@ -53,7 +54,7 @@ const sendGeneratedPassword = async (trainer, newPassword) => {
 const sendRecoveryCode = async (email, user, code) => {
   try {
     await transporter.sendMail({
-      from: "tessemayenoh94@gmail.com",
+      from: `${process.env.email}`,
       to: email,
       subject: "Password Recovery Code",
       html: ForgotPasswordCodeEmailTemplate(user, code),
