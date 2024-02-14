@@ -8,8 +8,10 @@ const trainerRouter = require("./routes/trainer");
 const authRouter = require("./routes/auth");
 const applicationRouter = require("./routes/application");
 const { deleteFile } = require("./cloudinary");
-const sendEmail = require("./Email");
+const { sendEmail } = require("./Email");
 const connectToDB = require("./DBconnection");
+const Project = require("./models/ProjectModel");
+
 require("dotenv").config();
 
 const app = express();
@@ -50,15 +52,4 @@ app.get("/api/announceProject/:id", async (req, res) => {
 
 connectToDB();
 
-const dd = async () => {
-  try {
-    // console.log("-----------------------Creating-----------------------------");
-    await trainersProjects.create({ TrainerId: 3, ProjectId: 10 });
-  } catch (error) {
-    console.log(error);
-  }
-};
-// console.log("-----------------------Creating-----------------------------");
-
 app.listen(3000, () => console.log("App running on port 3000"));
-// dd();

@@ -7,6 +7,7 @@ const jwt = require("jsonwebtoken");
 const { verifyRequest, generateCode } = require("../auth");
 const { NewReleasesSharp } = require("@material-ui/icons");
 const { sendRecoveryCode } = require("../Email");
+const { verify } = require("../nodeMailer");
 
 router.route("/trainer/login").post(async (req, res) => {
   try {
@@ -71,6 +72,7 @@ router.route("/admin/login").post(async (req, res) => {
           id: admin.id,
           admin: true,
           email: admin.email,
+          role: admin.role,
         },
         "1234"
       );
@@ -100,16 +102,30 @@ router.route("/verify").get(async (req, res) => {
   return res.status(200).json({ ...value, admin });
 });
 
-router.route("/send_password_code").get(async (req, res) => {
-  const { status, value, admin } = await verifyRequest(req, res);
-  if (status === 401) {
-    return res.status(401).json({ msg: "Unauthorized" });
-  }
-  const { id } = value;
-  const code = await generateCode();
-
+router.route("/send_password_code").post(async (req, res) => {
+  const { email } = req.body;
+  const trainer = await TrainerModel.findOne({ where: { email } });
   const time = new Date();
+  const code = await generateCode();
+  if (trainer) {
+    const { id, email } = trainer;
+    await TrainerModel.update(
+      { recoveryDigits: code, time },
+      {
+        where: {
+          id,
+        },
+        returning: true,
+      }
+    );
+    await sendRecoveryCode(email, trainer, code);
+    return res.status(201).json({ msg: "Code sent" });
+  }
+
+  const admin = await AdminModel.findOne({ where: { email } });
   if (admin) {
+    const { id, email } = admin;
+
     await AdminModel.update(
       { recoveryDigits: code, time },
       {
@@ -120,46 +136,121 @@ router.route("/send_password_code").get(async (req, res) => {
       }
     );
 
-    await sendRecoveryCode(value.email, value, code);
+    await sendRecoveryCode(email, admin, code);
+    return res.status(201).json({ msg: "Code sent" });
   } else {
+    return res.status(404).json({ msg: "not found" });
+  }
+});
+
+router.route("/update/password").post(async (req, res) => {
+  const { password, recoveryDigits, email } = req.body;
+
+  const trainer = await TrainerModel.findOne({ where: { email } });
+  if (trainer) {
+    if (trainer.recoveryDigits !== recoveryDigits) {
+      return res.status(401).json({ msg: "Invalid code" });
+    }
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
     await TrainerModel.update(
-      { recoveryDigits: code, time },
+      { password: hashedPassword, recoveryDigits: null, time: null },
       {
         where: {
-          id,
+          id: trainer.id,
         },
-        returning: true,
       }
     );
-    await sendRecoveryCode(value.email, value, code);
+    return res.status(200).json({ msg: "Password updated" });
   }
-  return res.status(201).json({ msg: "Code sent" });
+
+  const admin = await AdminModel.findOne({ where: { email } });
+
+  if (admin) {
+    if (admin.recoveryDigits !== recoveryDigits) {
+      return res.status(401).json({ msg: "Invalid code" });
+    }
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    await AdminModel.update(
+      { password: hashedPassword, recoveryDigits: null, time: null },
+      {
+        where: {
+          id: admin.id,
+        },
+      }
+    );
+
+    return res.status(200).json({ msg: "Password updated" });
+  } else {
+    return res.status(404).json({ msg: "Not found" });
+  }
 });
 
 router.route("/change/password").post(async (req, res) => {
-  const { password, recoveryDigits } = req.body;
+  const { oldPassword, newPassword } = req.body;
   const { status, value, admin } = await verifyRequest(req, res);
-  console.log(status, value);
+
   if (status === 401) {
     return res.status(401).json({ msg: "Unauthorized" });
   }
 
-  if (value.recoveryDigits !== recoveryDigits) {
-    return res.status(401).json({ msg: "Invalid code" });
+  if (!(await bcrypt.compare(oldPassword, value.password))) {
+    return res.status(401).json({ msg: "Invalid old password" });
   }
 
   const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, salt);
-  const updatedAdmin = await AdminModel.update(
-    { password: hashedPassword, recoveryDigits: null, time: null },
-    {
-      where: {
-        id: value.id,
-      },
-    }
-  );
-
+  const hashedPassword = await bcrypt.hash(newPassword, salt);
+  if (admin) {
+    await AdminModel.update(
+      { password: hashedPassword },
+      {
+        where: {
+          id: value.id,
+        },
+      }
+    );
+  } else {
+    await TrainerModel.update(
+      { password: hashedPassword },
+      {
+        where: {
+          id: value.id,
+        },
+      }
+    );
+  }
   return res.status(201).json({ msg: "password successfully updated" });
+});
+
+router.route("/delete/account").delete(async (req, res) => {
+  try {
+    const { status, value, admin } = await verifyRequest(req, res);
+    if (status === 401) {
+      return res.status(404).json({
+        msg: "Not found",
+      });
+    }
+
+    if (admin) {
+      await AdminModel.destroy({
+        where: {
+          id: value.id,
+        },
+      });
+    }
+
+    if (!admin) {
+      await TrainerModel.destroy({
+        where: {
+          id: value.id,
+        },
+      });
+    }
+    return res.status(204).json();
+  } catch (error) {
+    return res.status(500).json({ msg: "Failed to delete" });
+  }
 });
 
 module.exports = router;

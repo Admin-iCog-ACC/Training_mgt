@@ -26,6 +26,7 @@ const connectToDB = async () => {
       foreignKey: {
         allowNull: false,
       },
+      onDelete: "NO ACTION",
     });
     Project.belongsTo(Admin);
 
@@ -34,6 +35,7 @@ const connectToDB = async () => {
       foreignKey: {
         allowNull: false,
       },
+      onDelete: "NO ACTION",
     });
     Trainer.belongsTo(Admin);
 
