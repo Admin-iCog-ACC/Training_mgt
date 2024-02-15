@@ -4,6 +4,10 @@ const ProjectModel = require("../models/ProjectModel");
 const bcrypt = require("bcrypt");
 const TrainersProjects = require("../models/TrainersProjects");
 const { uploadFile } = require("../cloudinary");
+const { Op } = require("sequelize");
+const { verifyRequest } = require("../auth");
+const { generatePassword, sendGeneratedPassword } = require("../Email");
+require("dotenv").config();
 
 const getAdminServices = async (req, res) => {
   const { id } = req.params;
@@ -28,14 +32,41 @@ const getAllAdminsServices = async (req, res) => {
 };
 
 const createAdminServices = async (req, res) => {
+  const { status, value, admin } = await verifyRequest(req, res);
+  if (status === 401 || !admin) {
+    return res.status(401).json({ msg: "Unauthorized" });
+  }
   const data = req.body;
+
+  const checkAdmin = await AdminModel.findOne({
+    where: {
+      [Op.or]: {
+        email: data.email,
+        phoneNumber: data.phoneNumber,
+      },
+    },
+  });
+  if (checkAdmin) {
+    return res.status(400).json({
+      msg: "Email and/or phone number already used!",
+    });
+  }
+  const newPassword = generatePassword();
+
   try {
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(data.password, salt);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
     const admin = await AdminModel.create({
       ...data,
       password: hashedPassword,
     });
+    const sent = await sendGeneratedPassword(
+      admin.dataValues,
+      newPassword,
+      true,
+      value
+    );
+    console.log(sent);
 
     return res.status(201).json({ success: true });
   } catch (error) {
@@ -47,7 +78,24 @@ const createAdminServices = async (req, res) => {
 const updateAdminServices = async (req, res) => {
   const data = req.body;
   const { id } = req.params;
+  const checkAdmin = await AdminModel.findOne({
+    where: {
+      [Op.or]: {
+        email: data.email,
+        phoneNumber: data.phoneNumber,
+      },
+      id: { [Op.ne]: id },
+    },
+  });
+
+  if (checkAdmin) {
+    return res
+      .status(400)
+      .json({ msg: "Duplicated email and/or phone number" });
+  }
+
   const admin = await AdminModel.findByPk(id);
+
   if (!admin) {
     return res
       .status(404)
@@ -63,6 +111,7 @@ const updateAdminServices = async (req, res) => {
 
     return res.status(200).json({ admin: updatedAdmin[1][0] });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ msg: "Failed to update admin" });
   }
 };

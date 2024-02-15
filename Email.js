@@ -37,13 +37,13 @@ const generatePassword = () => {
   return password;
 };
 
-const sendGeneratedPassword = async (trainer, newPassword) => {
+const sendGeneratedPassword = async (trainer, newPassword, admin, giver) => {
   try {
     await transporter.sendMail({
-      from: `${process.env.email}`,
+      from: process.env.email,
       to: trainer.email,
       subject: "Your Account Has Been Successfully Approved",
-      html: AdminAccessEmailTemplate(trainer, newPassword),
+      html: AdminAccessEmailTemplate(trainer, newPassword, admin, giver),
     });
     return true;
   } catch (err) {

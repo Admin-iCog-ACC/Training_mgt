@@ -73,7 +73,7 @@ const getTrainerServices = async (req, res) => {
 
 const createTrainerServices = async (req, res) => {
   const data = req.body;
-
+  const admin = req.admin;
   const AdminId = req.admin.id;
   try {
     const newPassword = generatePassword();
@@ -86,7 +86,12 @@ const createTrainerServices = async (req, res) => {
       AdminId,
     });
 
-    const sent = await sendGeneratedPassword(trainer, newPassword);
+    const sent = await sendGeneratedPassword(
+      trainer,
+      newPassword,
+      false,
+      admin
+    );
 
     return res.status(201).json({ trainer: trainer });
   } catch (error) {

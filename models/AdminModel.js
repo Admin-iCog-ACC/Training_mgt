@@ -1,4 +1,3 @@
-// models/projectModel.js
 const { DataTypes } = require("sequelize");
 const { Sequelize } = require("sequelize");
 
@@ -19,6 +18,18 @@ const Admin = sequelize.define("Admin", {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true,
+  },
+  address: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  phoneNumber: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  gender: {
+    type: DataTypes.ENUM("Male", "Female"),
+    allowNull: false,
   },
   password: {
     type: DataTypes.STRING,
@@ -43,6 +54,10 @@ const Admin = sequelize.define("Admin", {
   time: {
     type: DataTypes.DATE,
     allowNull: true,
+  },
+  active: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true,
   },
 });
 

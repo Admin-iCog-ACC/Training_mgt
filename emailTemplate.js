@@ -150,7 +150,7 @@ const NewProjectAnnouncementTemplate = (project, trainer) => {
     `;
 };
 
-const AdminAccessEmailTemplate = (user, generatePassword) => {
+const AdminAccessEmailTemplate = (user, generatePassword, admin, giver) => {
   return `<!DOCTYPE html>
   <html lang="en">
     <head>
@@ -170,7 +170,9 @@ const AdminAccessEmailTemplate = (user, generatePassword) => {
         <div style="color: #222;">
           Welcome to
           <span style="font-weight: bold">iCog-ACC.</span> As
-          requested, we have created a trainer account for you.
+          requested, we have created ${
+            admin ? "a project lead" : "a trainer"
+          } account for you.
         </div>
         
         <div style="margin: 10px 0px">
@@ -192,8 +194,8 @@ const AdminAccessEmailTemplate = (user, generatePassword) => {
         initial login. 
         If you have any questions or need further assistance,
         please don't hesitate to contact your account provider at
-        <span style="font-weight: bold">Contact</span>
-        <div style="margin: 3px 0px">
+        <span style="font-weight: bold">${giver.email}</span>
+        <div style="margin: 3px 0px;color: #222;">
           Thank you for being part of
           <span style="font-weight: bold">iCog-ACC</span>. We
           look forward to your contributions!

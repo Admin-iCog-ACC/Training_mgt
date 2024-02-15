@@ -4,6 +4,7 @@ const TrainerModel = require("./models/TrainerModel");
 const { INTEGER } = require("sequelize");
 const verifyRequest = async (req, res) => {
   try {
+    console.log("-----------------------------------------");
     const authorization = req.headers.authorization;
 
     if (!authorization) {
@@ -40,7 +41,7 @@ const verifyRequest = async (req, res) => {
       }
     }
   } catch (err) {
-    // console.log(err);
+    console.log(err);
     return { status: 401 };
   }
 };
@@ -90,7 +91,7 @@ const verifyRequestAccess = async (req, res, next) => {
 
 const canDeleteUpdateCreateProject = async (req, res, next) => {
   const { status, value, admin } = await verifyRequest(req, res);
-
+  console.log(status, admin);
   if (status == 401 || !admin) {
     return res.status(401).json({ msg: "Can't proceed" });
   }

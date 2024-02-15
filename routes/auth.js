@@ -27,6 +27,15 @@ router.route("/trainer/login").post(async (req, res) => {
       });
     }
 
+    if (!trainer) {
+      return res.status(400).json({
+        location: "",
+        msg: "Invalid credentials",
+        type: "",
+        path: "",
+      });
+    }
+
     if (await bcrypt.compare(password, trainer.password)) {
       const token = jwt.sign(
         {
@@ -58,6 +67,15 @@ router.route("/admin/login").post(async (req, res) => {
     const admin = await AdminModel.findOne({ where: { email } });
 
     if (!admin) {
+      return res.status(400).json({
+        location: "",
+        msg: "Invalid credentials",
+        type: "",
+        path: "",
+      });
+    }
+
+    if (!admin.active) {
       return res.status(400).json({
         location: "",
         msg: "Invalid credentials",
@@ -109,6 +127,9 @@ router.route("/send_password_code").post(async (req, res) => {
   const code = await generateCode();
   if (trainer) {
     const { id, email } = trainer;
+    if (!trainer.active) {
+      return res.status(400).json({ msg: "Failed to send code" });
+    }
     await TrainerModel.update(
       { recoveryDigits: code, time },
       {
@@ -125,7 +146,9 @@ router.route("/send_password_code").post(async (req, res) => {
   const admin = await AdminModel.findOne({ where: { email } });
   if (admin) {
     const { id, email } = admin;
-
+    if (!trainer.active) {
+      return res.status(400).json({ msg: "Failed to send code" });
+    }
     await AdminModel.update(
       { recoveryDigits: code, time },
       {
@@ -224,7 +247,6 @@ router.route("/change/password").post(async (req, res) => {
 });
 
 router.route("/delete/account").delete(async (req, res) => {
-  console.log("deleting");
   try {
     const { status, value, admin } = await verifyRequest(req, res);
     if (status === 401) {
@@ -234,19 +256,25 @@ router.route("/delete/account").delete(async (req, res) => {
     }
 
     if (admin) {
-      await AdminModel.destroy({
-        where: {
-          id: value.id,
-        },
-      });
+      await AdminModel.update(
+        { active: false },
+        {
+          where: {
+            id: value.id,
+          },
+        }
+      );
     }
 
     if (!admin) {
-      await TrainerModel.destroy({
-        where: {
-          id: value.id,
-        },
-      });
+      await TrainerModel.update(
+        { active: false },
+        {
+          where: {
+            id: value.id,
+          },
+        }
+      );
     }
     return res.status(204).json();
   } catch (error) {

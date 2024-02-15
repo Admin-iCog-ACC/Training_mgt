@@ -18,22 +18,22 @@ const connectToDB = async () => {
     });
     Project.belongsToMany(Trainer, {
       through: TrainerProjects,
-      onDelete: "SET NULL",
+      onDelete: "RESTRICT",
     });
 
     // One-Many
     Admin.hasMany(Project, {
       foreignKey: {
-        allowNull: true,
+        allowNull: false,
       },
-      onDelete: "SET NULL",
+      onDelete: "RESTRICT",
     });
     Project.belongsTo(Admin, {
       foreignKey: {
-        allowNull: true,
+        allowNull: false,
         // defaultValue: null,
       },
-      onDelete: "SET NULL",
+      onDelete: "RESTRICT",
     });
 
     // One-Many
@@ -42,7 +42,7 @@ const connectToDB = async () => {
         allowNull: true,
         // defaultValue: null,
       },
-      onDelete: "SET NULL",
+      onDelete: "RESTRICT",
     });
     Trainer.belongsTo(Admin);
 

@@ -70,6 +70,10 @@ const Trainer = sequelize.define("Trainer", {
     type: DataTypes.DATE,
     allowNull: true,
   },
+  active: {
+    type: DataTypes.BOOLEAN,
+    default: true,
+  },
 });
 
 module.exports = Trainer;
