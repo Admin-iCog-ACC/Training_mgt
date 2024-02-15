@@ -22,8 +22,7 @@ export default function Projects() {
     try {
       const res = await axios.get("http://localhost:3000/api/project", {
         headers: {
-          authorization:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiYWRtaW4iOnRydWUsImVtYWlsIjoiYXJzZW5hbGd1bm5lcjYzMjZAZ21haWwuY29tIiwiaWF0IjoxNzA2ODAxMTQ2fQ.iBqM6CbSQtS7rDQfzLbVUf0FdkPqx3JKDXpet1LbEks",
+          authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
       console.log(res.data);
@@ -66,9 +65,6 @@ export default function Projects() {
       {/* </div> */}
       <div className="flex justify-between items-start">
         <form action="#" method="GET" className="hidden lg:block ">
-          <label htmlFor="topbar-search" className="sr-only">
-            Search
-          </label>
           <div className="relative mt-1 lg:w-96">
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
               <svg
@@ -99,8 +95,7 @@ export default function Projects() {
             />
           </div>
           <span className="tex-sm text-gray-400">
-            {filterProjects(projects)?.length} item
-            {filterProjects(projects)?.length > 1 && "s"}
+            {`${filterProjects(projects)?.length} found`}
           </span>
           <span
             onClick={() =>

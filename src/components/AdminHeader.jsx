@@ -100,14 +100,21 @@ export default function AdminHeader() {
     try {
       const res = await axios.post("http://localhost:3000/api/project", input, {
         headers: {
-          authorization:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiYWRtaW4iOnRydWUsImVtYWlsIjoiYXJzZW5hbGd1bm5lcjYzMjZAZ21haWwuY29tIiwiaWF0IjoxNzA2ODAxMTQ2fQ.iBqM6CbSQtS7rDQfzLbVUf0FdkPqx3JKDXpet1LbEks",
+          authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
+      await axios.get(
+        `http://localhost:3000/api/announceProject/${res.data.project.id}`,
+        {
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
       console.log(res.data);
       toast.success("Project successfully created!", {
-        position: "top-right",
-        autoClose: 1999,
+        position: "bottom-left",
+        autoClose: 2000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
@@ -116,12 +123,23 @@ export default function AdminHeader() {
         theme: "dark",
         transition: Flip,
       });
-      navigate("/admin/projects");
     } catch (error) {
       console.log(error);
+      toast.error("Project successfully created!", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Flip,
+      });
     }
     setLoading(false);
   };
+
   const verifyRequest = async () => {
     try {
       const res = await axios.get("http://localhost:3000/api/auth/verify", {
@@ -137,7 +155,22 @@ export default function AdminHeader() {
       setUser(value);
     } catch (error) {
       console.log(error);
+      // navigate("/login");
+    }
+  };
+
+  const deleteUser = async () => {
+    try {
+      await axios.delete("http://localhost:3000/api/auth/delete/account", {
+        headers: {
+          authorization: `Bearer ${localStorage.getItem("token")} `,
+        },
+      });
+
+      localStorage.removeItem("token");
       navigate("/login");
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -433,7 +466,6 @@ export default function AdminHeader() {
                   name="hour"
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   placeholder="Hours per day"
-                  required
                   onChange={handleDayChange}
                   value={days.hour}
                 />
@@ -556,9 +588,36 @@ export default function AdminHeader() {
           </section>
           <h1 className="font-bold text-xl text-white">iCog-ACC</h1>
         </div>
-        <div className="flex-1 flex items-center justify-end ">
+        <div className="relative flex-1 flex items-center justify-end ">
           <div
-            className="flex items-center gap-4 transition transform duration-75 hover:bg-gray-600 px-3 py-2 rounded cursor-pointer"
+            className={`absolute w-[319px] rounded border border-gray-400 shadow   top-16 bg-white text-gray-900 py-2 ${
+              dropDown ? "block" : "hidden"
+            }`}
+          >
+            <section
+              className="px-3 py-3 cursor-pointer hover:bg-gray-200"
+              onClick={() => navigate("/admin/profile")}
+            >
+              Profile
+            </section>
+            <section
+              className="px-3 py-3 cursor-pointer hover:bg-gray-200"
+              onClick={deleteUser}
+            >
+              Deactivate account
+            </section>
+            <section
+              className="px-3 py-3 cursor-pointer hover:bg-gray-200"
+              onClick={() => {
+                localStorage.removeItem("token");
+                navigate("/login");
+              }}
+            >
+              Sign Out
+            </section>
+          </div>
+          <div
+            className=" flex items-center gap-4 transition transform duration-75 hover:bg-gray-600 px-3 py-2 rounded cursor-pointer"
             onClick={() => setDropDown((prev) => !prev)}
           >
             <span>{user?.email}</span>
@@ -585,7 +644,6 @@ export default function AdminHeader() {
               <svg
                 fill="currentColor"
                 viewBox="0 0 20 20"
-                // className="{ 'rotate-180': open, 'rotate-0': !open }"
                 className={`inline w-5 h-5 transition duration-100 transform cursor-pointer rounded-[50%]  hover:bg-gray-600 ${
                   dropDown ? "rotate-180" : "rotate-0"
                 }`}
@@ -750,6 +808,100 @@ export default function AdminHeader() {
                 class={`px-6 py-3  text-sm text-gray-900 rounded-lg cursor-pointer hover:bg-gray-100 group dark:text-gray-200 dark:hover:bg-gray-700`}
               >
                 View Trainers
+              </div>
+            </section>
+            <div
+              onClick={() => {
+                const truth = selectedRoute.find(
+                  (route) => route === "project leads"
+                );
+                if (truth) {
+                  setSelectedRoute((prev) =>
+                    prev.filter((p) => p !== "project leads")
+                  );
+                } else {
+                  changeRoute({ name: "project leads" });
+                }
+              }}
+              class={`${
+                user?.role === "HR" ? "flex" : "hidden"
+              } items-center p-2 text-base text-gray-900 rounded-lg cursor-pointer hover:bg-gray-100 group dark:text-gray-200 dark:hover:bg-gray-700  ${
+                selectedRoute.find((route) => route === "project leads") &&
+                "bg-gray-700"
+              }`}
+            >
+              <svg
+                class="w-6 h-6 text-gray-800 dark:text-white"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M8 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4H6Zm7.3-2a6 6 0 0 0 0-6A4 4 0 0 1 20 8a4 4 0 0 1-6.7 3Zm2.2 9a4 4 0 0 0 .5-2v-1a6 6 0 0 0-1.5-4H18a4 4 0 0 1 4 4v1a2 2 0 0 1-2 2h-4.5Z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+
+              <div
+                class={`ml-3 flex flex-1 items-center justify-between`}
+                sidebar-toggle-item=""
+                onClick={() => {
+                  const truth = selectedRoute.find(
+                    (route) => route === "project leads"
+                  );
+                  if (truth) {
+                    setSelectedRoute((prev) =>
+                      prev.filter((p) => p !== "project leads")
+                    );
+                  } else {
+                    changeRoute({ name: "project leads" });
+                  }
+                }}
+              >
+                Project Leads
+                <svg
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  // className="{ 'rotate-180': open, 'rotate-0': !open }"
+                  className={`inline w-5 h-5 transition duration-100 transform cursor-pointer rounded-[50%]  ${
+                    selectedRoute.find((route) => route === "project leads") &&
+                    "text-white"
+                  }`}
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+            <section
+              className={`my-2 px-2 ml-3  ${
+                selectedRoute.find((route) => route === "project leads")
+                  ? "block"
+                  : "hidden"
+              }`}
+            >
+              <div
+                onClick={() => {
+                  setShowDrawer(false);
+                  navigate("/admin/project_leads");
+                }}
+                class={`px-6 py-3  text-sm text-gray-900 rounded-lg cursor-pointer hover:bg-gray-100 group dark:text-gray-200 dark:hover:bg-gray-700`}
+              >
+                View project leads
+              </div>
+              <div
+                onClick={() => {
+                  setShowDrawer(false);
+                  navigate("/admin/project_leads/register");
+                }}
+                class={`px-6 py-3  text-sm text-gray-900 rounded-lg cursor-pointer hover:bg-gray-100 group dark:text-gray-200 dark:hover:bg-gray-700`}
+              >
+                Register project leads
               </div>
             </section>
           </section>

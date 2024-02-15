@@ -17,16 +17,14 @@ function TrainerDetail() {
     try {
       await axios.delete(`http://localhost:3000/api/trainer/${id}`, {
         headers: {
-          authorization:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiYWRtaW4iOnRydWUsImVtYWlsIjoiYXJzZW5hbGd1bm5lcjYzMjZAZ21haWwuY29tIiwiaWF0IjoxNzA2ODAxMTQ2fQ.iBqM6CbSQtS7rDQfzLbVUf0FdkPqx3JKDXpet1LbEks",
+          authorization: `"Bearer ${localStorage.getItem("token")}`,
         },
       });
       await axios.delete(
         `http://localhost:3000/api/deleteFile/${trainer.profileImageId}`,
         {
           headers: {
-            authorization:
-              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiYWRtaW4iOnRydWUsImVtYWlsIjoiYXJzZW5hbGd1bm5lcjYzMjZAZ21haWwuY29tIiwiaWF0IjoxNzA2ODAxMTQ2fQ.iBqM6CbSQtS7rDQfzLbVUf0FdkPqx3JKDXpet1LbEks",
+            authorization: `"Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
@@ -34,8 +32,7 @@ function TrainerDetail() {
         `http://localhost:3000/api/deleteFile/${trainer.CVId}`,
         {
           headers: {
-            authorization:
-              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiYWRtaW4iOnRydWUsImVtYWlsIjoiYXJzZW5hbGd1bm5lcjYzMjZAZ21haWwuY29tIiwiaWF0IjoxNzA2ODAxMTQ2fQ.iBqM6CbSQtS7rDQfzLbVUf0FdkPqx3JKDXpet1LbEks",
+            authorization: `"Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
@@ -83,8 +80,7 @@ function TrainerDetail() {
     try {
       const res = await axios.get(`http://localhost:3000/api/trainer/${id}`, {
         headers: {
-          authorization:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiYWRtaW4iOnRydWUsImVtYWlsIjoiYXJzZW5hbGd1bm5lcjYzMjZAZ21haWwuY29tIiwiaWF0IjoxNzA2ODAxMTQ2fQ.iBqM6CbSQtS7rDQfzLbVUf0FdkPqx3JKDXpet1LbEks",
+          authorization: `"Bearer ${localStorage.getItem("token")}`,
         },
       });
       console.log(res.data.trainer);

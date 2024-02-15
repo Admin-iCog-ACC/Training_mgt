@@ -14,22 +14,27 @@ function ProjectDetail() {
   const [trainerUpdateLoading, setTrainerUpdateLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [showDeleteProject, setShowDeleteProject] = useState(false);
+  const [showUpdateProjectImage, setShowUpdateProjectImage] = useState(false);
+  const [projectPhotoUpdateLoading, setProjectPhotoUpdateLoading] =
+    useState(false);
+  const [imageURL, setImageURL] = useState("");
+  const [image, setImage] = useState("");
+  const [fileInputError, setFileInputError] = useState(false);
+
   const navigate = useNavigate();
   const deleteProject = async () => {
     setDeleteLoading(true);
     try {
       await axios.delete(`http://localhost:3000/api/project/${id}`, {
         headers: {
-          authorization:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiYWRtaW4iOnRydWUsImVtYWlsIjoiYXJzZW5hbGd1bm5lcjYzMjZAZ21haWwuY29tIiwiaWF0IjoxNzA2ODAxMTQ2fQ.iBqM6CbSQtS7rDQfzLbVUf0FdkPqx3JKDXpet1LbEks",
+          authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
       await axios.delete(
         `http://localhost:3000/api/deleteFile/${project.imageID}`,
         {
           headers: {
-            authorization:
-              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiYWRtaW4iOnRydWUsImVtYWlsIjoiYXJzZW5hbGd1bm5lcjYzMjZAZ21haWwuY29tIiwiaWF0IjoxNzA2ODAxMTQ2fQ.iBqM6CbSQtS7rDQfzLbVUf0FdkPqx3JKDXpet1LbEks",
+            authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
@@ -68,13 +73,12 @@ function ProjectDetail() {
         updateProject,
         {
           headers: {
-            authorization:
-              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiYWRtaW4iOnRydWUsImVtYWlsIjoiYXJzZW5hbGd1bm5lcjYzMjZAZ21haWwuY29tIiwiaWF0IjoxNzA2ODAxMTQ2fQ.iBqM6CbSQtS7rDQfzLbVUf0FdkPqx3JKDXpet1LbEks",
+            authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
+      console.log(res.data);
       setProject(updateProject);
-      console.log(project?.budget);
 
       setUpdateProject(null);
       toast.success("Project successfully updated!", {
@@ -106,15 +110,6 @@ function ProjectDetail() {
       );
       console.log(res);
 
-      // await axios.delete(
-      //   `http://localhost:3000/api/deleteFile/${toBeDeleted?.profileImageId}`,
-      //   {
-      //     headers: {
-      //       authorization:
-      //         "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiYWRtaW4iOnRydWUsImVtYWlsIjoiYXJzZW5hbGd1bm5lcjYzMjZAZ21haWwuY29tIiwiaWF0IjoxNzA2ODAxMTQ2fQ.iBqM6CbSQtS7rDQfzLbVUf0FdkPqx3JKDXpet1LbEks",
-      //     },
-      //   }
-      // );
       toast.success("Trainer successfully removed!", {
         position: "top-right",
         autoClose: 1999,
@@ -153,8 +148,7 @@ function ProjectDetail() {
     try {
       const res = await axios.get(`http://localhost:3000/api/project/${id}`, {
         headers: {
-          authorization:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiYWRtaW4iOnRydWUsImVtYWlsIjoiYXJzZW5hbGd1bm5lcjYzMjZAZ21haWwuY29tIiwiaWF0IjoxNzA2ODAxMTQ2fQ.iBqM6CbSQtS7rDQfzLbVUf0FdkPqx3JKDXpet1LbEks",
+          authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
       console.log(res.data.project);
@@ -198,12 +192,199 @@ function ProjectDetail() {
     console.log(name, value);
   };
 
+  const handleFileInput = (e) => {
+    const file = e.target.files["0"];
+    if (!["image/png", "image/jpeg", "image/jpg"].includes(file.type)) {
+      setFileInputError(true);
+      return;
+    }
+    setFileInputError(false);
+    const imageUrl = URL.createObjectURL(file);
+    setImageURL(imageUrl);
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      // console.log(reader.result);
+      setImage(reader.result);
+      // inputs.image = reader.result;
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+  const updateProjectPhoto = async () => {
+    if (!imageURL) {
+      return;
+    }
+    setProjectPhotoUpdateLoading(true);
+    try {
+      const res = await axios.patch(
+        `http://localhost:3000/api/project/uploadImage/${project.id}`,
+        { imageURL: image },
+        {
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("token")} `,
+          },
+        }
+      );
+
+      console.log(res.data);
+
+      toast.success("Photo successfully uploaded!", {
+        position: "top-right",
+        autoClose: 1999,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Flip,
+      });
+      setTimeout(() => {
+        setProject((prev) => {
+          return {
+            ...prev,
+            imageID: res.data.project.imageID,
+            imageURL: res.data.project.imageURL,
+          };
+        });
+
+        setShowUpdateProjectImage(false);
+        setImageURL("");
+        setImage("");
+      }, 4000);
+    } catch (error) {
+      console.log(error);
+    }
+    setProjectPhotoUpdateLoading(false);
+  };
+
   useEffect(() => {
     getProject();
   }, [id]);
 
   return (
     <>
+      <div
+        id="crud-modal"
+        tabindex="-1"
+        aria-hidden="true"
+        style={{ background: "rgba(0,0,0,0.5" }}
+        className={` overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full ${
+          showUpdateProjectImage ? "flex" : "hidden"
+        }`}
+      >
+        <div className="relative p-4 w-full max-w-md max-h-full">
+          <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Update Project Photo
+              </h3>
+              <button
+                type="button"
+                className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                data-modal-toggle="crud-modal"
+                onClick={() => {
+                  setShowUpdateProjectImage(false);
+                  // setUpdateProfile(false);
+                  setImage("");
+                  setImageURL("");
+                }}
+              >
+                <svg
+                  className="w-3 h-3"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 14 14"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+                  />
+                </svg>
+                <span className="sr-only">Close modal</span>
+              </button>
+            </div>
+
+            <form className="p-4 md:p-5">
+              <div className="flex items-center justify-center w-full">
+                <img src={imageURL} alt="" />
+                <label
+                  for="dropzone-file"
+                  className={`${
+                    imageURL ? "hidden" : "flex"
+                  } flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600`}
+                >
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <svg
+                      className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 20 16"
+                    >
+                      <path
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                      />
+                    </svg>
+                    <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                      <span className="font-semibold">Click to upload</span> or
+                      drag and drop
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      SVG, PNG, JPG or GIF (MAX. 800x400px)
+                    </p>
+                  </div>
+                  <input
+                    id="dropzone-file"
+                    type="file"
+                    className="hidden"
+                    onChange={handleFileInput}
+                  />
+                </label>
+              </div>
+
+              <button
+                type="button"
+                onClick={updateProjectPhoto}
+                className="text-white mt-3 inline-flex items-center bg-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center "
+              >
+                <svg
+                  className={`me-1 -ms-1 w-5 h-5 ${
+                    projectPhotoUpdateLoading ? "hidden" : "block"
+                  }`}
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                    clip-rule="evenodd"
+                  ></path>
+                </svg>
+                {projectPhotoUpdateLoading ? "Uploading...." : "Upload Photo"}
+              </button>
+              <div
+                className={`text-sm mt-1 text-red-500 ${
+                  fileInputError ? "block" : "hidden"
+                }`}
+              >
+                Invalid File type
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
       <div
         id="popup-modal"
         tabindex="-1"
@@ -623,9 +804,10 @@ function ProjectDetail() {
       <div class="md:flex no-wrap md:-mx-2 ">
         <div class="w-full md:w-9/12 mx-2 ">
           <div class="bg-white p-3 shadow-sm rounded-sm">
-            <div class="flex justify-start items-center  space-x-2 font-semibold text-gray-900 leading-8 mb-3 px-4 cursor-pointer">
+            <div class="flex justify-start items-center  space-x-2 font-semibold text-gray-900 leading-8 mb-3 px-4 ">
               <img
-                class="h-14 w-14 rounded-lg"
+                class="h-14 w-14 rounded-lg cursor-pointer"
+                onClick={() => setShowUpdateProjectImage(true)}
                 src={project?.imageURL}
                 alt=""
               />
@@ -716,12 +898,28 @@ function ProjectDetail() {
               <li class="flex items-center py-3">
                 <span>Status</span>
                 <span class="ml-auto">
-                  <span class="bg-green-500 py-1 px-2 rounded text-white text-sm">
+                  <span
+                    class={`bg-green-500 py-1 px-2 rounded text-white text-sm ${
+                      project?.Admin?.active ? "block" : "hidden"
+                    }`}
+                  >
                     Active
+                  </span>
+
+                  <span
+                    class={`bg-red-700 py-1 px-2 rounded text-white text-sm ${
+                      project?.Admin?.active ? "hidden" : "block"
+                    }`}
+                  >
+                    Unavailable
                   </span>
                 </span>
               </li>
-              <li class="flex items-center py-3">
+              <li
+                class={`flex items-center py-3 ${
+                  project?.Admin?.active ? "block" : "hidden"
+                }`}
+              >
                 <span>Member since</span>
                 <span class="ml-auto">
                   {getTimeDifference(project?.Admin?.createdAt)}

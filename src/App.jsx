@@ -10,6 +10,8 @@ import Trainers from "./pages/admin/Trainers";
 import ProjectDetail from "./pages/admin/ProjectDetail";
 import TrainerDetail from "./pages/admin/TrainerDetail";
 import ChangePassword from "./pages/admin/ChangePassword";
+import ProjectLeads from "./pages/admin/ProjectLeads";
+import ProjectLeadRegistration from "./pages/admin/ProjectLeadRegistration";
 // import ECommerce from "./pages/Dashboard/ECommerce";
 
 function App() {
@@ -23,6 +25,11 @@ function App() {
           <Route path="trainers" element={<Trainers />} />
           <Route path="project/detail/:id" element={<ProjectDetail />} />
           <Route path="trainer/detail/:id" element={<TrainerDetail />} />
+          <Route path="project_leads" element={<ProjectLeads />} />
+          <Route
+            path="project_leads/register"
+            element={<ProjectLeadRegistration />}
+          />
 
           {/* <Route path="*" element={<Error />} /> */}
         </Route>

@@ -94,8 +94,9 @@ function Login() {
               </label>
               <div class="text-sm">
                 <a
-                  href="#"
+                  href="http://localhost:5173/change/password"
                   class="font-semibold text-gray-400 hover:text-gray-700"
+                  target="blank"
                 >
                   Forgot password?
                 </a>

@@ -15,6 +15,7 @@ function Profile() {
     newPassword: "",
     confirmPassword: "",
   });
+  const [userPhotoDeleting, setUserPhotoDeleting] = useState(false);
   const navigate = useNavigate();
   const result = useOutletContext();
 
@@ -60,6 +61,9 @@ function Profile() {
         id,
         createdAt,
         updatedAt,
+        gender,
+        address,
+        phoneNumber,
       } = res.data.admin;
       toast.success("User successfully updated!", {
         position: "top-right",
@@ -83,21 +87,50 @@ function Profile() {
           id,
           createdAt,
           updatedAt,
+          gender,
+          address,
+          phoneNumber,
           admin: true,
         });
       }, 4000);
     } catch (error) {
-      toast.error("Failed to update user. Please try again! ", {
-        position: "top-right",
-        autoClose: 1999,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-        transition: Flip,
-      });
+      if (error.response.status === 400) {
+        toast.error("Email and/or phone number already used.", {
+          position: "top-right",
+          autoClose: 1999,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+          transition: Flip,
+        });
+      } else if (error.response.status === 404) {
+        toast.error("Admin not found! Try again.", {
+          position: "top-right",
+          autoClose: 1999,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+          transition: Flip,
+        });
+      } else {
+        toast.error("Failed to update user. Please try again! ", {
+          position: "top-right",
+          autoClose: 1999,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+          transition: Flip,
+        });
+      }
       console.log(error);
     }
   };
@@ -278,7 +311,7 @@ function Profile() {
       setUser(value);
     } catch (error) {
       console.log(error);
-      navigate("/login");
+      // navigate("/login");
     }
   };
 
@@ -308,6 +341,53 @@ function Profile() {
 
     await updateUserPassword(oldPassword, newPassword);
   };
+
+  const deletePhoto = async () => {
+    setUserPhotoDeleting(true);
+    try {
+      console.log("deleting...");
+      console.log(user.imageID);
+      await axios.delete(
+        `http://localhost:3000/api/deleteFile/${user.imageID}`,
+        {
+          headers: {
+            authorization: `"Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      const res = await axios.patch(
+        `http://localhost:3000/api/admin/${user.id}`,
+        { imageURL: null, imageID: null },
+        {
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("token")} `,
+          },
+        }
+      );
+      toast.success("Photo successfully deleted", {
+        position: "top-right",
+        autoClose: 1999,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Flip,
+      });
+      setTimeout(() => {
+        setUser((prev) => {
+          return { ...prev, imageID: null, imageURL: null };
+        });
+        setHeaderUser((prev) => {
+          return { ...prev, imageID: null, imageURL: null };
+        });
+      }, 4000);
+    } catch (error) {
+      console.log(error);
+    }
+    setUserPhotoDeleting(false);
+  };
   useEffect(() => {
     // setUser(result.user);
     verifyRequest();
@@ -320,7 +400,7 @@ function Profile() {
         id="crud-modal"
         tabindex="-1"
         aria-hidden="true"
-        style={{ background: "rgba(0,0,0,0.5" }}
+        style={{ background: "rgba(0,0,0,0.5)" }}
         className={` overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full ${
           updateProfile ? "flex" : "hidden"
         }`}
@@ -334,7 +414,6 @@ function Profile() {
               <button
                 type="button"
                 className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                data-modal-toggle="crud-modal"
                 onClick={() => {
                   setUpdateProfile(false);
                   setImage("");
@@ -489,7 +568,7 @@ function Profile() {
                 user?.imageURL ? "block" : "hidden"
               }`}
               src={user?.imageURL}
-              alt="Jese picture"
+              alt={user?.firstName}
             />
             <div
               className={`mb-4 border border-gray-600 bg-gray-600 rounded-lg w-28 h-28 sm:mb-0 xl:mb-4 2xl:mb-0 ${
@@ -522,9 +601,12 @@ function Profile() {
                 </button>
                 <button
                   type="button"
-                  className="py-2 px-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+                  onClick={deletePhoto}
+                  className={`${
+                    user?.imageURL ? "block" : "hidden"
+                  } py-2 px-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700`}
                 >
-                  Delete picture
+                  {userPhotoDeleting ? "Deleting.." : "Delete picture"}
                 </button>
               </div>
             </div>
@@ -755,7 +837,72 @@ function Profile() {
                   }
                 />
               </div>
-
+              <div class="col-span-6 sm:col-span-3">
+                <label
+                  for="gender"
+                  className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                >
+                  Gender
+                </label>
+                <select
+                  onChange={(e) =>
+                    setUser((prev) => {
+                      return { ...prev, gender: e.target.value };
+                    })
+                  }
+                  name="gender"
+                  id="gender"
+                  value={user?.gender}
+                  className="w-full mb-4 sm:mb-0 mr-4 inline-flex items-center text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-4 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
+                >
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
+              </div>
+              <div class="col-span-6 sm:col-span-3">
+                <label
+                  for="address"
+                  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                >
+                  Address
+                </label>
+                <input
+                  type="text"
+                  name="address"
+                  id="address"
+                  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                  placeholder="Your address"
+                  required
+                  value={user?.address}
+                  onChange={(e) =>
+                    setUser((prev) => {
+                      return { ...prev, address: e.target.value };
+                    })
+                  }
+                />
+              </div>
+              <div class="col-span-6 sm:col-span-3">
+                <label
+                  for="phoneNumber"
+                  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                >
+                  Contact No.
+                </label>
+                <input
+                  type="text"
+                  name="phoneNumber"
+                  id="phoneNumber"
+                  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                  placeholder="Your Phone Number"
+                  required
+                  value={user?.phoneNumber}
+                  onChange={(e) =>
+                    setUser((prev) => {
+                      return { ...prev, phoneNumber: e.target.value };
+                    })
+                  }
+                />
+              </div>
               <div class="col-span-6 sm:col-full">
                 <button
                   className="py-2 px-6 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"

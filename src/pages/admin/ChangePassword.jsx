@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer, Flip } from "react-toastify";
 
 function ChangePassword() {
-  const [user, setUser] = useState(null);
+  const [email, setEmail] = useState("");
   const [showDigitForm, setShowDigitForm] = useState(false);
   const [digitSending, setDigitSending] = useState(false);
   const [passwordUpdating, setPasswordUpdating] = useState(false);
@@ -37,12 +37,10 @@ function ChangePassword() {
     e.preventDefault();
     setDigitSending(true);
     try {
-      const res = await axios.get(
+      const res = await axios.post(
         "http://localhost:3000/api/auth/send_password_code",
         {
-          headers: {
-            authorization: `Bearer ${localStorage.getItem("token")} `,
-          },
+          email,
         }
       );
       toast.success("A four digit code is successfully sent to your email.", {
@@ -58,6 +56,7 @@ function ChangePassword() {
       });
       setShowDigitForm(true);
     } catch (error) {
+      console.log(error);
       toast.error("Unable to send code to your email. Please try again!", {
         position: "top-right",
         autoClose: 3000,
@@ -78,16 +77,11 @@ function ChangePassword() {
     setPasswordUpdating(true);
     try {
       const res = await axios.post(
-        "http://localhost:3000/api/auth//change/password",
+        "http://localhost:3000/api/auth/update/password",
         {
           password: password.new,
           recoveryDigits: `${firstDigit}${secondDigit}${thirdDigit}${fourthDigit}`,
-          email: user.email,
-        },
-        {
-          headers: {
-            authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+          email,
         }
       );
       toast.success("Password successfully updated.", {
@@ -104,7 +98,7 @@ function ChangePassword() {
       console.log(res);
     } catch (error) {
       console.log(error);
-      toast.error("Unable to send code to your email. Please try again!", {
+      toast.error("Invalid code", {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
@@ -117,13 +111,9 @@ function ChangePassword() {
       });
     }
     setPasswordUpdating(false);
-    setShowDigitForm(false);
-    setInterval(() => {
-      navigate("/login");
-    }, 2500);
   };
   useEffect(() => {
-    getUser();
+    // getUser();
   }, []);
   return (
     <main class="bg-gray-900">
@@ -156,7 +146,8 @@ function ChangePassword() {
                   class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                   placeholder="name@company.com"
                   required
-                  value={user?.email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  value={email}
                 />
               </div>
 

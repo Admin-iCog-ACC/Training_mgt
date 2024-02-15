@@ -406,10 +406,10 @@ function Trainers() {
         </form>
       </div>
       <main>
-        <div class="p-4 bg-white block sm:flex items-center justify-between border-b border-gray-200 lg:mt-1.5 dark:bg-gray-800 dark:border-gray-700">
-          <div class="w-full mb-1">
-            <div class="mb-4">
-              <nav class="flex mb-5" aria-label="Breadcrumb">
+        <div class=" bg-white block sm:flex items-center justify-between border-b border-gray-200 lg:mt-1.5 dark:bg-gray-800 dark:border-gray-700">
+          <div class="w-full mb-4">
+            <div class="mb-4 flex justify-between items-start">
+              <nav class="flex " aria-label="Breadcrumb">
                 <ol class="inline-flex items-center space-x-1 text-sm font-medium md:space-x-2">
                   <li class="inline-flex items-center">
                     <a
@@ -451,11 +451,53 @@ function Trainers() {
                   </li>
                 </ol>
               </nav>
-              <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">
-                Trainers
-              </h1>
+              <div class="flex items-center ml-auto space-x-2 sm:space-x-3">
+                <button
+                  onClick={() => {
+                    setTrainerDrawer(true);
+                    if (showDrawer) {
+                      setShowDrawer(false);
+                    }
+                  }}
+                  type="button"
+                  data-modal-toggle="add-user-modal"
+                  class="inline-flex items-center justify-center w-1/2 px-3 py-2 text-sm font-medium text-center border border-gray-600 text-white rounded-lg bg-gray-600 hover:bg-gray-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+                >
+                  <svg
+                    class="w-5 h-5 mr-2 -ml-1"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                      clip-rule="evenodd"
+                    ></path>
+                  </svg>
+                  Add
+                </button>
+                <a
+                  href="#"
+                  class="inline-flex items-center justify-center w-1/2 px-3 py-2 text-sm font-medium text-center text-gray-900 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-gray-700"
+                >
+                  <svg
+                    class="w-5 h-5 mr-2 -ml-1"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z"
+                      clip-rule="evenodd"
+                    ></path>
+                  </svg>
+                  Export
+                </a>
+              </div>
             </div>
-            <div class="sm:flex">
+            <div class="sm:flex justify-between items-end">
               <div class="items-center hidden mb-3 sm:flex sm:divide-x sm:divide-gray-100 sm:mb-0 dark:divide-gray-700">
                 <form class="lg:pr-3" action="#" method="GET">
                   <label for="users-search" class="sr-only">
@@ -467,7 +509,7 @@ function Trainers() {
                       name="email"
                       id="users-search"
                       class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                      placeholder="Search for users"
+                      placeholder="Search for trainers"
                       onChange={(e) => setSearchEmail(e.target.value)}
                     />
                   </div>
@@ -539,51 +581,9 @@ function Trainers() {
                   </a>
                 </div>
               </div>
-              <div class="flex items-center ml-auto space-x-2 sm:space-x-3">
-                <button
-                  onClick={() => {
-                    setTrainerDrawer(true);
-                    if (showDrawer) {
-                      setShowDrawer(false);
-                    }
-                  }}
-                  type="button"
-                  data-modal-toggle="add-user-modal"
-                  class="inline-flex items-center justify-center w-1/2 px-3 py-2 text-sm font-medium text-center border border-gray-600 text-white rounded-lg bg-gray-600 hover:bg-gray-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-                >
-                  <svg
-                    class="w-5 h-5 mr-2 -ml-1"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fill-rule="evenodd"
-                      d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                      clip-rule="evenodd"
-                    ></path>
-                  </svg>
-                  Add
-                </button>
-                <a
-                  href="#"
-                  class="inline-flex items-center justify-center w-1/2 px-3 py-2 text-sm font-medium text-center text-gray-900 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-gray-700"
-                >
-                  <svg
-                    class="w-5 h-5 mr-2 -ml-1"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fill-rule="evenodd"
-                      d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z"
-                      clip-rule="evenodd"
-                    ></path>
-                  </svg>
-                  Export
-                </a>
-              </div>
+              <div className="tex-sm text-gray-400">{`${
+                searchTrainers(trainers)?.length
+              } found`}</div>
             </div>
           </div>
         </div>
