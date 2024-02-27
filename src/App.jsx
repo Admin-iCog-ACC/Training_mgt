@@ -4,6 +4,7 @@ import "./App.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import AdminHeader from "./components/AdminHeader";
 import Projects from "./pages/admin/Projects";
+import TrainerProjects from "./pages/trainer/TrainerProjects";
 import Login from "./pages/admin/Login";
 import Profile from "./pages/admin/Profile";
 import Trainers from "./pages/admin/Trainers";
@@ -12,6 +13,10 @@ import TrainerDetail from "./pages/admin/TrainerDetail";
 import ChangePassword from "./pages/admin/ChangePassword";
 import ProjectLeads from "./pages/admin/ProjectLeads";
 import ProjectLeadRegistration from "./pages/admin/ProjectLeadRegistration";
+import Header from "./pages/trainer/Header";
+import TrainerProjectDetail from "./pages/trainer/TrainerProjectDetail";
+import TrainerProfile from "./pages/trainer/TrainerProfile";
+import TrainerLogin from "./pages/trainer/TrainerLogin";
 // import ECommerce from "./pages/Dashboard/ECommerce";
 
 function App() {
@@ -19,6 +24,12 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="login" element={<Login />} />
+        <Route path="trainer_login" element={<TrainerLogin />} />
+        <Route path="/" element={<Header />}>
+          <Route path="projects" element={<TrainerProjects />} />
+          <Route path="projects/:id" element={<TrainerProjectDetail />} />
+          <Route path="profile" element={<TrainerProfile />} />
+        </Route>
         <Route path="/admin" element={<AdminHeader />}>
           <Route path="projects" element={<Projects />} />
           <Route path="profile" element={<Profile />} />
@@ -30,8 +41,6 @@ function App() {
             path="project_leads/register"
             element={<ProjectLeadRegistration />}
           />
-
-          {/* <Route path="*" element={<Error />} /> */}
         </Route>
         <Route path="change/password" element={<ChangePassword />} />
       </Routes>

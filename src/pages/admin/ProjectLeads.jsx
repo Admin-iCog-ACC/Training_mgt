@@ -1,5 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer, Flip } from "react-toastify";
 
 function ProjectLeads() {
@@ -8,6 +9,7 @@ function ProjectLeads() {
   const [showDeleteLead, setShowDeleteLead] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [projectLead, setProjectLead] = useState(null);
+  const navigate = useNavigate();
   const accountRequest = async (id, active) => {
     setDeleteLoading(true);
     try {
@@ -296,10 +298,7 @@ function ProjectLeads() {
             </nav>
             <button
               onClick={() => {
-                // setTrainerDrawer(true);
-                // if (showDrawer) {
-                //   setShowDrawer(false);
-                // }
+                navigate("/admin/project_leads/register");
               }}
               type="button"
               data-modal-toggle="add-user-modal"

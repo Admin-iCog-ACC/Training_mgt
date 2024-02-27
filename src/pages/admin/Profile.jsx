@@ -254,46 +254,27 @@ function Profile() {
         setImage("");
       }, 4000);
     } catch (error) {
-      if (error.response.status === 400) {
-        toast.error("Incorrect old password!", {
-          position: "top-right",
-          autoClose: 1999,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "dark",
-          transition: Flip,
-        });
-      } else if (error.response.status === 404) {
-        toast.error("User not found", {
-          position: "top-right",
-          autoClose: 1999,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "dark",
-          transition: Flip,
-        });
-      } else {
-        toast.error("Failed to update password! Please try again.", {
-          position: "top-right",
-          autoClose: 1999,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "dark",
-          transition: Flip,
-        });
-      }
+      toast.error("Failed to upload photo", {
+        position: "top-right",
+        autoClose: 1999,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Flip,
+      });
       console.log(error);
     }
+
     setPhotoLoading(false);
+  };
+
+  const passwordInfoChange = (e) => {
+    setPasswordInfo((prev) => {
+      return { ...prev, [e.target.name]: e.target.value };
+    });
   };
 
   const verifyRequest = async () => {
@@ -313,12 +294,6 @@ function Profile() {
       console.log(error);
       // navigate("/login");
     }
-  };
-
-  const passwordInfoChange = (e) => {
-    setPasswordInfo((prev) => {
-      return { ...prev, [e.target.name]: e.target.value };
-    });
   };
 
   const handlePasswordUpdate = async (e) => {
@@ -345,8 +320,6 @@ function Profile() {
   const deletePhoto = async () => {
     setUserPhotoDeleting(true);
     try {
-      console.log("deleting...");
-      console.log(user.imageID);
       await axios.delete(
         `http://localhost:3000/api/deleteFile/${user.imageID}`,
         {
@@ -357,7 +330,7 @@ function Profile() {
       );
       const res = await axios.patch(
         `http://localhost:3000/api/admin/${user.id}`,
-        { imageURL: null, imageID: null },
+        { ...user, imageURL: null, imageID: null },
         {
           headers: {
             authorization: `Bearer ${localStorage.getItem("token")} `,
@@ -389,7 +362,6 @@ function Profile() {
     setUserPhotoDeleting(false);
   };
   useEffect(() => {
-    // setUser(result.user);
     verifyRequest();
   }, []);
 

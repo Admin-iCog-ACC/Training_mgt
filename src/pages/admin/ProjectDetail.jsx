@@ -7,8 +7,11 @@ import "react-toastify/dist/ReactToastify.css";
 function ProjectDetail() {
   let { id } = useParams();
   const [project, setProject] = useState(null);
+  const [showDrawer, setShowDrawer] = useState(true);
   const [searchEmail, setSearchEmail] = useState("");
+  const [searchStatus, setSearchStatus] = useState("");
   const [toBeDeleted, setToBeDeleted] = useState(null);
+  const [trainerApplication, setTrainerApplication] = useState(null);
   const [updateProject, setUpdateProject] = useState(null);
   const [trainerDeleteLoading, setTrainerDeleteLoading] = useState(false);
   const [trainerUpdateLoading, setTrainerUpdateLoading] = useState(false);
@@ -60,11 +63,25 @@ function ProjectDetail() {
     setDeleteLoading(false);
   };
   const searchTrainers = () => {
-    return project?.Trainers?.filter((trainer) =>
-      trainer.email.toLowerCase().startsWith(searchEmail.toLowerCase().trim())
+    console.log(project);
+
+    return project?.TrainersProjects?.filter(
+      (item) =>
+        item.Trainer.email
+          .toLowerCase()
+          .startsWith(searchEmail.toLowerCase().trim()) &&
+        item.status
+          .toLowerCase()
+          .startsWith(searchStatus.toLocaleLowerCase().trim())
     );
   };
-
+  function formatDate(dateString) {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
   const handleUpdateProject = async (e) => {
     e.preventDefault();
     try {
@@ -96,11 +113,15 @@ function ProjectDetail() {
       console.log(error);
     }
   };
-  const deleteTrainer = async () => {
+  const manageTrainer = async () => {
+    console.log(project);
+    console.log(toBeDeleted);
+
     setTrainerDeleteLoading(true);
     try {
-      const res = await axios.delete(
+      const res = await axios.patch(
         `http://localhost:3000/api/application/${toBeDeleted?.id}/${id}`,
+        { status: toBeDeleted.statusToBeSet },
         {
           headers: {
             authorization:
@@ -110,10 +131,11 @@ function ProjectDetail() {
       );
       console.log(res);
 
-      toast.success("Trainer successfully removed!", {
+      toast.success("Operation successful!", {
         position: "top-right",
         autoClose: 1999,
         hideProgressBar: false,
+
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
@@ -121,11 +143,25 @@ function ProjectDetail() {
         theme: "dark",
         transition: Flip,
       });
+
+      const index = project.TrainersProjects.findIndex(
+        ({ Trainer }) => Trainer.id === toBeDeleted.id
+      );
+
+      const newTrainersProjects = [
+        ...project.TrainersProjects.slice(0, index),
+        {
+          ...project.TrainersProjects[index],
+          status: toBeDeleted.statusToBeSet,
+        },
+        ...project.TrainersProjects.slice(
+          index + 1,
+          project.TrainersProjects.length
+        ),
+      ];
       setProject({
         ...project,
-        Trainers: project?.Trainers.filter(
-          (trainer) => trainer.id !== toBeDeleted.id
-        ),
+        TrainersProjects: newTrainersProjects,
       });
       setToBeDeleted(null);
     } catch (error) {
@@ -266,6 +302,932 @@ function ProjectDetail() {
 
   return (
     <>
+      <div
+        id="drawer-contact"
+        className={`fixed top-0 right-0 z-40 h-screen p-4 overflow-y-auto transition-transform border-l border-gray-600 bg-white w-[40%] dark:bg-gray-800 ${
+          showDrawer ? "translate-x-1" : "translate-x-full"
+        }`}
+        tabindex="-1"
+        aria-labelledby="drawer-contact-label"
+      >
+        <h5
+          id="drawer-label"
+          className="inline-flex items-center mb-6 text-base font-semibold text-gray-500 uppercase dark:text-gray-400"
+        >
+          <svg
+            viewBox="0 0 1024 1024"
+            fill="currentColor"
+            class={`w-4 h-4 me-2.5 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white`}
+          >
+            <path d="M880 112H144c-17.7 0-32 14.3-32 32v736c0 17.7 14.3 32 32 32h736c17.7 0 32-14.3 32-32V144c0-17.7-14.3-32-32-32zM368 744c0 4.4-3.6 8-8 8h-80c-4.4 0-8-3.6-8-8V280c0-4.4 3.6-8 8-8h80c4.4 0 8 3.6 8 8v464zm192-280c0 4.4-3.6 8-8 8h-80c-4.4 0-8-3.6-8-8V280c0-4.4 3.6-8 8-8h80c4.4 0 8 3.6 8 8v184zm192 72c0 4.4-3.6 8-8 8h-80c-4.4 0-8-3.6-8-8V280c0-4.4 3.6-8 8-8h80c4.4 0 8 3.6 8 8v256z" />
+          </svg>
+          Trainer Application
+        </h5>
+        <button
+          onClick={() => {
+            setShowDrawer(false);
+            setTrainerApplication(null);
+          }}
+          type="button"
+          data-drawer-hide="drawer-contact"
+          aria-controls="drawer-contact"
+          className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 absolute top-2.5 end-2.5 inline-flex items-center justify-center dark:hover:bg-gray-600 dark:hover:text-white"
+        >
+          <svg
+            className="w-3 h-3"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 14 14"
+          >
+            <path
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+            />
+          </svg>
+        </button>
+        <div>
+          <div className="border border-gray-600 rounded py-4 px-3">
+            <div className="flex justify-between items-center gap-x-4  mb-5   ">
+              <div className="flex items-center gap-x-4">
+                <section
+                  className={`w-[90px] h-[90px] rounded-full  ${
+                    trainerApplication?.Trainer?.profileImage
+                      ? "hidden"
+                      : "block"
+                  }`}
+                >
+                  <svg
+                    viewBox="0 0 512 512"
+                    fill="currentColor"
+                    height="1em"
+                    width="1em"
+                    className={`inline w-full h-full transition duration-100 transform  rounded-[50%] `}
+                  >
+                    <path d="M258.9 48C141.92 46.42 46.42 141.92 48 258.9c1.56 112.19 92.91 203.54 205.1 205.1 117 1.6 212.48-93.9 210.88-210.88C462.44 140.91 371.09 49.56 258.9 48zm126.42 327.25a4 4 0 01-6.14-.32 124.27 124.27 0 00-32.35-29.59C321.37 329 289.11 320 256 320s-65.37 9-90.83 25.34a124.24 124.24 0 00-32.35 29.58 4 4 0 01-6.14.32A175.32 175.32 0 0180 259c-1.63-97.31 78.22-178.76 175.57-179S432 158.81 432 256a175.32 175.32 0 01-46.68 119.25z" />
+                    <path d="M256 144c-19.72 0-37.55 7.39-50.22 20.82s-19 32-17.57 51.93C191.11 256 221.52 288 256 288s64.83-32 67.79-71.24c1.48-19.74-4.8-38.14-17.68-51.82C293.39 151.44 275.59 144 256 144z" />
+                  </svg>
+                </section>
+                <img
+                  src={`${trainerApplication?.Trainer?.profileImage}`}
+                  alt=""
+                  className={`w-[90px] h-[90px] rounded ${
+                    trainerApplication?.Trainer?.profileImage
+                      ? "visible"
+                      : "hidden"
+                  }`}
+                />
+
+                <div className="  flex-1">
+                  <span className="block font-bold text-lg">
+                    {trainerApplication?.Trainer?.firstName}{" "}
+                    {trainerApplication?.Trainer?.lastName}
+                  </span>
+                  <span className="block text-sm text-gray-400">
+                    {trainerApplication?.Trainer?.email}
+                  </span>
+                  <span className="block text-sm text-gray-400">
+                    {trainerApplication?.Trainer?.phoneNumber}
+                  </span>
+                </div>
+              </div>
+              <div>
+                <section className="flex">
+                  {
+                    <>
+                      {trainerApplication?.Trainer?.rating === 0 && (
+                        <>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="#888888"
+                              d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                            />
+                          </svg>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="#888888"
+                              d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                            />
+                          </svg>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="#888888"
+                              d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                            />
+                          </svg>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="#888888"
+                              d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                            />
+                          </svg>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="#888888"
+                              d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                            />
+                          </svg>
+                        </>
+                      )}
+                      {trainerApplication?.Trainer?.rating > 0 &&
+                        trainerApplication?.Trainer?.rating < 1 && (
+                          <>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="32"
+                              height="32"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                fill="orange"
+                                d="M12 8.125v7.8l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325zM7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                              />
+                            </svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="32"
+                              height="32"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                fill="#888888"
+                                d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                              />
+                            </svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="32"
+                              height="32"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                fill="#888888"
+                                d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                              />
+                            </svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="32"
+                              height="32"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                fill="#888888"
+                                d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                              />
+                            </svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="32"
+                              height="32"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                fill="#888888"
+                                d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                              />
+                            </svg>
+                          </>
+                        )}
+                      {trainerApplication?.Trainer?.rating === 1 && (
+                        <>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="orange"
+                              d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                            />
+                          </svg>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="#888888"
+                              d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                            />
+                          </svg>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="#888888"
+                              d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                            />
+                          </svg>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="#888888"
+                              d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                            />
+                          </svg>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="#888888"
+                              d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                            />
+                          </svg>
+                        </>
+                      )}
+                      {trainerApplication?.Trainer?.rating > 1 &&
+                        trainerApplication?.Trainer?.rating < 2 && (
+                          <>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="32"
+                              height="32"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                fill="orange"
+                                d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                              />
+                            </svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="32"
+                              height="32"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                fill="orange"
+                                d="M12 8.125v7.8l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325zM7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                              />
+                            </svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="32"
+                              height="32"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                fill="#888888"
+                                d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                              />
+                            </svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="32"
+                              height="32"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                fill="#888888"
+                                d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                              />
+                            </svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="32"
+                              height="32"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                fill="#888888"
+                                d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                              />
+                            </svg>
+                          </>
+                        )}
+                      {trainerApplication?.Trainer?.rating === 2 && (
+                        <>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="orange"
+                              d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                            />
+                          </svg>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="orange"
+                              d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                            />
+                          </svg>{" "}
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="#888888"
+                              d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                            />
+                          </svg>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="#888888"
+                              d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                            />
+                          </svg>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="#888888"
+                              d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                            />
+                          </svg>
+                        </>
+                      )}
+                      {trainerApplication?.Trainer?.rating > 2 &&
+                        trainerApplication?.Trainer?.rating < 3 && (
+                          <>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="32"
+                              height="32"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                fill="orange"
+                                d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                              />
+                            </svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="32"
+                              height="32"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                fill="orange"
+                                d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                              />
+                            </svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="32"
+                              height="32"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                fill="orange"
+                                d="M12 8.125v7.8l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325zM7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                              />
+                            </svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="32"
+                              height="32"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                fill="#888888"
+                                d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                              />
+                            </svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="32"
+                              height="32"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                fill="#888888"
+                                d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                              />
+                            </svg>
+                          </>
+                        )}
+                      {trainerApplication?.Trainer?.rating === 3 && (
+                        <>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="orange"
+                              d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                            />
+                          </svg>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="orange"
+                              d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                            />
+                          </svg>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="orange"
+                              d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                            />
+                          </svg>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="#888888"
+                              d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                            />
+                          </svg>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="#888888"
+                              d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                            />
+                          </svg>
+                        </>
+                      )}
+                      {trainerApplication?.Trainer?.rating === 4 && (
+                        <>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="orange"
+                              d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                            />
+                          </svg>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="orange"
+                              d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                            />
+                          </svg>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="orange"
+                              d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                            />
+                          </svg>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="orange"
+                              d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                            />
+                          </svg>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="#888888"
+                              d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                            />
+                          </svg>
+                        </>
+                      )}
+                      {trainerApplication?.Trainer?.rating === 5 && (
+                        <>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="orange"
+                              d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                            />
+                          </svg>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="orange"
+                              d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                            />
+                          </svg>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="orange"
+                              d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                            />
+                          </svg>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="orange"
+                              d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                            />
+                          </svg>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="orange"
+                              d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                            />
+                          </svg>
+                        </>
+                      )}
+                      {trainerApplication?.Trainer?.rating > 3 &&
+                        trainerApplication?.Trainer?.rating < 4 && (
+                          <>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="32"
+                              height="32"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                fill="orange"
+                                d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                              />
+                            </svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="32"
+                              height="32"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                fill="orange"
+                                d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                              />
+                            </svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="32"
+                              height="32"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                fill="orange"
+                                d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                              />
+                            </svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="32"
+                              height="32"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                fill="orange"
+                                d="M12 8.125v7.8l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325zM7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                              />
+                            </svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="32"
+                              height="32"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                fill="#888888"
+                                d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                              />
+                            </svg>
+                          </>
+                        )}
+                      {trainerApplication?.Trainer?.rating > 4 &&
+                        trainerApplication?.Trainer?.rating < 5 && (
+                          <>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="32"
+                              height="32"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                fill="orange"
+                                d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                              />
+                            </svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="32"
+                              height="32"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                fill="orange"
+                                d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                              />
+                            </svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="32"
+                              height="32"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                fill="orange"
+                                d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                              />
+                            </svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="32"
+                              height="32"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                fill="orange"
+                                d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                              />
+                            </svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="32"
+                              height="32"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                fill="orange"
+                                d="M12 8.125v7.8l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325zM7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                              />
+                            </svg>
+                          </>
+                        )}
+                    </>
+                  }
+                </section>
+                <section className="text-center font-bold text-xl">
+                  {trainerApplication?.Trainer?.rating}
+                  <span className="font-normal ml-1 text-gray-400">
+                    ({trainerApplication?.Trainer?.numRating})
+                  </span>
+                </section>
+              </div>
+            </div>
+            <div className="text-sm text-gray-400 mb-5">
+              {trainerApplication?.Trainer?.bio}
+            </div>
+            <div className="">
+              <div className="flex justify-between mb-2">
+                <section className="flex items-center  gap-x-4 mb-2 flex-1">
+                  <span className="block text-sm font-bold">Gender</span>
+                  <span className="block text-gray-400 text-xs font-bold">
+                    {trainerApplication?.Trainer?.gender}
+                  </span>
+                </section>
+                <section className="flex items-center  gap-x-4 mb-2 flex-1">
+                  <span className="block text-sm font-bold"> Address</span>
+                  <span className="block text-gray-400 text-xs font-bold">
+                    {trainerApplication?.Trainer?.address}
+                  </span>
+                </section>
+              </div>
+              <div className="flex justify-between mb-2">
+                <section className="flex items-center gap-x-4 mb-2 flex-1">
+                  <span className="block text-sm font-bold">Expertise</span>
+                  <span className="block text-gray-400 text-xs font-bold">
+                    {trainerApplication?.Trainer?.AreaofExpertise}
+                  </span>
+                </section>
+                <section className="flex items-center gap-x-4 mb-2 flex-1 ">
+                  <span className="block text-sm font-bold">
+                    {" "}
+                    Experience Level
+                  </span>
+                  <span className="block text-gray-400 text-xs font-bold">
+                    {trainerApplication?.Trainer?.experienceLevel}
+                  </span>
+                </section>
+              </div>
+              <section className="flex items-center gap-x-4 mb-2">
+                <span className="block text-sm font-bold"> CV</span>
+                <span className="block text-gray-400 text-sm font-bold  cursor-pointer hover:underline">
+                  {trainerApplication?.Trainer?.CvURL ? (
+                    <a href={trainerApplication?.Trainer?.CvURL}>Here</a>
+                  ) : (
+                    "Upload"
+                  )}
+                </span>
+              </section>
+              <ul className="list-disc text-white px-4 mt-5">
+                <li className="mt-2 text-lg text-gray-400">
+                  Worked on 2 projects
+                </li>
+                <li className="mt-2 text-lg text-gray-400">
+                  Currently working on 0 projects
+                </li>
+                <li className="mt-2 text-lg text-gray-400">
+                  Has applied on 4 projects
+                </li>
+                <li className="mt-2 text-lg text-gray-400">
+                  Has been rejected on 4 projects
+                </li>
+              </ul>
+              <section
+                className=" mt-7 bg-gray-700  py-2 rounded text-center cursor-pointer hover:bg-gray-600 "
+                // onClick={() => setShowDeleteTrainer(true)}
+              >
+                Delete Application
+              </section>
+            </div>
+          </div>
+
+          <div className="border border-gray-600 bg-gray-900 rounded py-4 px-3 mt-4">
+            <div className="mb-6 flex justify-between">
+              <h5 className="inline-flex items-center text-base font-semibold text-white uppercase ">
+                Application - {project?.title}
+              </h5>
+              <section
+                className={`text-sm tracking-wide font-bold ${
+                  trainerApplication?.status === "In Progress" &&
+                  "text-gray-400"
+                } ${trainerApplication?.status === "Rejected" && "text-red-500"}
+                ${
+                  trainerApplication?.status === "Accepted" && "text-green-500"
+                }`}
+              >
+                {trainerApplication?.status}
+              </section>
+            </div>
+            <div className="text-lg">
+              Lorem ipsum dolor sit amet consectetur, adipisicing elit. Pariatur
+              repellendus soluta magnam quidem? Recusandae tempore sequi rem
+              pariatur aspernatur ut fugiat alias consectetur voluptatum! Iste
+              accusantium, tenetur qui placeat adipisci beatae quibusdam
+              similique, et aspernatur ducimus, aliquid quos commodi dolorem.
+              Enim eum aperiam vel doloremque ut obcaecati dolorem velit iste.
+              Lorem ipsum dolor sit amet consectetur, adipisicing elit. Pariatur
+              repellendus soluta magnam quidem? Recusandae tempore sequi rem
+              pariatur aspernatur ut fugiat alias consectetur voluptatum! Iste
+              accusantium, tenetur qui placeat adipisci beatae quibusdam
+              similique, et aspernatur ducimus, aliquid quos commodi dolorem.
+              Enim eum aperiam vel doloremque ut obcaecati dolorem velit iste.
+            </div>
+
+            <div className="mt-6">
+              <h5 className="inline-flex items-center mb-6 text-base font-semibold text-gray-500 uppercase dark:text-gray-400">
+                What is your rating for{" "}
+                <span className="ml-1 text-white">
+                  {trainerApplication?.Trainer?.firstName}{" "}
+                  {trainerApplication?.Trainer?.lastName}
+                </span>
+                ?
+              </h5>
+              <section className="flex gap-x-3">
+                <div
+                  className={`${
+                    trainerApplication?.Trainer?.TrainersRatings[0]?.rating ===
+                    1
+                      ? "bg-green-600 hover:bg-green-700"
+                      : "bg-gray-700 hover:bg-gray-600"
+                  } w-16 h-14 text-4xl  rounded  cursor-pointer flex items-center justify-center`}
+                >
+                  1
+                </div>
+                <div
+                  className={`${
+                    trainerApplication?.Trainer?.TrainersRatings[0]?.rating ===
+                    2
+                      ? "bg-green-600 hover:bg-green-700"
+                      : "bg-gray-700 hover:bg-gray-600"
+                  } w-16 h-14 text-4xl  rounded cursor-pointer hover:bg-gray-600  flex items-center justify-center`}
+                >
+                  2
+                </div>
+                <div
+                  className={`${
+                    trainerApplication?.Trainer?.TrainersRatings[0]?.rating ===
+                    3
+                      ? "bg-green-600 hover:bg-green-700"
+                      : "bg-gray-700 hover:bg-gray-600"
+                  } w-16 h-14 text-4xl  rounded cursor-pointer hover:bg-gray-600  flex items-center justify-center`}
+                >
+                  3
+                </div>
+                <div
+                  className={`${
+                    trainerApplication?.Trainer?.TrainersRatings[0]?.rating ===
+                    4
+                      ? "bg-green-600 hover:bg-green-700"
+                      : "bg-gray-700 hover:bg-gray-600"
+                  } w-16 h-14 text-4xl  rounded cursor-pointer hover:bg-gray-600  flex items-center justify-center`}
+                >
+                  4
+                </div>
+                <div
+                  className={`${
+                    trainerApplication?.Trainer?.TrainersRatings[0]?.rating ===
+                    5
+                      ? "bg-green-600 hover:bg-green-700"
+                      : "bg-gray-700 hover:bg-gray-600"
+                  } w-16 h-14 text-4xl  rounded cursor-pointer hover:bg-gray-600  flex items-center justify-center`}
+                >
+                  5
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+      </div>
       <div
         id="crud-modal"
         tabindex="-1"
@@ -668,6 +1630,7 @@ function ProjectDetail() {
                     placeholder="Project description"
                     value={updateProject?.description}
                     name="description"
+                    onChange={handleUpdateProjectChange}
                   ></textarea>
                 </div>
               </div>
@@ -739,7 +1702,7 @@ function ProjectDetail() {
               </svg>
               <span class="sr-only">Close modal</span>
             </button>
-            {console.log(toBeDeleted?.profileImage)}
+
             <div class="p-4 md:p-5 text-center">
               <img
                 src={toBeDeleted?.profileImage}
@@ -753,13 +1716,18 @@ function ProjectDetail() {
                 {toBeDeleted?.email}
               </section>
               <h3 class="mb-5 mt-7 text-lg font-normal text-gray-500 dark:text-gray-400">
-                Are you sure you want to delete this trainer?
+                {toBeDeleted?.statusToBeSet === "Rejected" &&
+                  "Are you sure you want to reject this trainer?"}
+                {toBeDeleted?.statusToBeSet === "Accepted" &&
+                  "Are you sure you want to accept this trainer?"}
+                {toBeDeleted?.statusToBeSet === "In Progress" &&
+                  "Are you sure you want to revert this trainer back?"}
               </h3>
               <div className="flex justify-center align-center">
                 <button
                   data-modal-hide="popup-modal"
                   type="button"
-                  onClick={deleteTrainer}
+                  onClick={manageTrainer}
                   class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center me-2"
                 >
                   {!trainerDeleteLoading && "Yes, I'm sure"}
@@ -785,7 +1753,7 @@ function ProjectDetail() {
                         fill="currentFill"
                       />
                     </svg>
-                    <span>Deleting...</span>
+                    <span>Rejecting...</span>
                   </div>
                 </button>
                 <button
@@ -865,8 +1833,12 @@ function ProjectDetail() {
             </div>
           </div>
         </div>
-        <div class="w-full md:w-3/12 md:mx-2">
-          <div class="bg-white p-3 border-t-4 border-green-400">
+        <div class="w-full md:w-3/12 md:mx-2 ">
+          <div
+            className={`bg-white p-3 border-t-4  h-full ${
+              project?.Admin?.active ? "border-green-400" : "border-red-700"
+            }`}
+          >
             <h1 class="text-gray-900 font-bold text-xl leading-8 my-1">
               <img
                 class={`h-16 w-16 rounded-full mx-auto ${
@@ -887,7 +1859,6 @@ function ProjectDetail() {
                 <path d="M258.9 48C141.92 46.42 46.42 141.92 48 258.9c1.56 112.19 92.91 203.54 205.1 205.1 117 1.6 212.48-93.9 210.88-210.88C462.44 140.91 371.09 49.56 258.9 48zm126.42 327.25a4 4 0 01-6.14-.32 124.27 124.27 0 00-32.35-29.59C321.37 329 289.11 320 256 320s-65.37 9-90.83 25.34a124.24 124.24 0 00-32.35 29.58 4 4 0 01-6.14.32A175.32 175.32 0 0180 259c-1.63-97.31 78.22-178.76 175.57-179S432 158.81 432 256a175.32 175.32 0 01-46.68 119.25z" />
                 <path d="M256 144c-19.72 0-37.55 7.39-50.22 20.82s-19 32-17.57 51.93C191.11 256 221.52 288 256 288s64.83-32 67.79-71.24c1.48-19.74-4.8-38.14-17.68-51.82C293.39 151.44 275.59 144 256 144z" />
               </svg>
-              {/* {console.log(project?.Admin?.imageURL)} */}
               {project?.Admin?.firstName} {project?.Admin?.lastName}
             </h1>
             <h3 class="text-gray-600 font-lg text-semibold leading-6">
@@ -933,8 +1904,8 @@ function ProjectDetail() {
       <div className="my-4"></div>
       <div class="flex flex-col">
         <div class="sm:flex mb-3 ">
-          <div class="items-center hidden sm:flex sm:divide-x sm:divide-gray-100 sm:mb-0 dark:divide-gray-700">
-            <form class="lg:pr-3  w-full" action="#" method="GET">
+          <div class="items-center hidden sm:flex sm:divide-x w-full sm:divide-gray-100 sm:mb-0 dark:divide-gray-700">
+            <form className="lg:pr-3  w-full flex justify-between items-start ">
               <div class="items-center justify-between relative mt-1 lg:w-64 xl:w-96">
                 <input
                   type="text"
@@ -949,12 +1920,24 @@ function ProjectDetail() {
                   {searchTrainers()?.length > 1 ? "s" : null}
                 </span>
               </div>
+              <select
+                onChange={(e) => {
+                  setSearchStatus(e.target.value);
+                }}
+                value={searchStatus}
+                className="bg-gray-500  border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-[200px] p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:hover:bg-gray-800"
+              >
+                <option value="">Filter by trainer status</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Accepted">Accepted</option>
+                <option value="Rejected">Rejected</option>
+              </select>
             </form>
           </div>
         </div>
         <div class="overflow-x-auto">
           <div class="inline-block min-w-full align-middle">
-            <div class="overflow-y-auto  h-[400px]">
+            <div class="">
               <table class="min-w-full divide-y divide-gray-200 table-fixed dark:divide-gray-600">
                 <thead class="bg-gray-700 ">
                   <tr>
@@ -990,42 +1973,734 @@ function ProjectDetail() {
                     </th>
                     <th
                       scope="col"
+                      class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400"
+                    >
+                      Overall Rating
+                    </th>
+                    <th
+                      scope="col"
+                      class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400"
+                    >
+                      Status
+                    </th>
+                    <th
+                      scope="col"
+                      class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400"
+                    >
+                      Application Date
+                    </th>
+                    <th
+                      scope="col"
                       class="p-4 text-xs text-center font-medium  text-gray-500 uppercase dark:text-gray-400"
                     >
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody class=" divide-y divide-gray-200   dark:bg-gray-800 dark:divide-gray-700">
-                  {searchTrainers(project?.Trainers)?.map((trainer) => {
+                <tbody class=" divide-y divide-gray-200  dark:bg-gray-800 dark:divide-gray-700">
+                  {searchTrainers()?.map((item) => {
                     return (
                       <tr
-                        key={trainer.id}
+                        key={item.id}
                         class="hover:bg-gray-100 dark:hover:bg-gray-700"
+                        onClick={() => {
+                          setTrainerApplication(item);
+                          setShowDrawer(true);
+                        }}
                       >
                         <td class="flex items-center p-4 mr-12 space-x-6 whitespace-nowrap">
                           <div class="text-sm font-normal text-gray-500 dark:text-gray-400">
                             <div class="text-base font-semibold text-gray-900 dark:text-white">
-                              {trainer.firstName} {trainer.lastName}
+                              {item.Trainer.firstName} {item.Trainer.lastName}
                             </div>
                             <div class="text-sm font-normal text-gray-500 dark:text-gray-400">
-                              {trainer.email}
+                              {item.Trainer.email}
                             </div>
                           </div>
                         </td>
                         <td class="max-w-sm p-4 overflow-hidden text-base font-normal text-gray-500 truncate xl:max-w-xs dark:text-gray-400">
-                          {trainer.gender}
+                          {item.Trainer.gender}
                         </td>
                         <td class="p-4 text-base font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                          {trainer.phoneNumber}
+                          {item.Trainer.phoneNumber}
                         </td>
                         <td class="p-4 text-base font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                          {trainer.address}
+                          {item.Trainer.address}
                         </td>
                         <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
                           <div class="flex items-center">
                             <div class="h-2.5 w-2.5 rounded-full bg-green-400 mr-2"></div>{" "}
-                            {trainer.AreaofExpertise}
+                            {item.Trainer.AreaofExpertise}
+                          </div>
+                        </td>
+                        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+                          <section className="flex">
+                            {
+                              <>
+                                {item.Trainer?.rating === 0 && (
+                                  <>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="#888888"
+                                        d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="#888888"
+                                        d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="#888888"
+                                        d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="#888888"
+                                        d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="#888888"
+                                        d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                      />
+                                    </svg>
+                                  </>
+                                )}
+                                {item.Trainer?.rating > 0 &&
+                                  item.Trainer?.rating < 1 && (
+                                    <>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="orange"
+                                          d="M12 8.125v7.8l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325zM7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="#888888"
+                                          d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="#888888"
+                                          d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="#888888"
+                                          d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="#888888"
+                                          d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                        />
+                                      </svg>
+                                    </>
+                                  )}
+                                {item.Trainer?.rating === 1 && (
+                                  <>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="orange"
+                                        d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="#888888"
+                                        d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="#888888"
+                                        d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="#888888"
+                                        d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="#888888"
+                                        d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                      />
+                                    </svg>
+                                  </>
+                                )}
+                                {item.Trainer?.rating > 1 &&
+                                  item.Trainer?.rating < 2 && (
+                                    <>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="orange"
+                                          d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="orange"
+                                          d="M12 8.125v7.8l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325zM7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="#888888"
+                                          d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="#888888"
+                                          d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="#888888"
+                                          d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                        />
+                                      </svg>
+                                    </>
+                                  )}
+                                {item.Trainer?.rating === 2 && (
+                                  <>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="orange"
+                                        d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="orange"
+                                        d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                      />
+                                    </svg>{" "}
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="#888888"
+                                        d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="#888888"
+                                        d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="#888888"
+                                        d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                      />
+                                    </svg>
+                                  </>
+                                )}
+                                {item.Trainer?.rating > 2 &&
+                                  item.Trainer?.rating < 3 && (
+                                    <>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="orange"
+                                          d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="orange"
+                                          d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="orange"
+                                          d="M12 8.125v7.8l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325zM7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="#888888"
+                                          d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="#888888"
+                                          d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                        />
+                                      </svg>
+                                    </>
+                                  )}
+                                {item.Trainer?.rating === 3 && (
+                                  <>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="orange"
+                                        d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="orange"
+                                        d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="orange"
+                                        d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="#888888"
+                                        d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="#888888"
+                                        d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                      />
+                                    </svg>
+                                  </>
+                                )}
+                                {item.Trainer?.rating === 4 && (
+                                  <>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="orange"
+                                        d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="orange"
+                                        d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="orange"
+                                        d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="orange"
+                                        d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="#888888"
+                                        d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                      />
+                                    </svg>
+                                  </>
+                                )}
+                                {item.Trainer?.rating === 5 && (
+                                  <>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="orange"
+                                        d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="orange"
+                                        d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="orange"
+                                        d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="orange"
+                                        d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="orange"
+                                        d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                      />
+                                    </svg>
+                                  </>
+                                )}
+                                {item.Trainer?.rating > 3 &&
+                                  item.Trainer?.rating < 4 && (
+                                    <>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="orange"
+                                          d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="orange"
+                                          d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="orange"
+                                          d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="orange"
+                                          d="M12 8.125v7.8l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325zM7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="#888888"
+                                          d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                        />
+                                      </svg>
+                                    </>
+                                  )}
+                                {item.Trainer?.rating > 4 &&
+                                  item.Trainer?.rating < 5 && (
+                                    <>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="orange"
+                                          d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="orange"
+                                          d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="orange"
+                                          d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="orange"
+                                          d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="orange"
+                                          d="M12 8.125v7.8l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325zM7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                        />
+                                      </svg>
+                                    </>
+                                  )}
+                              </>
+                            }
+                          </section>
+                        </td>
+                        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+                          <div class="flex items-center">{item.status}</div>
+                        </td>
+                        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+                          <div class="flex items-center">
+                            {formatDate(item.createdAt)}
                           </div>
                         </td>
                         <td class="p-4  whitespace-nowrap ">
@@ -1033,8 +2708,16 @@ function ProjectDetail() {
                             <button
                               type="button"
                               data-modal-toggle="delete-user-modal"
-                              class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900"
-                              onClick={() => setToBeDeleted(trainer)}
+                              className={`${
+                                item.status === "Rejected" ? "hidden" : "block"
+                              } inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setToBeDeleted({
+                                  ...item.Trainer,
+                                  statusToBeSet: "Rejected",
+                                });
+                              }}
                             >
                               <svg
                                 class="w-4 h-4 mr-2"
@@ -1048,7 +2731,43 @@ function ProjectDetail() {
                                   clip-rule="evenodd"
                                 ></path>
                               </svg>
-                              Delete trainer
+                              Reject
+                            </button>
+
+                            <button
+                              type="button"
+                              data-modal-toggle="delete-user-modal"
+                              className={`${
+                                item.status === "Accepted" ? "hidden" : "block"
+                              } inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-green-600 rounded-lg hover:bg-green-800 focus:ring-4 focus:ring-green-300 dark:focus:ring-green-700`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setToBeDeleted({
+                                  ...item.Trainer,
+                                  statusToBeSet: "Accepted",
+                                });
+                              }}
+                            >
+                              Accept
+                            </button>
+                            <button
+                              type="button"
+                              data-modal-toggle="delete-user-modal"
+                              className={`${
+                                item.status !== "In Progress"
+                                  ? "block"
+                                  : "hidden"
+                              } inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-gray-600 rounded-lg hover:bg-gray-800 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-700`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+
+                                setToBeDeleted({
+                                  ...item.Trainer,
+                                  statusToBeSet: "In Progress",
+                                });
+                              }}
+                            >
+                              Revert Back
                             </button>
                           </div>
                         </td>

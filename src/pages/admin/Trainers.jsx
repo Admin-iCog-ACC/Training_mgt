@@ -29,7 +29,7 @@ function Trainers() {
           authorization: `Bearer ${localStorage.getItem("token")} `,
         },
       });
-      console.log(res.data.trainers[0]);
+      console.log(res.data.trainers);
       setTrainers(res.data.trainers);
     } catch (error) {
       console.log(error);
@@ -62,7 +62,7 @@ function Trainers() {
       const newTrainer = res.data.trainer;
       //   setTimeout(() => {
       setTrainers((prev) => {
-        return [{ Projects: [], ...newTrainer }, ...prev];
+        return [{ TrainersProjects: [], ...newTrainer }, ...prev];
       });
       setTrainerDrawer(false);
       setInput({
@@ -406,7 +406,7 @@ function Trainers() {
         </form>
       </div>
       <main>
-        <div class=" bg-white block sm:flex items-center justify-between border-b border-gray-200 lg:mt-1.5 dark:bg-gray-800 dark:border-gray-700">
+        <div class=" bg-white block sm:flex items-center justify-between border-b border-gray-200 lg:mt-1.5  dark:bg-gray-800 dark:border-gray-700">
           <div class="w-full mb-4">
             <div class="mb-4 flex justify-between items-start">
               <nav class="flex " aria-label="Breadcrumb">
@@ -700,8 +700,8 @@ function Trainers() {
                           <td class="p-4 text-base  text-gray-400 whitespace-nowrap ">
                             {console.log(trainers)}
                             {
-                              trainer.Projects.filter(
-                                (project) => project.status === "Completed"
+                              trainer.TrainersProjects.filter(
+                                (project) => project.status === "Accepted"
                               ).length
                             }{" "}
                             Project(s)
