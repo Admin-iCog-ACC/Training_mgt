@@ -6,6 +6,7 @@ const {
   createTrainerServices,
   uploadTrainerImageService,
   uploadTrainerCvService,
+  updateTrainerPasswordServices,
 } = require("../services/trainer");
 
 const getAllTrainersController = async (req, res) => {
@@ -52,6 +53,12 @@ const createTrainerCvController = async (req, res) => {
 
   return uploadTrainerCvService(req, res);
 };
+const updateTrainerPasswordController = async (req, res) => {
+  // const errors = validate(req);
+  // if (errors.isEmpty()) return createBlogService(req, res);
+
+  return updateTrainerPasswordServices(req, res);
+};
 
 module.exports = {
   getAllTrainersController,
@@ -61,4 +68,5 @@ module.exports = {
   createTrainerController,
   createTrainerImageController,
   createTrainerCvController,
+  updateTrainerPasswordController,
 };

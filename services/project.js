@@ -3,6 +3,8 @@ const { deleteFile, uploadFile } = require("../cloudinary");
 const ProjectModel = require("../models/ProjectModel");
 const Trainer = require("../models/TrainerModel");
 const Admin = require("../models/AdminModel");
+const TrainersRating = require("../models/TrainersRating");
+const TrainersProjects = require("../models/TrainersProjects");
 require("dotenv").config();
 
 const uploadProjectImageService = async (req, res) => {
@@ -30,20 +32,58 @@ const uploadProjectImageService = async (req, res) => {
   }
 };
 const getAllProjectsServices = async (req, res) => {
-  const projects = await ProjectModel.findAll({ include: Trainer });
+  if (req.role === "trainer" || req.role === "HR") {
+    const projects = await ProjectModel.findAll({
+      include: Trainer,
+      order: [["createdAt", "DESC"]],
+    });
+    return res.status(200).json({ projects: projects });
+  }
+  const adminId = req.adminId;
+  const projects = await ProjectModel.findAll({
+    where: { AdminId: adminId },
+    order: [["createdAt", "DESC"]],
+  });
   return res.status(200).json({ projects: projects });
 };
 
 const getProjectServices = async (req, res) => {
   const { id } = req.params;
-  const project = await ProjectModel.findByPk(id, {
-    include: [Trainer, Admin],
+
+  var project = await ProjectModel.findByPk(id, {
+    include: [
+      {
+        model: TrainersProjects,
+        include: {
+          model: Trainer,
+          include: [
+            {
+              model: TrainersRating,
+              required: false,
+              where: { ProjectId: id },
+            },
+            { model: TrainersProjects },
+          ],
+        },
+      },
+      Admin,
+    ],
   });
+  // var project = await TrainersProjects.findAll({
+  //   where: { ProjectId: id },
+  //   include: [{ model: ProjectModel, include: Admin }, Trainer],
+  // });
 
   if (!project) {
     return res
       .status(404)
       .json({ location: "", path: "", msg: "Project not found.", type: "" });
+  }
+
+  if (req.requestedBy === "trainer") {
+    project = await ProjectModel.findByPk(id, {
+      include: [Admin],
+    });
   }
 
   return res.status(200).json({ project: project });

@@ -11,6 +11,7 @@ const {
 const {
   verifyRequestAccess,
   canDeleteUpdateCreateProject,
+  canGetProjectDetail,
 } = require("../auth");
 router
   .route("/")
@@ -18,7 +19,7 @@ router
   .post(canDeleteUpdateCreateProject, createProjectController);
 router
   .route("/:id")
-  .get(verifyRequestAccess, getProjectController)
+  .get(canGetProjectDetail, getProjectController)
   .delete(canDeleteUpdateCreateProject, deleteProjectController)
   .patch(canDeleteUpdateCreateProject, updateProjectController);
 

@@ -72,7 +72,11 @@ const Trainer = sequelize.define("Trainer", {
   },
   active: {
     type: DataTypes.BOOLEAN,
-    default: true,
+    defaultValue: true,
+  },
+  rating: {
+    type: DataTypes.DOUBLE,
+    defaultValue: 0,
   },
 });
 

@@ -8,6 +8,7 @@ const {
   deleteTrainerController,
   createTrainerImageController,
   createTrainerCvController,
+  updateTrainerPasswordController,
 } = require("../controllers/trainer");
 
 const {
@@ -16,6 +17,7 @@ const {
   canGetAllTrainers,
   canDeleteUpdateTrainer,
   canCreateTrainer,
+  canUpdateTrainerPassword,
 } = require("../auth");
 
 router
@@ -33,5 +35,7 @@ router
 router
   .route("/uploadCV/:id")
   .patch(canDeleteUpdateTrainer, createTrainerCvController);
-
+router
+  .route("/password/:id")
+  .patch(canUpdateTrainerPassword, updateTrainerPasswordController);
 module.exports = router;

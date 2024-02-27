@@ -4,6 +4,7 @@ const ProjectModel = require("../models/ProjectModel");
 const TrainerModel = require("../models/TrainerModel");
 const TrainersProjects = require("../models/TrainersProjects");
 const bcrypt = require("bcrypt");
+const TrainersRating = require("../models/TrainersRating");
 
 const uploadTrainerImageService = async (req, res) => {
   const data = req.body;
@@ -54,21 +55,43 @@ const uploadTrainerCvService = async (req, res) => {
 };
 
 const getAllTrainersServices = async (req, res) => {
-  const trainers = await TrainerModel.findAll({ include: ProjectModel });
+  const trainers = await TrainerModel.findAll({
+    include: { model: TrainersProjects, include: ProjectModel },
+  });
   return res.status(200).json({ trainers: trainers });
 };
 
 const getTrainerServices = async (req, res) => {
   const { id } = req.params;
-  const trainer = await TrainerModel.findByPk(id, { include: ProjectModel });
+  const trainer = await TrainerModel.findOne({
+    where: { id },
+  });
 
+  // console.log(result[0]);
   if (!trainer) {
     return res
       .status(404)
       .json({ location: "", path: "", msg: "trainer not found.", type: "" });
   }
+  const numRating = await TrainersRating.count({
+    where: { TrainerId: id },
+  });
+  const projects = await TrainersProjects.findAll({
+    where: { TrainerId: id },
+    order: [["createdAt", "DESC"]],
+    include: [
+      {
+        model: ProjectModel,
 
-  return res.status(200).json({ trainer: trainer });
+        include: [
+          { model: TrainersRating, required: false, where: { TrainerId: id } },
+        ],
+      },
+    ],
+  });
+  return res
+    .status(200)
+    .json({ trainer: { ...trainer.dataValues, numRating }, projects });
 };
 
 const createTrainerServices = async (req, res) => {
@@ -79,7 +102,7 @@ const createTrainerServices = async (req, res) => {
     const newPassword = generatePassword();
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
-
+    console.log(newPassword);
     const trainer = await TrainerModel.create({
       ...data,
       password: hashedPassword,
@@ -116,7 +139,7 @@ const updateTrainerServices = async (req, res) => {
       returning: true,
     });
 
-    return res.status(200).json({ project: updatedTrainer[1][0] });
+    return res.status(200).json({ msg: "updated" });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ msg: "Failed to update trainer" });
@@ -145,6 +168,38 @@ const deleteTrainerServices = async (req, res) => {
   }
 };
 
+const updateTrainerPasswordServices = async (req, res) => {
+  try {
+    const data = req.body;
+    const { id } = req.params;
+    const trainer = await TrainerModel.findByPk(id);
+    if (!trainer) {
+      return res
+        .status(404)
+        .json({ location: "", path: "", msg: "admin not found.", type: "" });
+    }
+    if (!(await bcrypt.compare(data.oldPassword, trainer.password))) {
+      return res.status(400).json({ msg: "Incorrect old password" });
+    }
+    const salt = await bcrypt.genSalt(10);
+
+    const newPassword = await bcrypt.hash(data.newPassword, salt);
+    const updatedTrainer = await TrainerModel.update(
+      { password: newPassword },
+      {
+        where: {
+          id,
+        },
+        returning: true,
+      }
+    );
+    return res.status(200).json({ trainer: updatedTrainer[1][0] });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ msg: "Failed to update password" });
+  }
+};
+
 module.exports = {
   getTrainerServices,
   getAllTrainersServices,
@@ -152,5 +207,6 @@ module.exports = {
   updateTrainerServices,
   deleteTrainerServices,
   uploadTrainerImageService,
+  updateTrainerPasswordServices,
   uploadTrainerCvService,
 };

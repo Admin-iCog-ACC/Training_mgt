@@ -7,6 +7,7 @@ const trainersProjects = require("./models/TrainersProjects");
 const trainerRouter = require("./routes/trainer");
 const authRouter = require("./routes/auth");
 const applicationRouter = require("./routes/application");
+const ratingRouter = require("./routes/rating");
 const { deleteFile } = require("./cloudinary");
 const { sendEmail } = require("./Email");
 const connectToDB = require("./DBconnection");
@@ -22,13 +23,14 @@ app.use("/api/admin", adminRouter);
 app.use("/api/trainer", trainerRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/application", applicationRouter);
+app.use("/api/rating", ratingRouter);
 app.delete("/api/deleteFile/:id", async (req, res) => {
   const { id } = req.params;
   try {
     await deleteFile(id);
     return res.status(204).json();
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     return res.status(500).json({ msg: "Failed to delete file" });
   }
 });

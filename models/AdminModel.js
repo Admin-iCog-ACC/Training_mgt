@@ -26,6 +26,7 @@ const Admin = sequelize.define("Admin", {
   phoneNumber: {
     type: DataTypes.STRING,
     allowNull: false,
+    unique: true,
   },
   gender: {
     type: DataTypes.ENUM("Male", "Female"),

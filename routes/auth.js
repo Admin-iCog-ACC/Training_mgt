@@ -5,7 +5,7 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { verifyRequest, generateCode } = require("../auth");
-const { NewReleasesSharp } = require("@material-ui/icons");
+const { NewReleasesSharp, RateReviewSharp } = require("@material-ui/icons");
 const { sendRecoveryCode } = require("../Email");
 const { verify } = require("../nodeMailer");
 
@@ -35,18 +35,19 @@ router.route("/trainer/login").post(async (req, res) => {
         path: "",
       });
     }
-
-    if (await bcrypt.compare(password, trainer.password)) {
+    console.log(trainer.dataValues);
+    if (await bcrypt.compare(password, trainer.dataValues.password)) {
       const token = jwt.sign(
         {
-          id: trainer.id,
+          id: trainer.dataValues.id,
           admin: false,
-          email: trainer.email,
+          email: trainer.dataValues.email,
         },
         `${process.env.jwt_secret}`
       );
       return res.status(200).json({ access_token: token });
     }
+
     return res.status(400).json({
       location: "",
       msg: "Incorrect username and/or password.",
@@ -125,6 +126,7 @@ router.route("/send_password_code").post(async (req, res) => {
   const trainer = await TrainerModel.findOne({ where: { email } });
   const time = new Date();
   const code = await generateCode();
+  console.log(trainer.active);
   if (trainer) {
     const { id, email } = trainer;
     if (!trainer.active) {
@@ -146,7 +148,7 @@ router.route("/send_password_code").post(async (req, res) => {
   const admin = await AdminModel.findOne({ where: { email } });
   if (admin) {
     const { id, email } = admin;
-    if (!trainer.active) {
+    if (!admin.active) {
       return res.status(400).json({ msg: "Failed to send code" });
     }
     await AdminModel.update(
@@ -280,6 +282,50 @@ router.route("/delete/account").delete(async (req, res) => {
   } catch (error) {
     console.log(error);
     return res.status(500).json({ msg: "Failed to delete" });
+  }
+});
+
+router.route("/deactivate/account/:id").post(async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { active } = req.body;
+    const { status, value, admin } = await verifyRequest(req, res);
+    console.log(status, value, admin);
+    if (status === 401 || !admin || value.role === "Project Lead") {
+      return res.status(401).json({
+        msg: "Unauthorized",
+      });
+    }
+
+    const checkAdmin = await AdminModel.findByPk(id);
+    if (checkAdmin) {
+      await AdminModel.update(
+        { active },
+        {
+          where: {
+            id,
+          },
+        }
+      );
+      return res.status(204).json();
+    }
+    const checkTrainer = await TrainerModel.findByPk(id);
+
+    if (checkTrainer) {
+      await TrainerModel.update(
+        { active },
+        {
+          where: {
+            id,
+          },
+        }
+      );
+    } else {
+      return res.status(404).json({ msg: "Not found" });
+    }
+    return res.status(204).json();
+  } catch (error) {
+    return res.status(500).json({ msg: "Failed to deactivate" });
   }
 });
 

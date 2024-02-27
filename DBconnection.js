@@ -3,6 +3,7 @@ const Trainer = require("./models/TrainerModel");
 const TrainerProjects = require("./models/TrainersProjects");
 const Admin = require("./models/AdminModel");
 const Project = require("./models/ProjectModel");
+const TrainersRating = require("./models/TrainersRating");
 
 const connectToDB = async () => {
   const sequelize = new Sequelize(
@@ -20,6 +21,24 @@ const connectToDB = async () => {
       through: TrainerProjects,
       onDelete: "RESTRICT",
     });
+
+    Trainer.hasMany(TrainerProjects);
+    TrainerProjects.belongsTo(Trainer);
+    Project.hasMany(TrainerProjects);
+    TrainerProjects.belongsTo(Project);
+    // Many - Many;
+    Trainer.belongsToMany(Project, {
+      through: { model: TrainersRating },
+      onDelete: "SET NULL",
+    });
+    Project.belongsToMany(Trainer, {
+      through: TrainersRating,
+      onDelete: "RESTRICT",
+    });
+    Trainer.hasMany(TrainersRating);
+    TrainersRating.belongsTo(Trainer);
+    Project.hasMany(TrainersRating);
+    TrainersRating.belongsTo(Project);
 
     // One-Many
     Admin.hasMany(Project, {
@@ -47,6 +66,7 @@ const connectToDB = async () => {
     Trainer.belongsTo(Admin);
 
     await TrainerProjects.sync({ alter: true });
+    await TrainersRating.sync({ alter: true });
     await Project.sync({ alter: true });
     await Admin.sync({ alter: true });
     await Trainer.sync({ alter: true });

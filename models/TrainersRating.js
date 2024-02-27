@@ -5,17 +5,16 @@ const Project = require("../models/ProjectModel");
 const sequelize = new Sequelize(
   "postgres://postgres:password@localhost:5432/Trainers"
 );
-const TrainersProjects = sequelize.define("TrainersProjects", {
+const TrainersRating = sequelize.define("TrainersRating", {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
   },
-  status: {
-    type: DataTypes.ENUM("Accepted", "Rejected", "In Progress"),
+  rating: {
+    type: DataTypes.SMALLINT,
     allowNull: false,
-    defaultValue: "In Progress",
   },
 });
 
-module.exports = TrainersProjects;
+module.exports = TrainersRating;

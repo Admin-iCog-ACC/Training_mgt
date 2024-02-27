@@ -76,15 +76,21 @@ const createAdminServices = async (req, res) => {
 };
 
 const updateAdminServices = async (req, res) => {
+  const result = await verifyRequest(req, res);
+  console.log(result);
+
+  if (result.status === 401 || !result.admin) {
+    return res.status(401).json({ msg: "Unauthorized" });
+  }
   const data = req.body;
-  const { id } = req.params;
+
   const checkAdmin = await AdminModel.findOne({
     where: {
       [Op.or]: {
         email: data.email,
         phoneNumber: data.phoneNumber,
       },
-      id: { [Op.ne]: id },
+      id: { [Op.ne]: result.value.id },
     },
   });
 
@@ -94,7 +100,7 @@ const updateAdminServices = async (req, res) => {
       .json({ msg: "Duplicated email and/or phone number" });
   }
 
-  const admin = await AdminModel.findByPk(id);
+  const admin = await AdminModel.findByPk(result.value.id);
 
   if (!admin) {
     return res
@@ -104,7 +110,7 @@ const updateAdminServices = async (req, res) => {
   try {
     const updatedAdmin = await AdminModel.update(data, {
       where: {
-        id,
+        id: result.value.id,
       },
       returning: true,
     });

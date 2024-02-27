@@ -2,10 +2,10 @@ const express = require("express");
 const router = express.Router();
 const {
   createApplicationController,
-  deleteApplicationController,
+  manageApplicationController,
 } = require("../controllers/application");
 
 router.route("/").post(createApplicationController);
-router.route("/:TrainerId/:ProjectId").delete(deleteApplicationController);
+router.route("/:TrainerId/:ProjectId").patch(manageApplicationController);
 
 module.exports = router;

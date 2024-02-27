@@ -2,9 +2,11 @@ const jwt = require("jsonwebtoken");
 const AdminModel = require("./models/AdminModel");
 const TrainerModel = require("./models/TrainerModel");
 const { INTEGER } = require("sequelize");
+const Project = require("./models/ProjectModel");
+const Trainer = require("./models/TrainerModel");
+const TrainersProjects = require("./models/TrainersProjects");
 const verifyRequest = async (req, res) => {
   try {
-    console.log("-----------------------------------------");
     const authorization = req.headers.authorization;
 
     if (!authorization) {
@@ -70,16 +72,21 @@ const verifyRequestAccess = async (req, res, next) => {
       if (!trainer) {
         return res.status(401).json({ msg: "Can't proceed" });
       } else {
+        req.role = "trainer";
         next();
       }
     } else {
       const admin = await AdminModel.findByPk(data.id, {
-        attributes: ["email", "firstName", "lastName"],
+        attributes: ["email", "firstName", "lastName", "role", "id"],
       });
 
       if (!admin) {
         return res.status(401).json({ msg: "Can't proceed" });
       } else {
+        admin.dataValues.role === "HR"
+          ? (req.role = "HR")
+          : (req.role = "Project Lead");
+        req.adminId = admin.dataValues.id;
         next();
       }
     }
@@ -99,6 +106,32 @@ const canDeleteUpdateCreateProject = async (req, res, next) => {
   req.admin = value;
   next();
 };
+const canGetProjectDetail = async (req, res, next) => {
+  const { status, value, admin } = await verifyRequest(req, res);
+  const { id } = req.params;
+
+  if (status === 401) {
+    return res.status(401).json({ msg: "Unauthorized" });
+  }
+
+  const project = await Project.findByPk(id);
+  if (!project) {
+    return res.status(404).json({ msg: "Project not found" });
+  }
+
+  if (admin) {
+    if (value.id !== project.AdminId) {
+      if (value.role !== "HR") {
+        return res.status(401).json({ msg: "Unauthorized" });
+      }
+    }
+    req.requestedBy = "admin";
+  } else {
+    req.requestedBy = "trainer";
+  }
+
+  next();
+};
 
 const canDeleteUpdateTrainer = async (req, res, next) => {
   const { status, value, admin } = await verifyRequest(req, res);
@@ -108,7 +141,22 @@ const canDeleteUpdateTrainer = async (req, res, next) => {
   }
 
   const { id } = req.params;
-  if (!admin && id != value.id) {
+  if (!admin && id != value.id && admin.role !== "HR") {
+    return res.status(401).json({ msg: "Can't proceed" });
+  }
+
+  next();
+};
+
+const canUpdateTrainerPassword = async (req, res, next) => {
+  const { status, value, admin } = await verifyRequest(req, res);
+
+  if (status === 401 || admin) {
+    return res.status(401).json({ msg: "Can't proceed" });
+  }
+
+  const { id } = req.params;
+  if (id != value.id) {
     return res.status(401).json({ msg: "Can't proceed" });
   }
 
@@ -195,6 +243,126 @@ const canGetAllAdmins = async (req, res, next) => {
   }
 };
 
+const canCreateRating = async (req, res, next) => {
+  const { status, admin, value } = await verifyRequest(req, res);
+  if (status === 401 || !admin) {
+    return res.status(401).json({ msg: "Unauthorized" });
+  }
+
+  const { projectId, trainerId } = req.body;
+
+  const project = await Project.findByPk(projectId);
+  const trainer = await Trainer.findByPk(trainerId);
+  const application = await TrainersProjects.findOne({
+    where: { TrainerId: trainerId, ProjectId: projectId },
+  });
+  if (!project) {
+    return res.status(404).json({ msg: "Project is not found" });
+  }
+
+  if (project.status !== "Completed") {
+    return res.status(400).json({ msg: "Project is not completed" });
+  }
+
+  if (project.adminId !== value.id) {
+    if (value.role !== "HR") {
+      return res.status(401).json({ msg: "Unauthorized" });
+    }
+  }
+
+  if (!trainer) {
+    return res.status(404).json({ msg: "Trainer is not found" });
+  }
+
+  if (!application) {
+    return res
+      .status(404)
+      .json({ msg: "Trainer did not apply for this project" });
+  }
+
+  req.admin = value;
+  next();
+};
+
+const canGetRating = async (req, res, next) => {
+  const { status, admin, value } = await verifyRequest(req, res);
+  if (status === 401) {
+    return res.status(401).json({ msg: "Unauthorized" });
+  }
+
+  const { projectId, trainerId } = req.params;
+
+  const project = await Project.findByPk(projectId);
+  const trainer = await Trainer.findByPk(trainerId);
+  const application = await TrainersProjects.findOne({
+    where: { TrainerId: trainerId, ProjectId: projectId },
+  });
+  if (!project) {
+    return res.status(404).json({ msg: "Project is not found" });
+  }
+
+  if (!trainer) {
+    return res.status(404).json({ msg: "Trainer is not found" });
+  }
+
+  if (!application) {
+    return res
+      .status(404)
+      .json({ msg: "Trainer did not apply for this project" });
+  }
+  if (!admin) {
+    if (value.id !== application.TrainerId) {
+      return res.status(401).json({ msg: "Unauthorized" });
+    }
+  }
+
+  if (value.id !== project.id) {
+    if (value.role !== "HR") {
+      return res.status(401).json({ msg: "Unauthorized" });
+    }
+  }
+
+  req.admin = value;
+  next();
+};
+
+const canUpdateRating = async (rea, res, next) => {
+  const { status, admin, value } = await verifyRequest(req, res);
+  if (status === 401 || !admin) {
+    return res.status(401).json({ msg: "Unauthorized" });
+  }
+
+  const { projectId, trainerId } = req.params;
+
+  const project = await Project.findByPk(projectId);
+  const trainer = await Trainer.findByPk(trainerId);
+  const application = await TrainersProjects.findOne({
+    where: { TrainerId: trainerId, ProjectId: projectId },
+  });
+  if (!project) {
+    return res.status(404).json({ msg: "Project is not found" });
+  }
+
+  if (!trainer) {
+    return res.status(404).json({ msg: "Trainer is not found" });
+  }
+
+  if (!application) {
+    return res
+      .status(404)
+      .json({ msg: "Trainer did not apply for this project" });
+  }
+
+  if (value.id !== project.id) {
+    if (value.role !== "HR") {
+      return res.status(401).json({ msg: "Unauthorized" });
+    }
+  }
+
+  req.admin = value;
+  next();
+};
+
 module.exports = {
   verifyRequest,
   canDeleteUpdateCreateProject,
@@ -206,4 +374,9 @@ module.exports = {
   canCreateTrainer,
   generateCode,
   canGetAllAdmins,
+  canCreateRating,
+  canUpdateTrainerPassword,
+  canUpdateRating,
+  canGetRating,
+  canGetProjectDetail,
 };
