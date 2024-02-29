@@ -48,16 +48,13 @@ const manageApplicationService = async (req, res) => {
 
     if (!application) {
       return res.status(404).json({
-        location: "",
-        path: "",
         msg: "application not found.",
-        type: "",
       });
     }
     application.status = status;
     await application.save();
 
-    return res.status(204).json();
+    return res.status(200).json({ msg: "status updated" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ msg: "Operation Failed" });

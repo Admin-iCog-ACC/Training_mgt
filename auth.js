@@ -16,6 +16,7 @@ const verifyRequest = async (req, res) => {
     if (!token) {
       return { status: 401 };
     }
+
     const data = jwt.verify(token, `${process.env.jwt_secret}`);
 
     if (!data) {
@@ -98,9 +99,8 @@ const verifyRequestAccess = async (req, res, next) => {
 
 const canDeleteUpdateCreateProject = async (req, res, next) => {
   const { status, value, admin } = await verifyRequest(req, res);
-  console.log(status, admin);
   if (status == 401 || !admin) {
-    return res.status(401).json({ msg: "Can't proceed" });
+    return res.status(401).json({ msg: "Unauthorized" });
   }
 
   req.admin = value;
@@ -237,8 +237,9 @@ const canGetAllAdmins = async (req, res, next) => {
     if (!admin || value.role !== "HR") {
       return res.status(401).json({ msg: "Unauthorized" });
     }
-    next(0);
+    next();
   } catch (error) {
+    console.log(error);
     return res.status(401).json({ msg: "Unauthorized" });
   }
 };
@@ -260,11 +261,7 @@ const canCreateRating = async (req, res, next) => {
     return res.status(404).json({ msg: "Project is not found" });
   }
 
-  if (project.status !== "Completed") {
-    return res.status(400).json({ msg: "Project is not completed" });
-  }
-
-  if (project.adminId !== value.id) {
+  if (project.AdminId !== value.id) {
     if (value.role !== "HR") {
       return res.status(401).json({ msg: "Unauthorized" });
     }
@@ -278,6 +275,11 @@ const canCreateRating = async (req, res, next) => {
     return res
       .status(404)
       .json({ msg: "Trainer did not apply for this project" });
+  }
+  if (application.status !== "Done") {
+    return res
+      .status(400)
+      .json({ msg: "Trainer has not finished working on this project" });
   }
 
   req.admin = value;
@@ -353,7 +355,7 @@ const canUpdateRating = async (rea, res, next) => {
       .json({ msg: "Trainer did not apply for this project" });
   }
 
-  if (value.id !== project.id) {
+  if (value.id !== project.AdminId) {
     if (value.role !== "HR") {
       return res.status(401).json({ msg: "Unauthorized" });
     }

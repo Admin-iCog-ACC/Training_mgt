@@ -15,6 +15,10 @@ const TrainersRating = sequelize.define("TrainersRating", {
     type: DataTypes.SMALLINT,
     allowNull: false,
   },
+  ratingRationale: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
 });
 
 module.exports = TrainersRating;

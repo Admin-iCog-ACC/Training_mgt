@@ -14,21 +14,23 @@ const getAdminServices = async (req, res) => {
   const admin = await AdminModel.findByPk(id, { include: ProjectModel });
 
   if (!admin) {
-    return res
-      .status(404)
-      .json({ location: "", path: "", msg: "Admin not found.", type: "" });
+    return res.status(404).json({ msg: "Admin not found." });
   }
 
   return res.status(200).json({ admin: admin });
 };
 
 const getAllAdminsServices = async (req, res) => {
-  const admin = await AdminModel.findAll({
-    attributes: { exclude: ["password", "recoveryDigits"] },
-    include: ProjectModel,
-  });
-
-  return res.status(200).json({ admin: admin });
+  try {
+    const admin = await AdminModel.findAll({
+      attributes: { exclude: ["password", "recoveryDigits"] },
+      include: ProjectModel,
+    });
+    console.log(admin);
+    return res.status(200).json({ admin: admin });
+  } catch {
+    return res.status(500).json({ msg: "Operation failed" });
+  }
 };
 
 const createAdminServices = async (req, res) => {
@@ -77,7 +79,6 @@ const createAdminServices = async (req, res) => {
 
 const updateAdminServices = async (req, res) => {
   const result = await verifyRequest(req, res);
-  console.log(result);
 
   if (result.status === 401 || !result.admin) {
     return res.status(401).json({ msg: "Unauthorized" });
@@ -103,9 +104,7 @@ const updateAdminServices = async (req, res) => {
   const admin = await AdminModel.findByPk(result.value.id);
 
   if (!admin) {
-    return res
-      .status(404)
-      .json({ location: "", path: "", msg: "admin not found.", type: "" });
+    return res.status(404).json({ msg: "admin not found." });
   }
   try {
     const updatedAdmin = await AdminModel.update(data, {
@@ -128,9 +127,7 @@ const updateAdminPasswordService = async (req, res) => {
     const { id } = req.params;
     const admin = await AdminModel.findByPk(id);
     if (!admin) {
-      return res
-        .status(404)
-        .json({ location: "", path: "", msg: "admin not found.", type: "" });
+      return res.status(404).json({ msg: "admin not found." });
     }
     if (!(await bcrypt.compare(data.oldPassword, admin.password))) {
       return res.status(400).json({ msg: "Incorrect old password" });
@@ -155,13 +152,10 @@ const updateAdminPasswordService = async (req, res) => {
 };
 
 const deleteAdminServices = async (req, res) => {
-  const data = req.body;
   const { id } = req.params;
   const admin = await AdminModel.findByPk(id);
   if (!admin) {
-    return res
-      .status(404)
-      .json({ location: "", path: "", msg: "admin not found.", type: "" });
+    return res.status(404).json({ msg: "admin not found." });
   }
   try {
     await AdminModel.destroy({

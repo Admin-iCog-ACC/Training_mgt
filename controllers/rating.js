@@ -8,6 +8,7 @@ const {
   deleteRatingService,
   getRatingService,
   getTrainerOverallRatingService,
+  updateRatingService,
 } = require("../services/rating");
 
 const createRatingController = async (req, res) => {
@@ -33,10 +34,14 @@ const getTrainerOverallRatingController = async (req, res) => {
   // if (errors.isEmpty()) return createBlogService(req, res);
   return getTrainerOverallRatingService(req, res);
 };
+const updateRatingController = async (req, res) => {
+  return updateRatingService(req, res);
+};
 
 module.exports = {
   createRatingController,
   deleteRatingController,
   getRatingController,
   getTrainerOverallRatingController,
+  updateRatingController,
 };

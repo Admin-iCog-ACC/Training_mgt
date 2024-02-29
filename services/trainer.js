@@ -67,11 +67,8 @@ const getTrainerServices = async (req, res) => {
     where: { id },
   });
 
-  // console.log(result[0]);
   if (!trainer) {
-    return res
-      .status(404)
-      .json({ location: "", path: "", msg: "trainer not found.", type: "" });
+    return res.status(404).json({ msg: "trainer not found." });
   }
   const numRating = await TrainersRating.count({
     where: { TrainerId: id },
@@ -102,7 +99,6 @@ const createTrainerServices = async (req, res) => {
     const newPassword = generatePassword();
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
-    console.log(newPassword);
     const trainer = await TrainerModel.create({
       ...data,
       password: hashedPassword,
@@ -127,9 +123,7 @@ const updateTrainerServices = async (req, res) => {
   const { id } = req.params;
   const trainer = await TrainerModel.findByPk(id);
   if (!trainer) {
-    return res
-      .status(404)
-      .json({ location: "", path: "", msg: "trainer not found.", type: "" });
+    return res.status(404).json({ msg: "trainer not found." });
   }
   try {
     const updatedTrainer = await TrainerModel.update(data, {
@@ -139,7 +133,7 @@ const updateTrainerServices = async (req, res) => {
       returning: true,
     });
 
-    return res.status(200).json({ msg: "updated" });
+    return res.status(200).json({ msg: "trainer updated" });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ msg: "Failed to update trainer" });
@@ -151,9 +145,7 @@ const deleteTrainerServices = async (req, res) => {
   const { id } = req.params;
   const trainer = await TrainerModel.findByPk(id);
   if (!trainer) {
-    return res
-      .status(404)
-      .json({ location: "", path: "", msg: "trainer not found.", type: "" });
+    return res.status(404).json({ msg: "trainer not found." });
   }
   try {
     await TrainerModel.destroy({
@@ -174,9 +166,7 @@ const updateTrainerPasswordServices = async (req, res) => {
     const { id } = req.params;
     const trainer = await TrainerModel.findByPk(id);
     if (!trainer) {
-      return res
-        .status(404)
-        .json({ location: "", path: "", msg: "admin not found.", type: "" });
+      return res.status(404).json({ msg: "trainer not found." });
     }
     if (!(await bcrypt.compare(data.oldPassword, trainer.password))) {
       return res.status(400).json({ msg: "Incorrect old password" });

@@ -9,6 +9,48 @@ const { NewReleasesSharp, RateReviewSharp } = require("@material-ui/icons");
 const { sendRecoveryCode } = require("../Email");
 const { verify } = require("../nodeMailer");
 
+/**
+ * @swagger
+ * /api/auth/trainer/login:
+ *   post:
+ *     tags:
+ *        - Authentication
+ *     description: This api allows trainers to login
+ *     requestBody:
+ *       description: Optional description in *Markdown*
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               example: {msg: Failed to login.}
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               example: {msg: Incorrect username and/or password.}
+ *
+ */
 router.route("/trainer/login").post(async (req, res) => {
   try {
     // const errors = validate(req);
@@ -21,20 +63,12 @@ router.route("/trainer/login").post(async (req, res) => {
     if (!trainer) {
       return res.status(400).json({
         location: "",
-        msg: "Invalid credentials",
+        msg: "Incorrect username and/or password.",
         type: "",
         path: "",
       });
     }
 
-    if (!trainer) {
-      return res.status(400).json({
-        location: "",
-        msg: "Invalid credentials",
-        type: "",
-        path: "",
-      });
-    }
     console.log(trainer.dataValues);
     if (await bcrypt.compare(password, trainer.dataValues.password)) {
       const token = jwt.sign(
@@ -56,12 +90,52 @@ router.route("/trainer/login").post(async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    return res
-      .status(500)
-      .json({ msg: "Failed to login.", path: "", location: "", type: "" });
+    return res.status(500).json({ msg: "Failed to login." });
   }
 });
 
+/**
+ * @swagger
+ * /api/auth/admin/login:
+ *   post:
+ *     tags:
+ *        - Authentication
+ *     description: This api allows admins to login
+ *     requestBody:
+ *       description: Optional description in *Markdown*
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               example: {msg: Failed to login.}
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               example: {msg: Incorrect username and/or password.}
+ *
+ */
 router.route("/admin/login").post(async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -69,19 +143,13 @@ router.route("/admin/login").post(async (req, res) => {
 
     if (!admin) {
       return res.status(400).json({
-        location: "",
         msg: "Invalid credentials",
-        type: "",
-        path: "",
       });
     }
 
     if (!admin.active) {
       return res.status(400).json({
-        location: "",
         msg: "Invalid credentials",
-        type: "",
-        path: "",
       });
     }
 
@@ -105,12 +173,48 @@ router.route("/admin/login").post(async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    return res
-      .status(500)
-      .json({ msg: "Failed to login.", path: "", location: "", type: "" });
+    return res.status(500).json({ msg: "Failed to login." });
   }
 });
 
+/**
+ * @swagger
+ * /api/auth/verify:
+ *   get:
+ *     tags:
+ *        - Authentication
+ *     security:
+ *       - bearerAuth: []
+ *     description: This api allows to verify a token
+ *     requestBody:
+ *       description: Optional description in *Markdown*
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Application successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       401:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               example: {msg: Please login}
+ *
+ *
+ */
 router.route("/verify").get(async (req, res) => {
   const { status, value, admin } = await verifyRequest(req, res);
 
@@ -121,12 +225,55 @@ router.route("/verify").get(async (req, res) => {
   return res.status(200).json({ ...value, admin });
 });
 
+/**
+ * @swagger
+ * /api/auth/send_password_code:
+ *   post:
+ *     tags:
+ *        - Authentication
+ *     description: This api allows users to send a code
+ *     requestBody:
+ *       description: Optional description in *Markdown*
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *
+ *     responses:
+ *       201:
+ *         description: Code sent
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               example: {msg: code sent}
+ *
+ *       404:
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               example: {msg: user not found}
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               example: {msg: Failed to send code}
+ *
+ */
 router.route("/send_password_code").post(async (req, res) => {
   const { email } = req.body;
   const trainer = await TrainerModel.findOne({ where: { email } });
   const time = new Date();
   const code = await generateCode();
-  console.log(trainer.active);
+
   if (trainer) {
     const { id, email } = trainer;
     if (!trainer.active) {
@@ -164,10 +311,57 @@ router.route("/send_password_code").post(async (req, res) => {
     await sendRecoveryCode(email, admin, code);
     return res.status(201).json({ msg: "Code sent" });
   } else {
-    return res.status(404).json({ msg: "not found" });
+    return res.status(404).json({ msg: "user not found" });
   }
 });
 
+/**
+ * @swagger
+ * /api/auth/update/password:
+ *   post:
+ *     tags:
+ *        - Authentication
+ *     description: This api allows users to forget their password
+ *     requestBody:
+ *       description: Optional description in *Markdown*
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               recoveryDigits:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *
+ *     responses:
+ *       200:
+ *         description: Code sent
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               example: {msg: Password updated}
+ *
+ *       401:
+ *         description: Invalid code
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               example: {msg: Invalid code}
+ *       404:
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               example: {msg: user not found}
+ *
+ */
 router.route("/update/password").post(async (req, res) => {
   const { password, recoveryDigits, email } = req.body;
 
@@ -208,10 +402,57 @@ router.route("/update/password").post(async (req, res) => {
 
     return res.status(200).json({ msg: "Password updated" });
   } else {
-    return res.status(404).json({ msg: "Not found" });
+    return res.status(404).json({ msg: "user not found" });
   }
 });
 
+/**
+ * @swagger
+ * /api/auth/change/password:
+ *   post:
+ *     tags:
+ *        - Authentication
+ *     security:
+ *       - bearerAuth: []
+ *     description: This api allows users to change their password
+ *     requestBody:
+ *       description: Optional description in *Markdown*
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *
+ *     responses:
+ *       201:
+ *         description: password updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               example: {msg: password successfully updated}
+ *
+ *       401:
+ *         description: Unauthorized / Invalid token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               example: {msg: Unauthorized}
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               example: {msg: Invalid old password}
+ *
+ */
 router.route("/change/password").post(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
   const { status, value, admin } = await verifyRequest(req, res);
@@ -221,7 +462,7 @@ router.route("/change/password").post(async (req, res) => {
   }
 
   if (!(await bcrypt.compare(oldPassword, value.password))) {
-    return res.status(401).json({ msg: "Invalid old password" });
+    return res.status(400).json({ msg: "Invalid old password" });
   }
 
   const salt = await bcrypt.genSalt(10);
@@ -248,6 +489,32 @@ router.route("/change/password").post(async (req, res) => {
   return res.status(201).json({ msg: "password successfully updated" });
 });
 
+/**
+ * @swagger
+ * /api/auth/delete/account:
+ *   delete:
+ *     tags:
+ *        - Authentication
+ *     security:
+ *       - bearerAuth: []
+ *     description: This api allows to deactivate a user account
+ *
+ *
+ *     responses:
+ *       204:
+ *         description: account deactivated
+ *         content:
+ *           application/json:
+ *             schema:
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               example: {msg: Failed to delete}
+ *
+ */
 router.route("/delete/account").delete(async (req, res) => {
   try {
     const { status, value, admin } = await verifyRequest(req, res);
@@ -285,12 +552,66 @@ router.route("/delete/account").delete(async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/auth/deactivate/account/{id}:
+ *   post:
+ *     tags:
+ *        - Authentication
+ *     security:
+ *       - bearerAuth: []
+ *     description: This api allows to activate a user account
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *          type: string
+ *
+ *     requestBody:
+ *       description: Optional description in *Markdown*
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               active:
+ *                 type: boolean
+ *     responses:
+ *       204:
+ *         description: account activated
+ *         content:
+ *           application/json:
+ *             schema:
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               example: {msg: Failed to deactivate}
+ *       404:
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               example: {msg: User not found}
+ *       401:
+ *         description: Unauthorized / Invalid Token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               example: {msg: Unauthorized }
+ *
+ */
 router.route("/deactivate/account/:id").post(async (req, res) => {
   try {
     const { id } = req.params;
     const { active } = req.body;
     const { status, value, admin } = await verifyRequest(req, res);
-    console.log(status, value, admin);
+
     if (status === 401 || !admin || value.role === "Project Lead") {
       return res.status(401).json({
         msg: "Unauthorized",
@@ -321,11 +642,11 @@ router.route("/deactivate/account/:id").post(async (req, res) => {
         }
       );
     } else {
-      return res.status(404).json({ msg: "Not found" });
+      return res.status(404).json({ msg: "User not found" });
     }
     return res.status(204).json();
   } catch (error) {
-    return res.status(500).json({ msg: "Failed to deactivate" });
+    return res.status(500).json({ msg: "Failed to activate" });
   }
 });
 

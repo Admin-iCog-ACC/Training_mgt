@@ -12,7 +12,7 @@ const TrainersProjects = sequelize.define("TrainersProjects", {
     autoIncrement: true,
   },
   status: {
-    type: DataTypes.ENUM("Accepted", "Rejected", "In Progress"),
+    type: DataTypes.ENUM("Accepted", "Rejected", "In Progress", "Done"),
     allowNull: false,
     defaultValue: "In Progress",
   },

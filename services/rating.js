@@ -4,26 +4,37 @@ const projectModel = require("../models/ProjectModel");
 const Project = require("../models/ProjectModel");
 const trainerModel = require("../models/TrainerModel");
 const { verifyRequest } = require("../auth");
+const TrainersProjects = require("../models/TrainersProjects");
 require("dotenv").config();
 
 const createRatingService = async (req, res) => {
   try {
-    const admin = req.admin;
-    const { trainerId, projectId, rating } = req.body;
+    const { trainerId, projectId, rating, ratingRationale } = req.body;
 
     const checkRating = await TrainersRating.findOne({
       where: { TrainerId: trainerId, ProjectId: projectId },
     });
 
+    const application = await TrainersProjects.findOne({
+      where: { TrainerId: trainerId, ProjectId: projectId },
+    });
+
+    if (application.status !== "Done") {
+      return res
+        .status(400)
+        .json({ msg: "Trainer has not finished working on this project!" });
+    }
     if (checkRating) {
       return res
         .status(400)
         .json({ msg: "Rating already done for this trainer on this project" });
     }
+
     const rate = await TrainersRating.create({
       TrainerId: trainerId,
       ProjectId: projectId,
       rating,
+      ratingRationale,
     });
 
     const totalRating = await TrainersRating.sum("rating", {
@@ -37,7 +48,57 @@ const createRatingService = async (req, res) => {
       { rating: totalRating / (numRating * 5) },
       { where: { id: trainerId } }
     );
-    return res.status(201).json({ rating: rate });
+    return res
+      .status(201)
+      .json({ rating: rate, overallRating: totalRating / (numRating * 5) });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ msg: "Failed to rate" });
+  }
+};
+
+const updateRatingService = async (req, res) => {
+  try {
+    const { trainerId, projectId } = req.params;
+    const { rating, ratingRationale } = req.body;
+
+    const checkRating = await TrainersRating.findOne({
+      where: { TrainerId: trainerId, ProjectId: projectId },
+    });
+
+    const application = await TrainersProjects.findOne({
+      where: { TrainerId: trainerId, ProjectId: projectId },
+    });
+
+    if (!checkRating) {
+      return res.status(404).json({ msg: "Rating not found." });
+    }
+
+    if (application.status !== "Done") {
+      return res
+        .status(400)
+        .json({ msg: "Trainer has not finished working on this project!" });
+    }
+
+    checkRating.rating = rating;
+    checkRating.ratingRationale = ratingRationale;
+    await checkRating.save();
+
+    const totalRating = await TrainersRating.sum("rating", {
+      where: { TrainerId: trainerId },
+    });
+    const numRating = await TrainersRating.count({
+      where: { TrainerId: trainerId },
+    });
+
+    await trainerModel.update(
+      { rating: totalRating / (numRating * 5) },
+      { where: { id: trainerId } }
+    );
+    return res.status(201).json({
+      rating: checkRating,
+      overallRating: totalRating / (numRating * 5),
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ msg: "Failed to rate" });
@@ -116,4 +177,5 @@ module.exports = {
   deleteRatingService,
   getRatingService,
   getTrainerOverallRatingService,
+  updateRatingService,
 };
