@@ -7,9 +7,14 @@ import "react-toastify/dist/ReactToastify.css";
 function ProjectDetail() {
   let { id } = useParams();
   const [project, setProject] = useState(null);
-  const [showDrawer, setShowDrawer] = useState(true);
-  const [searchEmail, setSearchEmail] = useState("");
-  const [searchStatus, setSearchStatus] = useState("");
+  const [ratingRationale, setRatingRationale] = useState("");
+  const [showDrawer, setShowDrawer] = useState(false);
+
+  const [existingSearch, setExistingSearch] = useState({
+    email: "",
+    status: "",
+  });
+  const [newSearch, setNewSearch] = useState({ email: "", status: "" });
   const [toBeDeleted, setToBeDeleted] = useState(null);
   const [trainerApplication, setTrainerApplication] = useState(null);
   const [updateProject, setUpdateProject] = useState(null);
@@ -63,16 +68,27 @@ function ProjectDetail() {
     setDeleteLoading(false);
   };
   const searchTrainers = () => {
-    console.log(project);
+    const { email, status } = newSearch;
 
     return project?.TrainersProjects?.filter(
       (item) =>
-        item.Trainer.email
+        item?.Trainer?.email
           .toLowerCase()
-          .startsWith(searchEmail.toLowerCase().trim()) &&
-        item.status
+          .startsWith(email.toLowerCase().trim()) &&
+        (item?.status === "Rejected" || item?.status === "In Progress") &&
+        item?.status.toLowerCase().startsWith(status.toLocaleLowerCase().trim())
+    );
+  };
+  const searchExistingTrainers = () => {
+    const { email, status } = existingSearch;
+
+    return project?.TrainersProjects?.filter(
+      (item) =>
+        item?.Trainer?.email
           .toLowerCase()
-          .startsWith(searchStatus.toLocaleLowerCase().trim())
+          .startsWith(email.toLowerCase().trim()) &&
+        (item?.status === "Accepted" || item?.status === "Done") &&
+        item?.status.toLowerCase().startsWith(status.toLocaleLowerCase().trim())
     );
   };
   function formatDate(dateString) {
@@ -296,6 +312,215 @@ function ProjectDetail() {
     setProjectPhotoUpdateLoading(false);
   };
 
+  const createRating = async (rating) => {
+    try {
+      const res = await axios.post(
+        `http://localhost:3000/api/rating`,
+        {
+          trainerId: trainerApplication.Trainer.id,
+          projectId: id,
+          rating,
+          ratingRationale,
+        },
+        {
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("token")} `,
+          },
+        }
+      );
+
+      toast.success("Rating successfully recorded!", {
+        position: "top-right",
+        autoClose: 1999,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Flip,
+      });
+
+      setTrainerApplication({
+        ...trainerApplication,
+        Trainer: {
+          ...trainerApplication.Trainer,
+          rating: res.data.overallRating,
+          TrainersRatings: [{ ...res.data.rating }],
+        },
+      });
+      const index = project?.TrainersProjects?.findIndex(
+        (item) => item.TrainerId === trainerApplication.TrainerId
+      );
+      const newTrainersProjects = [
+        ...project.TrainersProjects.slice(0, index),
+        {
+          ...trainerApplication,
+          Trainer: {
+            ...trainerApplication.Trainer,
+            rating: res.data.overallRating,
+            TrainersRatings: [{ ...res.data.rating }],
+          },
+        },
+        ...project.TrainersProjects.slice(
+          index + 1,
+          project.TrainersProjects.length
+        ),
+      ];
+      const newProject = { ...project, TrainersProjects: newTrainersProjects };
+      setProject(newProject);
+    } catch (error) {
+      console.log(error);
+      toast.error("Operation failed. Please Try again!", {
+        position: "top-right",
+        autoClose: 1999,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Flip,
+      });
+    }
+  };
+  const updateRating = async (rating) => {
+    try {
+      const res = await axios.patch(
+        `http://localhost:3000/api/rating/project/${trainerApplication.Trainer.id}/${id}`,
+        {
+          rating,
+          ratingRationale,
+        },
+        {
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("token")} `,
+          },
+        }
+      );
+      console.log(res.data);
+
+      setTrainerApplication({
+        ...trainerApplication,
+        Trainer: {
+          ...trainerApplication.Trainer,
+          rating: res.data.overallRating,
+          TrainersRatings: [
+            {
+              ...trainerApplication?.Trainer?.TrainersRatings[0],
+              rating,
+              ratingRationale,
+            },
+          ],
+        },
+      });
+      toast.success("Rating successfully recorded!", {
+        position: "top-right",
+        autoClose: 1999,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Flip,
+      });
+
+      const index = project?.TrainersProjects?.findIndex(
+        (item) => item.TrainerId === trainerApplication.TrainerId
+      );
+
+      const newTrainersProjects = [
+        ...project.TrainersProjects.slice(0, index),
+        {
+          ...trainerApplication,
+          Trainer: {
+            ...trainerApplication.Trainer,
+            rating: res.data.overallRating,
+            TrainersRatings: [
+              {
+                ...trainerApplication.Trainer.TrainersRatings,
+                rating,
+                ratingRationale,
+              },
+            ],
+          },
+        },
+        ...project.TrainersProjects.slice(
+          index + 1,
+          project.TrainersProjects.length
+        ),
+      ];
+      const newProject = { ...project, TrainersProjects: newTrainersProjects };
+      setProject(newProject);
+    } catch (error) {
+      toast.error("Operation failed. Please Try again!", {
+        position: "top-right",
+        autoClose: 1999,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Flip,
+      });
+      console.log(error);
+    }
+  };
+
+  const manageRating = async (rating) => {
+    console.log(trainerApplication?.Trainer?.TrainersRatings[0], rating);
+    if (!ratingRationale.trim()) {
+      toast.error("Rating Rationale is required!", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Flip,
+      });
+      return;
+    }
+
+    if (!trainerApplication?.Trainer?.TrainersRatings[0]) {
+      await createRating(rating);
+      return;
+    }
+
+    if (rating === trainerApplication?.Trainer?.TrainersRatings[0].rating) {
+      return;
+    }
+
+    // if(rating !== trainerApplication?.Trainer?.TrainersRatings[0]){
+    await updateRating(rating);
+    // }
+  };
+
+  const returnTrainerProjects = () => {
+    var working = 0;
+    var worked = 0;
+    var applied = 0;
+    var rejected = 0;
+    trainerApplication?.Trainer?.TrainersProjects?.map((application) => {
+      if (application.status === "In Progress") {
+        applied++;
+      } else if (application.status === "Rejected") {
+        rejected++;
+      } else if (application.status === "Accepted") {
+        working++;
+      } else if (application.status === "Done") {
+        worked++;
+      }
+    });
+    return { worked, working, applied, rejected };
+  };
+
+  const { worked, working, applied, rejected } = returnTrainerProjects();
+
   useEffect(() => {
     getProject();
   }, [id]);
@@ -327,6 +552,7 @@ function ProjectDetail() {
           onClick={() => {
             setShowDrawer(false);
             setTrainerApplication(null);
+            setRatingRationale("");
           }}
           type="button"
           data-drawer-hide="drawer-contact"
@@ -1110,16 +1336,16 @@ function ProjectDetail() {
               </section>
               <ul className="list-disc text-white px-4 mt-5">
                 <li className="mt-2 text-lg text-gray-400">
-                  Worked on 2 projects
+                  Has worked on {worked} project(s)
                 </li>
                 <li className="mt-2 text-lg text-gray-400">
-                  Currently working on 0 projects
+                  Currently working on {working} project(s)
                 </li>
                 <li className="mt-2 text-lg text-gray-400">
-                  Has applied on 4 projects
+                  Currently applied on {applied} project(s)
                 </li>
                 <li className="mt-2 text-lg text-gray-400">
-                  Has been rejected on 4 projects
+                  Has been rejected on {rejected} project(s)
                 </li>
               </ul>
               <section
@@ -1133,7 +1359,7 @@ function ProjectDetail() {
 
           <div className="border border-gray-600 bg-gray-900 rounded py-4 px-3 mt-4">
             <div className="mb-6 flex justify-between">
-              <h5 className="inline-flex items-center text-base font-semibold text-white uppercase ">
+              <h5 className="inline-flex items-center text-base font-bold text-white uppercase ">
                 Application - {project?.title}
               </h5>
               <section
@@ -1145,10 +1371,19 @@ function ProjectDetail() {
                   trainerApplication?.status === "Accepted" && "text-green-500"
                 }`}
               >
-                {trainerApplication?.status}
+                {trainerApplication?.status === "Done"
+                  ? "Finished"
+                  : trainerApplication?.status}
               </section>
             </div>
-            <div className="text-lg">
+            <div
+              className={`${
+                trainerApplication?.status === "Done" && "hidden"
+              } text-base text-gray-400`}
+            >
+              <section className="  font-medium text-gray-200  mb-2 ">
+                Why should we hire your for this project?
+              </section>
               Lorem ipsum dolor sit amet consectetur, adipisicing elit. Pariatur
               repellendus soluta magnam quidem? Recusandae tempore sequi rem
               pariatur aspernatur ut fugiat alias consectetur voluptatum! Iste
@@ -1163,7 +1398,11 @@ function ProjectDetail() {
               Enim eum aperiam vel doloremque ut obcaecati dolorem velit iste.
             </div>
 
-            <div className="mt-6">
+            <div
+              className={`${
+                trainerApplication?.status !== "Done" && "hidden"
+              } mt-6`}
+            >
               <h5 className="inline-flex items-center mb-6 text-base font-semibold text-gray-500 uppercase dark:text-gray-400">
                 What is your rating for{" "}
                 <span className="ml-1 text-white">
@@ -1172,8 +1411,9 @@ function ProjectDetail() {
                 </span>
                 ?
               </h5>
-              <section className="flex gap-x-3">
+              <section className="flex gap-x-3 mb-8">
                 <div
+                  onClick={() => manageRating(1)}
                   className={`${
                     trainerApplication?.Trainer?.TrainersRatings[0]?.rating ===
                     1
@@ -1184,6 +1424,7 @@ function ProjectDetail() {
                   1
                 </div>
                 <div
+                  onClick={() => manageRating(2)}
                   className={`${
                     trainerApplication?.Trainer?.TrainersRatings[0]?.rating ===
                     2
@@ -1194,6 +1435,7 @@ function ProjectDetail() {
                   2
                 </div>
                 <div
+                  onClick={() => manageRating(3)}
                   className={`${
                     trainerApplication?.Trainer?.TrainersRatings[0]?.rating ===
                     3
@@ -1204,6 +1446,7 @@ function ProjectDetail() {
                   3
                 </div>
                 <div
+                  onClick={() => manageRating(4)}
                   className={`${
                     trainerApplication?.Trainer?.TrainersRatings[0]?.rating ===
                     4
@@ -1214,6 +1457,7 @@ function ProjectDetail() {
                   4
                 </div>
                 <div
+                  onClick={() => manageRating(5)}
                   className={`${
                     trainerApplication?.Trainer?.TrainersRatings[0]?.rating ===
                     5
@@ -1223,6 +1467,15 @@ function ProjectDetail() {
                 >
                   5
                 </div>
+              </section>
+              <section>
+                <textarea
+                  id="rating-rationale"
+                  placeholder="Write Your Rational For The Above Rating"
+                  value={ratingRationale}
+                  onChange={(e) => setRatingRationale(e.target.value)}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                ></textarea>
               </section>
             </div>
           </div>
@@ -1721,7 +1974,16 @@ function ProjectDetail() {
                 {toBeDeleted?.statusToBeSet === "Accepted" &&
                   "Are you sure you want to accept this trainer?"}
                 {toBeDeleted?.statusToBeSet === "In Progress" &&
-                  "Are you sure you want to revert this trainer back?"}
+                  "Are you sure you want to revert back this trainer?"}
+                {toBeDeleted?.statusToBeSet === "Done" &&
+                  "Are you sure this trainer has finished working on this project?"}
+                <section
+                  className={`${
+                    toBeDeleted?.statusToBeSet !== "Done" && "hidden"
+                  } text-white font-bold my-3`}
+                >
+                  This action can not be reverted!
+                </section>
               </h3>
               <div className="flex justify-center align-center">
                 <button
@@ -1902,18 +2164,878 @@ function ProjectDetail() {
       </div>
 
       <div className="my-4"></div>
-      <div class="flex flex-col">
-        <div class="sm:flex mb-3 ">
+      <div class="flex flex-col bg-gray-800 pt-5 my-2 border-t mb-10 border-gray-400 ">
+        <h1 className="font-bold text-2xl mb-3 px-3 text-gray-400">
+          Browse and Manage Existing Trainers Here
+        </h1>
+        <div class="sm:flex mb-3 px-3">
           <div class="items-center hidden sm:flex sm:divide-x w-full sm:divide-gray-100 sm:mb-0 dark:divide-gray-700">
-            <form className="lg:pr-3  w-full flex justify-between items-start ">
+            <form className=" w-full flex justify-between items-start ">
               <div class="items-center justify-between relative mt-1 lg:w-64 xl:w-96">
                 <input
                   type="text"
                   name="email"
                   id="users-search"
                   class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                  placeholder="Search for trainers"
-                  onChange={(e) => setSearchEmail(e.target.value)}
+                  placeholder="Search for existing trainers"
+                  onChange={(e) =>
+                    setExistingSearch((prev) => {
+                      return { ...prev, email: e.target.value };
+                    })
+                  }
+                  value={existingSearch.email}
+                />
+                <span className="text-sm">
+                  {searchExistingTrainers()?.length} item
+                  {searchExistingTrainers()?.length > 1 ? "s" : null}
+                </span>
+              </div>
+              <select
+                onChange={(e) =>
+                  setExistingSearch((prev) => {
+                    return { ...prev, status: e.target.value };
+                  })
+                }
+                value={existingSearch.status}
+                className="bg-gray-500  border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-[200px] p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:hover:bg-gray-800"
+              >
+                <option value="">Filter by trainer status</option>
+
+                <option value="Accepted">Accepted</option>
+                <option value="Done">Done</option>
+              </select>
+            </form>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <div class="inline-block min-w-full align-middle">
+            <div class="">
+              <table class="min-w-full divide-y divide-gray-200 table-fixed dark:divide-gray-600">
+                <thead class="bg-gray-700 ">
+                  <tr>
+                    <th
+                      scope="col"
+                      class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400"
+                    >
+                      Trainer
+                    </th>
+                    <th
+                      scope="col"
+                      class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400"
+                    >
+                      Gender
+                    </th>
+                    <th
+                      scope="col"
+                      class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400"
+                    >
+                      Phone Number
+                    </th>
+                    <th
+                      scope="col"
+                      class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400"
+                    >
+                      Address
+                    </th>
+                    <th
+                      scope="col"
+                      class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400"
+                    >
+                      Expertise
+                    </th>
+                    <th
+                      scope="col"
+                      class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400"
+                    >
+                      Overall Rating
+                    </th>
+                    <th
+                      scope="col"
+                      class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400"
+                    >
+                      Status
+                    </th>
+                    <th
+                      scope="col"
+                      class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400"
+                    >
+                      Application Date
+                    </th>
+                    <th
+                      scope="col"
+                      class="p-4 text-xs text-center font-medium  text-gray-500 uppercase dark:text-gray-400"
+                    >
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class=" divide-y divide-gray-200  dark:bg-gray-800 dark:divide-gray-700">
+                  {searchExistingTrainers()?.map((item) => {
+                    return (
+                      <tr
+                        key={item.id}
+                        class="hover:bg-gray-100 dark:hover:bg-gray-700"
+                        onClick={() => {
+                          console.log(item.Trainer.TrainersRatings);
+                          // return;
+                          setTrainerApplication(item);
+                          setRatingRationale(
+                            item.Trainer.TrainersRatings[0]
+                              ? item.Trainer.TrainersRatings[0].ratingRationale
+                              : ""
+                          );
+                          setShowDrawer(true);
+                        }}
+                      >
+                        <td class="flex items-center p-4 mr-12 space-x-6 whitespace-nowrap">
+                          <div class="text-sm font-normal text-gray-500 dark:text-gray-400">
+                            <div class="text-base font-semibold text-gray-900 dark:text-white">
+                              {item.Trainer.firstName} {item.Trainer.lastName}
+                            </div>
+                            <div class="text-sm font-normal text-gray-500 dark:text-gray-400">
+                              {item.Trainer.email}
+                            </div>
+                          </div>
+                        </td>
+                        <td class="max-w-sm p-4 overflow-hidden text-base font-normal text-gray-500 truncate xl:max-w-xs dark:text-gray-400">
+                          {item.Trainer.gender}
+                        </td>
+                        <td class="p-4 text-base font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                          {item.Trainer.phoneNumber}
+                        </td>
+                        <td class="p-4 text-base font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                          {item.Trainer.address}
+                        </td>
+                        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+                          <div class="flex items-center">
+                            <div class="h-2.5 w-2.5 rounded-full bg-green-400 mr-2"></div>{" "}
+                            {item.Trainer.AreaofExpertise}
+                          </div>
+                        </td>
+                        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+                          <section className="flex">
+                            {
+                              <>
+                                {item.Trainer?.rating === 0 && (
+                                  <>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="#888888"
+                                        d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="#888888"
+                                        d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="#888888"
+                                        d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="#888888"
+                                        d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="#888888"
+                                        d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                      />
+                                    </svg>
+                                  </>
+                                )}
+                                {item.Trainer?.rating > 0 &&
+                                  item.Trainer?.rating < 1 && (
+                                    <>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="orange"
+                                          d="M12 8.125v7.8l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325zM7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="#888888"
+                                          d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="#888888"
+                                          d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="#888888"
+                                          d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="#888888"
+                                          d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                        />
+                                      </svg>
+                                    </>
+                                  )}
+                                {item.Trainer?.rating === 1 && (
+                                  <>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="orange"
+                                        d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="#888888"
+                                        d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="#888888"
+                                        d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="#888888"
+                                        d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="#888888"
+                                        d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                      />
+                                    </svg>
+                                  </>
+                                )}
+                                {item.Trainer?.rating > 1 &&
+                                  item.Trainer?.rating < 2 && (
+                                    <>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="orange"
+                                          d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="orange"
+                                          d="M12 8.125v7.8l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325zM7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="#888888"
+                                          d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="#888888"
+                                          d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="#888888"
+                                          d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                        />
+                                      </svg>
+                                    </>
+                                  )}
+                                {item.Trainer?.rating === 2 && (
+                                  <>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="orange"
+                                        d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="orange"
+                                        d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                      />
+                                    </svg>{" "}
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="#888888"
+                                        d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="#888888"
+                                        d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="#888888"
+                                        d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                      />
+                                    </svg>
+                                  </>
+                                )}
+                                {item.Trainer?.rating > 2 &&
+                                  item.Trainer?.rating < 3 && (
+                                    <>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="orange"
+                                          d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="orange"
+                                          d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="orange"
+                                          d="M12 8.125v7.8l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325zM7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="#888888"
+                                          d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="#888888"
+                                          d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                        />
+                                      </svg>
+                                    </>
+                                  )}
+                                {item.Trainer?.rating === 3 && (
+                                  <>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="orange"
+                                        d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="orange"
+                                        d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="orange"
+                                        d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="#888888"
+                                        d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="#888888"
+                                        d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                      />
+                                    </svg>
+                                  </>
+                                )}
+                                {item.Trainer?.rating === 4 && (
+                                  <>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="orange"
+                                        d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="orange"
+                                        d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="orange"
+                                        d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="orange"
+                                        d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="#888888"
+                                        d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                      />
+                                    </svg>
+                                  </>
+                                )}
+                                {item.Trainer?.rating === 5 && (
+                                  <>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="orange"
+                                        d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="orange"
+                                        d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="orange"
+                                        d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="orange"
+                                        d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                      />
+                                    </svg>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="orange"
+                                        d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                      />
+                                    </svg>
+                                  </>
+                                )}
+                                {item.Trainer?.rating > 3 &&
+                                  item.Trainer?.rating < 4 && (
+                                    <>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="orange"
+                                          d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="orange"
+                                          d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="orange"
+                                          d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="orange"
+                                          d="M12 8.125v7.8l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325zM7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="#888888"
+                                          d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                        />
+                                      </svg>
+                                    </>
+                                  )}
+                                {item.Trainer?.rating > 4 &&
+                                  item.Trainer?.rating < 5 && (
+                                    <>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="orange"
+                                          d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="orange"
+                                          d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="orange"
+                                          d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="orange"
+                                          d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                        />
+                                      </svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fill="orange"
+                                          d="M12 8.125v7.8l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325zM7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                        />
+                                      </svg>
+                                    </>
+                                  )}
+                              </>
+                            }
+                          </section>
+                        </td>
+                        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+                          <div class="flex items-center">{item.status}</div>
+                        </td>
+                        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+                          <div class="flex items-center">
+                            {formatDate(item.createdAt)}
+                          </div>
+                        </td>
+                        <td class="p-4  whitespace-nowrap ">
+                          <div className="flex justify-center gap-x-4">
+                            <button
+                              type="button"
+                              data-modal-toggle="delete-user-modal"
+                              className={`${
+                                item.status === "Accepted" ? "block" : "hidden"
+                              } inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setToBeDeleted({
+                                  ...item.Trainer,
+                                  statusToBeSet: "Done",
+                                });
+                              }}
+                            >
+                              Complete
+                            </button>
+                            <span
+                              className={`${
+                                item.status === "Done" ? "block" : "hidden"
+                              }`}
+                            >
+                              -----
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-col border pt-5 my-2 border-gray-700">
+        <h1 className="font-bold text-2xl mb-3 px-3">Here Are New Trainers</h1>
+        <div class="sm:flex mb-3 px-3">
+          <div class="items-center hidden sm:flex sm:divide-x w-full sm:divide-gray-100 sm:mb-0 dark:divide-gray-700">
+            <form className=" w-full flex justify-between items-start ">
+              <div class="items-center justify-between relative mt-1 lg:w-64 xl:w-96">
+                <input
+                  type="text"
+                  name="email"
+                  id="users-search"
+                  class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                  placeholder="Search for new trainers"
+                  onChange={(e) =>
+                    setNewSearch((prev) => {
+                      return { ...prev, email: e.target.value };
+                    })
+                  }
+                  value={newSearch.email}
                 />
                 <span className="text-sm">
                   {searchTrainers()?.length} item
@@ -1921,15 +3043,16 @@ function ProjectDetail() {
                 </span>
               </div>
               <select
-                onChange={(e) => {
-                  setSearchStatus(e.target.value);
-                }}
-                value={searchStatus}
+                onChange={(e) =>
+                  setNewSearch((prev) => {
+                    return { ...prev, status: e.target.value };
+                  })
+                }
+                value={newSearch.status}
                 className="bg-gray-500  border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-[200px] p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:hover:bg-gray-800"
               >
                 <option value="">Filter by trainer status</option>
                 <option value="In Progress">In Progress</option>
-                <option value="Accepted">Accepted</option>
                 <option value="Rejected">Rejected</option>
               </select>
             </form>

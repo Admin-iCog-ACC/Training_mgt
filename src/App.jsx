@@ -17,6 +17,7 @@ import Header from "./pages/trainer/Header";
 import TrainerProjectDetail from "./pages/trainer/TrainerProjectDetail";
 import TrainerProfile from "./pages/trainer/TrainerProfile";
 import TrainerLogin from "./pages/trainer/TrainerLogin";
+import TrainerRegistration from "./pages/trainer/TrainerRegistration";
 // import ECommerce from "./pages/Dashboard/ECommerce";
 
 function App() {
@@ -43,6 +44,7 @@ function App() {
           />
         </Route>
         <Route path="change/password" element={<ChangePassword />} />
+        <Route path="trainer_registration" element={<TrainerRegistration />} />
       </Routes>
     </BrowserRouter>
   );

@@ -16,11 +16,12 @@ export default function AdminHeader() {
     startDate: "",
     endDate: "",
     span: "",
-    priority: "",
+    priority: "Low",
     budget: "",
     overview: "",
     description: "",
     imageURL: "",
+    status: "In Progress",
     days: [],
   });
 
@@ -243,6 +244,7 @@ export default function AdminHeader() {
                 placeholder="project title"
                 required
                 onChange={handleInputChange}
+                value={input.title}
               />
             </div>
             <div className="mb-4">
@@ -260,6 +262,7 @@ export default function AdminHeader() {
                 placeholder="project location"
                 required
                 onChange={handleInputChange}
+                value={input.location}
               />
             </div>
             <div className="mb-4 flex gap-x-4 ">
@@ -278,6 +281,7 @@ export default function AdminHeader() {
                   placeholder="project budget"
                   required
                   onChange={handleInputChange}
+                  value={input.budget}
                 />
               </section>
               <section className="flex-1">
@@ -295,6 +299,7 @@ export default function AdminHeader() {
                   placeholder="project span"
                   required
                   onChange={handleInputChange}
+                  value={input.span}
                 />
               </section>
             </div>
@@ -307,6 +312,7 @@ export default function AdminHeader() {
                   Priority
                 </label>
                 <select
+                  value={input.priority}
                   onChange={handleInputChange}
                   name="priority"
                   id="priority"
@@ -328,6 +334,7 @@ export default function AdminHeader() {
                   onChange={handleInputChange}
                   name="status"
                   id="status"
+                  value={input.status}
                   className="mb-4 sm:mb-0 mr-4 inline-flex items-center text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-4 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
                 >
                   <option value="In Progress">In Progress</option>
@@ -351,6 +358,7 @@ export default function AdminHeader() {
                     required
                     name="startDate"
                     onChange={handleInputChange}
+                    value={input.startDate}
                   />
                 </div>
                 <div className="flex-1">
@@ -366,6 +374,7 @@ export default function AdminHeader() {
                     required
                     name="endDate"
                     onChange={handleInputChange}
+                    value={input.endDate}
                   />
                 </div>
               </section>
@@ -386,6 +395,7 @@ export default function AdminHeader() {
                 required
                 name="overview"
                 onChange={handleInputChange}
+                value={input.overview}
               ></textarea>
             </div>
             <div className="mb-4">
@@ -403,6 +413,7 @@ export default function AdminHeader() {
                 required
                 name="description"
                 onChange={handleInputChange}
+                value={input.description}
               ></textarea>
             </div>
 
