@@ -133,8 +133,8 @@ function TrainerProjectDetail() {
   return (
     <div>
       <ToastContainer />
-      <div class="md:flex no-wrap md:-mx-2  mt-8 ">
-        <div class="w-full md:w-9/12 mx-auto shadow border border-gray-100 rounded ">
+      <div class="md:flex no-wrap md:-mx-2  mt-8  ">
+        <div class="w-full md:w-9/12 mx-auto shadow-sm border bg-white  rounded ">
           <div class=" p-3 shadow-sm rounded-sm">
             <div class="flex items-center justify-between  space-x-2 font-semibold text-gray-900 leading-8 mb-3 px-4 ">
               <section className="flex items-center">
@@ -143,9 +143,11 @@ function TrainerProjectDetail() {
                   src={project?.imageURL}
                   alt=""
                 />
-                <span class="tracking-wide text-3xl">{project?.title}</span>
+                <span class="tracking-wide text-3xl text-[#168c9e] ml-2">
+                  {project?.title}
+                </span>
               </section>
-              <section className="text-gray-500 font-normal">
+              <section className="font-normal text-[#168c9e]">
                 {getTimeDifference(project?.createdAt).date}
                 {getTimeDifference(project?.createdAt).unit}
               </section>
@@ -191,7 +193,7 @@ function TrainerProjectDetail() {
             <div className="flex">
               <button
                 onClick={() => handleApply()}
-                class="block w-full  text-blue-800 text-base font-semibold rounded-lg hover:bg-gray-200 focus:outline-none focus:shadow-outline focus:bg-gray-100 hover:shadow-xs p-3 my-4"
+                class="block w-full  text-[#168c9e] text-base font-semibold rounded-lg hover:bg-gray-200 focus:outline-none focus:shadow-outline focus:bg-gray-100 hover:shadow-xs p-3 my-4"
               >
                 {applyLoading ? "Applying..." : "Apply Here"}
               </button>

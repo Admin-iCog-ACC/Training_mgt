@@ -1,9 +1,10 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 function Projects() {
   const [projects, setProjects] = useState(null);
+  let [searchParams, setSearchParams] = useSearchParams();
 
   const [search, setSearch] = useState({
     title: "",
@@ -17,14 +18,10 @@ function Projects() {
 
   const handleSearchChange = (e) => {
     const { name, value } = e.target;
-
-    console.log(name, value);
-    setSearch((prev) => {
-      return {
-        ...prev,
-        [name]: value,
-      };
-    });
+    const sp = new URLSearchParams(searchParams);
+    sp.delete(name);
+    sp.append(name, value);
+    setSearchParams(sp);
   };
   const fetchProjects = async () => {
     try {
@@ -44,16 +41,46 @@ function Projects() {
     const { title, priority, status, start, end, location } = search;
     const filteredProjects = projects?.filter(
       (project) =>
-        project.title.toLowerCase().startsWith(title.toLowerCase().trim()) &&
+        project.title
+          .toLowerCase()
+          .startsWith(
+            searchParams.get("title")
+              ? searchParams.get("title").toLowerCase().trim()
+              : ""
+          ) &&
         project.startDate
           .toLowerCase()
-          .startsWith(start.toLowerCase().trim()) &&
-        project.endDate.toLowerCase().startsWith(end.toLowerCase().trim()) &&
-        project.status.toLowerCase().startsWith(status.toLowerCase().trim()) &&
+          .startsWith(
+            searchParams.get("start") ? searchParams.get("start").trim() : ""
+          ) &&
+        project.endDate
+          .toLowerCase()
+          .startsWith(
+            searchParams.get("end")
+              ? searchParams.get("end").toLowerCase().trim()
+              : ""
+          ) &&
+        project.status
+          .toLowerCase()
+          .startsWith(
+            searchParams.get("status")
+              ? searchParams.get("status").toLowerCase().trim()
+              : ""
+          ) &&
         project.priority
           .toLowerCase()
-          .startsWith(priority.toLowerCase().trim()) &&
-        project.location.toLowerCase().startsWith(location.toLowerCase().trim())
+          .startsWith(
+            searchParams.get("priority")
+              ? searchParams.get("priority").toLowerCase().trim()
+              : ""
+          ) &&
+        project.location
+          .toLowerCase()
+          .startsWith(
+            searchParams.get("location")
+              ? searchParams.get("location").toLowerCase().trim()
+              : ""
+          )
     );
 
     return filteredProjects;
@@ -67,16 +94,95 @@ function Projects() {
         <h1 className=" font-bold text-2xl">
           Discover Engaging Projects and Apply as a Trainer Today!
         </h1>
-        <section className="mb-3 mt-5 flex items-center justify-between">
-          <input
-            className="border-2 border-gray-300 text-gray-700  h-10 px-5 pr-16 rounded-lg text-base focus:outline-none"
-            type="text"
-            name="title"
-            placeholder="title"
-            onChange={(e) => handleSearchChange(e)}
-            value={search.title}
-          />
-          <section className="flex gap-x-4 items-center">
+        <section className="mb-3 mt-5 flex items-start justify-between relative ">
+          <div className="absolute top-3 left-0  flex items-center pl-3 pointer-events-none">
+            <svg
+              className="w-5 h-5 text-gray-500 dark:text-gray-400"
+              fill="#168c9e"
+              viewBox="0 0 20 20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fillRule="evenodd"
+                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                clipRule="evenodd"
+              ></path>
+            </svg>
+          </div>
+          <div className="">
+            <input
+              className="border-2 border-gray-300 text-gray-700 h-10 pl-9 rounded-lg text-base focus:outline-none"
+              type="text"
+              name="title"
+              placeholder="title"
+              onChange={(e) => handleSearchChange(e)}
+              value={searchParams.get("title") ? searchParams.get("title") : ""}
+            />
+            <div className="flex items-end gap-x-4">
+              <section>{filterProjects(projects)?.length} found</section>
+              <section
+                className={`cursor-pointer mt-1 hover:text-[#168c9e] ${
+                  searchParams.get("title")?.trim() ||
+                  searchParams.get("priority")?.trim() ||
+                  searchParams.get("status")?.trim() ||
+                  searchParams.get("start")?.trim() ||
+                  searchParams.get("location")?.trim() ||
+                  searchParams.get("end")?.trim()
+                    ? "inline"
+                    : "hidden"
+                }`}
+                onClick={() => {
+                  setSearch({
+                    title: "",
+                    priority: "",
+                    status: "",
+                    start: "",
+                    end: "",
+                    location: "",
+                  });
+                  setSearchParams({});
+                }}
+              >
+                Clear search
+              </section>
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              const sp = new URLSearchParams(searchParams);
+              sp.delete("filter");
+              sp.append("filter", true);
+              setSearchParams(sp);
+            }}
+            className={`  group flex gap-x-4 items-center text-[#168c9e] text-lg tracking-wide transition ease-in-out duration-100  px-4 py-1 rounded-xl cursor-pointer   hover:bg-[#168c9e] hover:font-bold hover:text-white`}
+          >
+            Filters
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              className="block group-hover:hidden"
+            >
+              <path
+                fill="#168c9e"
+                d="M11.058 17q-.213 0-.357-.144q-.143-.144-.143-.357q0-.212.143-.356q.144-.143.357-.143h1.865q.213 0 .356.144t.144.357q0 .212-.144.356q-.143.143-.356.143zm-3.75-4.5q-.213 0-.357-.144q-.143-.144-.143-.357t.143-.356q.144-.143.357-.143h9.365q.213 0 .356.144q.144.144.144.357t-.144.356q-.143.143-.356.143zM4.5 8q-.213 0-.356-.144T4 7.499q0-.212.144-.356Q4.288 7 4.5 7h15q.213 0 .356.144q.144.144.144.357q0 .212-.144.356Q19.713 8 19.5 8z"
+              />
+            </svg>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              className="hidden group-hover:block"
+            >
+              <path
+                fill="white"
+                d="M11.058 17q-.213 0-.357-.144q-.143-.144-.143-.357q0-.212.143-.356q.144-.143.357-.143h1.865q.213 0 .356.144t.144.357q0 .212-.144.356q-.143.143-.356.143zm-3.75-4.5q-.213 0-.357-.144q-.143-.144-.143-.357t.143-.356q.144-.143.357-.143h9.365q.213 0 .356.144q.144.144.144.357t-.144.356q-.143.143-.356.143zM4.5 8q-.213 0-.356-.144T4 7.499q0-.212.144-.356Q4.288 7 4.5 7h15q.213 0 .356.144q.144.144.144.357q0 .212-.144.356Q19.713 8 19.5 8z"
+              />
+            </svg>
+          </button>
+          {/* <section className="flex gap-x-4 items-center">
             <section>
               <label htmlFor="start" className=" text-sm">
                 Start:{" "}
@@ -100,10 +206,10 @@ function Projects() {
                 onChange={handleSearchChange}
               />
             </section>
-          </section>
+          </section> */}
         </section>
         <div className="flex justify-between">
-          <section>
+          {/* <section>
             <select
               onChange={handleSearchChange}
               name="priority"
@@ -122,41 +228,17 @@ function Projects() {
               placeholder="location"
               onChange={handleSearchChange}
             />
-          </section>
+          </section> */}
 
-          <section>{filterProjects(projects)?.length} found</section>
+          {/* <section>{filterProjects(projects)?.length} found</section> */}
         </div>
-        <section
-          className={`cursor-pointer mt-1 hover:text-gray-900 ${
-            search.title.trim() ||
-            search.priority.trim() ||
-            search.status.trim() ||
-            search.start.trim() ||
-            search.location.trim() ||
-            search.end.trim()
-              ? "inline"
-              : "hidden"
-          }`}
-          onClick={() =>
-            setSearch({
-              title: "",
-              priority: "",
-              status: "",
-              start: "",
-              end: "",
-              location: "",
-            })
-          }
-        >
-          Clear search
-        </section>
       </div>
       <div className="grid grid-cols-4 py-2  gap-y-8 justify-items-center ">
         {filterProjects(projects)?.map((project) => {
           return (
             <section
               key={project.id}
-              className="bg-gray-100  text-gray-500 hover:text-gray-900 hover:bg-gray-200 w-[450px] rounded-lg transition shadow-md group hover:shadow-none hover:-translate-y-2"
+              className="bg-white group text-gray-500 hover:text-gray-900 hover:shadow-lg w-[450px] rounded-lg transition  group  hover:-translate-y-2"
             >
               <img
                 src={`${project.imageURL}`}
@@ -166,21 +248,29 @@ function Projects() {
               <section className="px-3 mb-3">
                 <section className="flex justify-between items-center">
                   <h1 className={` font-bold text-2xl`}>{project.title}</h1>
-                  <section>{project.priority}</section>
+                  <section className="text-[#21c2db] group-hover:text-[#168c9e] group-hover:font-bold">
+                    {project.priority}
+                  </section>
                 </section>
                 <section className="text-base">
                   <span className="text-gray-900 mr-2">Start Date:</span>
-                  <span className="font-bold">{project.startDate}</span>{" "}
+                  <span className="text-[#21c2db] group-hover:text-[#168c9e] group-hover:font-bold">
+                    {project.startDate}
+                  </span>{" "}
                 </section>
                 <section className="text-sm ">
                   <span className="text-gray-900 mr-2">End Date:</span>
-                  <span className="font-bold">{project.endDate}</span>{" "}
+                  <span className="text-[#21c2db] group-hover:text-[#168c9e] group-hover:font-bold">
+                    {project.endDate}
+                  </span>{" "}
                 </section>
                 <section
                   className={`${search.location ? "block" : "hidden"} text-sm`}
                 >
                   <span className="text-gray-900 mr-2">Location:</span>
-                  <span className={`font-bold`}>{project.location}</span>{" "}
+                  <span className="text-[#21c2db] group-hover:text-[#168c9e] group-hover:font-bold">
+                    {project.location}
+                  </span>{" "}
                 </section>
               </section>
               <section className="px-1 ">
@@ -190,7 +280,7 @@ function Projects() {
               </section>
               <section className="text-center my-3 font-bold text-lg tracking-wide ">
                 <span
-                  className="hover:text-gray-500 cursor-pointer"
+                  className=" text-sm text-[#21c2db] hover:text-[#168c9e] hover:underline cursor-pointer"
                   onClick={() => navigate(`/projects/${project.id}`)}
                 >
                   Detail Here

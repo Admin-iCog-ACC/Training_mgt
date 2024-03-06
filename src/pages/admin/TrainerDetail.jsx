@@ -70,7 +70,7 @@ function TrainerDetail() {
   const filterCompletedProjects = () => {
     return trainer?.Projects?.filter(
       (project) =>
-        project.status === "Accepted" &&
+        (project.status === "Done" || project.status === "Accepted") &&
         project.Project.title
           .toLowerCase()
           .startsWith(completedProjectTitle.toLowerCase().trim())
@@ -80,7 +80,7 @@ function TrainerDetail() {
   const filterAppliedProjects = () => {
     return trainer?.Projects?.filter(
       (project) =>
-        project.status !== "Accepted" &&
+        (project.status === "Accepted" || project.status === "In Progress") &&
         project.Project.title
           .toLowerCase()
           .startsWith(appliedProjectTitle.toLowerCase().trim())
