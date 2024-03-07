@@ -2,8 +2,13 @@ const { DataTypes } = require("sequelize");
 const { Sequelize } = require("sequelize");
 const Trainer = require("../models/TrainerModel");
 const Project = require("../models/ProjectModel");
+require("dotenv").config();
+
 const sequelize = new Sequelize(
-  "postgres://postgres:password@localhost:5432/Trainers"
+  // `postgres://${process.env.DBuser}:${process.env.DBpassword}@${process.env.DBhost}:${process.env.DBport}/${process.env.DB}`
+  process.env.connection_string
+
+  // "postgres://postgres:password@localhost:5432/Trainers"
 );
 const TrainersRating = sequelize.define("TrainersRating", {
   id: {
@@ -16,7 +21,7 @@ const TrainersRating = sequelize.define("TrainersRating", {
     allowNull: false,
   },
   ratingRationale: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false,
   },
 });

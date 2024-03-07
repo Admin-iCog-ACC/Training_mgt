@@ -9,6 +9,8 @@ const {
   createTrainerImageController,
   createTrainerCvController,
   updateTrainerPasswordController,
+  sendRegistrationLinkController,
+  activateTrainerAccountController,
 } = require("../controllers/trainer");
 
 const {
@@ -308,4 +310,10 @@ router
 router
   .route("/password/:id")
   .patch(canUpdateTrainerPassword, updateTrainerPasswordController);
+router
+  .route("/send_registration_link")
+  .post(canCreateTrainer, sendRegistrationLinkController);
+router
+  .route("/activate_trainer_account")
+  .post(activateTrainerAccountController);
 module.exports = router;

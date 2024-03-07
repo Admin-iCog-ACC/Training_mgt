@@ -74,6 +74,8 @@ const verifyRequestAccess = async (req, res, next) => {
         return res.status(401).json({ msg: "Can't proceed" });
       } else {
         req.role = "trainer";
+        req.trainerId = trainer.dataValues.id;
+
         next();
       }
     } else {
@@ -126,8 +128,10 @@ const canGetProjectDetail = async (req, res, next) => {
       }
     }
     req.requestedBy = "admin";
+    req.adminId = value.id;
   } else {
     req.requestedBy = "trainer";
+    req.trainerId = value.id;
   }
 
   next();
@@ -328,7 +332,7 @@ const canGetRating = async (req, res, next) => {
   next();
 };
 
-const canUpdateRating = async (rea, res, next) => {
+const canUpdateRating = async (req, res, next) => {
   const { status, admin, value } = await verifyRequest(req, res);
   if (status === 401 || !admin) {
     return res.status(401).json({ msg: "Unauthorized" });
@@ -365,6 +369,34 @@ const canUpdateRating = async (rea, res, next) => {
   next();
 };
 
+const verifyRegistrationToken = async (req) => {
+  try {
+    const { token } = req.body;
+    if (!token) {
+      return false;
+    }
+
+    const data = jwt.verify(token, `${process.env.registration_secret}`);
+
+    if (!data) {
+      return false;
+    }
+    const id = data.id;
+    const trainer = await TrainerModel.findByPk(id, {
+      attributes: { exclude: ["password"] },
+    });
+
+    if (!trainer) {
+      return false;
+    } else {
+      return trainer;
+    }
+  } catch (err) {
+    console.log(err);
+    return false;
+  }
+};
+
 module.exports = {
   verifyRequest,
   canDeleteUpdateCreateProject,
@@ -381,4 +413,5 @@ module.exports = {
   canUpdateRating,
   canGetRating,
   canGetProjectDetail,
+  verifyRegistrationToken,
 };

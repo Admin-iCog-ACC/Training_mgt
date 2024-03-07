@@ -4,10 +4,12 @@ const TrainerProjects = require("./models/TrainersProjects");
 const Admin = require("./models/AdminModel");
 const Project = require("./models/ProjectModel");
 const TrainersRating = require("./models/TrainersRating");
+require("dotenv").config();
 
 const connectToDB = async () => {
   const sequelize = new Sequelize(
-    `postgres://${process.env.DBuser}:${process.env.DBpassword}@${process.env.DBhost}:${process.env.DBport}/${process.env.DB}`
+    // `postgres://${process.env.DBuser}:${process.env.DBpassword}@${process.env.DBhost}:${process.env.DBport}/${process.env.DB}`
+    process.env.connection_string
   );
 
   try {
@@ -15,11 +17,11 @@ const connectToDB = async () => {
     // Many - Many;
     Trainer.belongsToMany(Project, {
       through: { model: TrainerProjects },
-      onDelete: "SET NULL",
+      onDelete: "CASCADE",
     });
     Project.belongsToMany(Trainer, {
       through: TrainerProjects,
-      onDelete: "RESTRICT",
+      onDelete: "CASCADE",
     });
 
     Trainer.hasMany(TrainerProjects);
@@ -29,11 +31,11 @@ const connectToDB = async () => {
     // Many - Many;
     Trainer.belongsToMany(Project, {
       through: { model: TrainersRating },
-      onDelete: "SET NULL",
+      onDelete: "CASCADE",
     });
     Project.belongsToMany(Trainer, {
       through: TrainersRating,
-      onDelete: "RESTRICT",
+      onDelete: "CASCADE",
     });
     Trainer.hasMany(TrainersRating);
     TrainersRating.belongsTo(Trainer);
@@ -52,7 +54,7 @@ const connectToDB = async () => {
         allowNull: false,
         // defaultValue: null,
       },
-      onDelete: "RESTRICT",
+      onDelete: "CASCADE",
     });
 
     // One-Many
@@ -61,7 +63,7 @@ const connectToDB = async () => {
         allowNull: true,
         // defaultValue: null,
       },
-      onDelete: "RESTRICT",
+      onDelete: "CASCADE",
     });
     Trainer.belongsTo(Admin);
 

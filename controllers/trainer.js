@@ -7,6 +7,8 @@ const {
   uploadTrainerImageService,
   uploadTrainerCvService,
   updateTrainerPasswordServices,
+  sendTrainerRegistrationLinkService,
+  activateTrainerAccountService,
 } = require("../services/trainer");
 
 const getAllTrainersController = async (req, res) => {
@@ -59,6 +61,18 @@ const updateTrainerPasswordController = async (req, res) => {
 
   return updateTrainerPasswordServices(req, res);
 };
+const sendRegistrationLinkController = async (req, res) => {
+  // const errors = validate(req);
+  // if (errors.isEmpty()) return createBlogService(req, res);
+
+  return sendTrainerRegistrationLinkService(req, res);
+};
+const activateTrainerAccountController = async (req, res) => {
+  // const errors = validate(req);
+  // if (errors.isEmpty()) return createBlogService(req, res);
+
+  return activateTrainerAccountService(req, res);
+};
 
 module.exports = {
   getAllTrainersController,
@@ -69,4 +83,6 @@ module.exports = {
   createTrainerImageController,
   createTrainerCvController,
   updateTrainerPasswordController,
+  sendRegistrationLinkController,
+  activateTrainerAccountController,
 };

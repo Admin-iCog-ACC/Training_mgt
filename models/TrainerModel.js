@@ -1,9 +1,11 @@
 // models/projectModel.js
 const { DataTypes } = require("sequelize");
 const { Sequelize } = require("sequelize");
+require("dotenv").config();
 
 const sequelize = new Sequelize(
-  "postgres://postgres:password@localhost:5432/Trainers"
+  process.env.connection_string
+  // `postgres://${process.env.DBuser}:${process.env.DBpassword}@${process.env.DBhost}:${process.env.DBport}/${process.env.DB}`
 );
 const Trainer = sequelize.define("Trainer", {
   firstName: {
@@ -48,7 +50,7 @@ const Trainer = sequelize.define("Trainer", {
   },
   bio: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   profileImage: {
     type: DataTypes.STRING,

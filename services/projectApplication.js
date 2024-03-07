@@ -11,7 +11,7 @@ const createApplicationService = async (req, res) => {
     if (status === 401 || admin) {
       return res.status(401).json({ msg: "Unauthorized" });
     }
-    const { ProjectId } = req.body;
+    const { ProjectId, description } = req.body;
 
     const project = await projectModel.findByPk(ProjectId);
     if (!project) {
@@ -29,6 +29,7 @@ const createApplicationService = async (req, res) => {
     const application = await trainersProjects.create({
       TrainerId: value.id,
       ProjectId,
+      description,
     });
 
     return res.status(201).json({ application: application });

@@ -4,6 +4,7 @@ const {
   NewProjectAnnouncementTemplate,
   AdminAccessEmailTemplate,
   ForgotPasswordCodeEmailTemplate,
+  SendingGeneratedLinkEmailTemplate,
 } = require("./emailTemplate");
 require("dotenv").config();
 
@@ -51,6 +52,20 @@ const sendGeneratedPassword = async (trainer, newPassword, admin, giver) => {
     return false;
   }
 };
+const sendGeneratedLink = async (trainer, link, admin) => {
+  try {
+    await transporter.sendMail({
+      from: process.env.email,
+      to: trainer.email,
+      subject: "Your Account Has Been Successfully Approved",
+      html: SendingGeneratedLinkEmailTemplate(trainer, link, admin),
+    });
+    return true;
+  } catch (err) {
+    console.log(err);
+    return false;
+  }
+};
 const sendRecoveryCode = async (email, user, code) => {
   try {
     await transporter.sendMail({
@@ -71,4 +86,5 @@ module.exports = {
   sendGeneratedPassword,
   generatePassword,
   sendRecoveryCode,
+  sendGeneratedLink,
 };

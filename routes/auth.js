@@ -4,7 +4,11 @@ const AdminModel = require("../models/AdminModel");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { verifyRequest, generateCode } = require("../auth");
+const {
+  verifyRequest,
+  generateCode,
+  verifyRegistrationToken,
+} = require("../auth");
 const { NewReleasesSharp, RateReviewSharp } = require("@material-ui/icons");
 const { sendRecoveryCode } = require("../Email");
 const { verify } = require("../nodeMailer");
@@ -223,6 +227,20 @@ router.route("/verify").get(async (req, res) => {
   }
   console.log(value);
   return res.status(200).json({ ...value, admin });
+});
+
+router.route("/verify_registration_token").post(async (req, res) => {
+  const { status, admin } = await verifyRequest(req, res);
+
+  if (status === 401 || !admin) {
+    return res.status(401).json({ msg: "Unauthorized" });
+  }
+  const result = await verifyRegistrationToken(req);
+  if (!result) {
+    return res.status(401).json({ msg: "Invalid token" });
+  }
+
+  return res.status(200).json({ result });
 });
 
 /**

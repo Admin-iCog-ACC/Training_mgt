@@ -45,12 +45,12 @@ const createRatingService = async (req, res) => {
     });
 
     await trainerModel.update(
-      { rating: totalRating / (numRating * 5) },
+      { rating: totalRating / numRating },
       { where: { id: trainerId } }
     );
     return res
       .status(201)
-      .json({ rating: rate, overallRating: totalRating / (numRating * 5) });
+      .json({ rating: rate, overallRating: totalRating / numRating });
   } catch (error) {
     console.log(error);
     res.status(500).json({ msg: "Failed to rate" });
@@ -92,12 +92,12 @@ const updateRatingService = async (req, res) => {
     });
 
     await trainerModel.update(
-      { rating: totalRating / (numRating * 5) },
+      { rating: totalRating / numRating },
       { where: { id: trainerId } }
     );
     return res.status(201).json({
       rating: checkRating,
-      overallRating: totalRating / (numRating * 5),
+      overallRating: totalRating / numRating,
     });
   } catch (error) {
     console.log(error);

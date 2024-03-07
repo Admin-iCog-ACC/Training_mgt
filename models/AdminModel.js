@@ -1,8 +1,10 @@
 const { DataTypes } = require("sequelize");
 const { Sequelize } = require("sequelize");
+require("dotenv").config();
 
 const sequelize = new Sequelize(
-  "postgres://postgres:password@localhost:5432/Trainers"
+  // `postgres://${process.env.DBuser}:${process.env.DBpassword}@${process.env.DBhost}:${process.env.DBport}/${process.env.DB}`
+  process.env.connection_string
 );
 
 const Admin = sequelize.define("Admin", {
