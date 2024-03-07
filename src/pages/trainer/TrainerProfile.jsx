@@ -366,7 +366,7 @@ function TrainerProfile() {
 
       <div className="grid grid-cols-3 px-8 py-8 gap-x-5 text-gray-900  ">
         <div className="col-span-full xl:col-auto">
-          <div className="p-4 mb-4  border border-gray-300 rounded-lg shadow 2xl:col-span-2  sm:p-6">
+          <div className="p-4 mb-4  border bg-white rounded-lg  2xl:col-span-2  sm:p-6">
             <div className="items-center sm:flex xl:block 2xl:flex sm:space-x-4 xl:space-x-0 2xl:space-x-4">
               <img
                 className={`mb-4 rounded-lg w-28 h-28 sm:mb-0 xl:mb-4 2xl:mb-0 ${
@@ -376,12 +376,14 @@ function TrainerProfile() {
                 alt={user?.firstName}
               />
               <div
-                className={`mb-4 border border-gray-300 bg-gray-100  rounded-lg w-28 h-28 sm:mb-0 xl:mb-4 2xl:mb-0 ${
+                className={`mb-4 border  bg-[#168c9e]  rounded-lg w-28 h-28 sm:mb-0 xl:mb-4 2xl:mb-0 ${
                   user?.imageURL ? "hidden" : "block"
                 } `}
               ></div>
               <div>
-                <h3 className="mb-1 text-xl font-bold  ">Profile picture</h3>
+                <h3 className="mb-1 text-xl font-bold text-[#168c9e] ">
+                  Profile picture
+                </h3>
                 <div className="mb-4 text-sm text-gray-500 ">
                   JPG, GIF or PNG. Max size of 800K
                 </div>
@@ -389,7 +391,7 @@ function TrainerProfile() {
                   <button
                     type="button"
                     onClick={() => setUpdateProfile(true)}
-                    class="inline-flex  border border-gray-300   items-center px-3 py-2 text-sm font-medium text-center  rounded-lg  hover:bg-gray-100"
+                    class="inline-flex  border border-gray-300 text-[#168c9e]   items-center px-3 py-2 text-sm font-medium text-center  rounded-lg  hover:bg-gray-100"
                   >
                     <svg
                       class="w-4 h-4 mr-2 -ml-1"
@@ -415,8 +417,8 @@ function TrainerProfile() {
               </div>
             </div>
           </div>
-          <div className="p-4 mb-4  border border-gray-300 rounded-lg shadow 2xl:col-span-2  sm:p-6 ">
-            <h3 className="mb-4 text-xl font-semibold ">
+          <div className="p-4 mb-4 bg-white  border  rounded-lg 2xl:col-span-2  sm:p-6 ">
+            <h3 className="mb-4 text-xl font-semibold text-[#168c9e] ">
               Password information
             </h3>
             <form onSubmit={handlePasswordUpdate}>
@@ -432,7 +434,7 @@ function TrainerProfile() {
                     type="password"
                     name="oldPassword"
                     id="current-password"
-                    class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5  dark:border-gray-600 dark:placeholder-gray-400  dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    className="shadow-sm border border-gray-300 text-gray-900 sm:text-sm rounded-lg outline-none block w-full p-2.5  placeholder-gray-400"
                     placeholder="••••••••"
                     required
                     value={passwordInfo.oldPassword}
@@ -451,7 +453,7 @@ function TrainerProfile() {
                     data-popover-placement="bottom"
                     type="password"
                     id="password"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:border-gray-600 dark:placeholder-gray-400  dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    className="shadow-sm border border-gray-300 text-gray-900 sm:text-sm rounded-lg outline-none block w-full p-2.5  placeholder-gray-400"
                     placeholder="••••••••"
                     required
                     name="newPassword"
@@ -470,7 +472,7 @@ function TrainerProfile() {
                     type="text"
                     name="confirmPassword"
                     id="confirm-password"
-                    class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5  dark:border-gray-600 dark:placeholder-gray-400  dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    className="shadow-sm border border-gray-300 text-gray-900 sm:text-sm rounded-lg outline-none block w-full p-2.5  placeholder-gray-400"
                     placeholder="••••••••"
                     required
                     onChange={passwordInfoChange}
@@ -479,7 +481,7 @@ function TrainerProfile() {
                 </div>
                 <div class="col-span-6 sm:col-full">
                   <button
-                    class="border border-gray-300   items-center px-6 py-2 text-sm font-medium text-center rounded-lg   hover:bg-gray-100"
+                    class="border border-gray-300 text-[#168c9e]  items-center px-6 py-2 text-sm font-medium text-center rounded-lg   hover:bg-gray-100"
                     type="submit"
                   >
                     Save
@@ -490,8 +492,10 @@ function TrainerProfile() {
           </div>
         </div>
         <div class="col-span-2">
-          <div class="p-4 mb-4 bg-white border border-gray-300 shadow rounded-lg  2xl:col-span-2 sm:p-6 ">
-            <h3 class="mb-4 text-xl font-semibold ">General information</h3>
+          <div class="p-4 mb-4 bg-white   rounded-lg  2xl:col-span-2 sm:p-6 ">
+            <h3 class="mb-4 text-xl font-semibold text-[#168c9e]">
+              General information
+            </h3>
             <form onSubmit={updateUser}>
               <div class="grid grid-cols-6 gap-6">
                 <div class="col-span-6 sm:col-span-3">
@@ -503,9 +507,8 @@ function TrainerProfile() {
                   </label>
                   <input
                     type="text"
-                    name="first-name"
                     id="first-name"
-                    className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5  dark:border-gray-600 dark:placeholder-gray-400  dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    className="shadow-sm border border-gray-300 text-gray-900 sm:text-sm rounded-lg outline-none block w-full p-2.5  placeholder-gray-400"
                     placeholder="Your first name"
                     required
                     value={user?.firstName}
@@ -527,7 +530,7 @@ function TrainerProfile() {
                     type="text"
                     name="last-name"
                     id="last-name"
-                    className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5  dark:border-gray-600 dark:placeholder-gray-400  dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    className="shadow-sm border border-gray-300 text-gray-900 sm:text-sm rounded-lg outline-none block w-full p-2.5  placeholder-gray-400"
                     placeholder="Your last name"
                     required
                     value={user?.lastName}
@@ -547,7 +550,7 @@ function TrainerProfile() {
                     type="email"
                     name="email"
                     id="email"
-                    className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5  dark:border-gray-600 dark:placeholder-gray-400  dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    className="shadow-sm border border-gray-300 text-gray-900 sm:text-sm rounded-lg outline-none block w-full p-2.5  placeholder-gray-400"
                     placeholder="Your email"
                     required
                     value={user?.email}
@@ -574,7 +577,7 @@ function TrainerProfile() {
                     name="gender"
                     id="gender"
                     value={user?.gender}
-                    className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5  dark:border-gray-600 dark:placeholder-gray-400  dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    className="shadow-sm border border-gray-300 text-gray-900 sm:text-sm rounded-lg outline-none block w-full p-2.5  placeholder-gray-400"
                   >
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
@@ -588,7 +591,7 @@ function TrainerProfile() {
                     type="text"
                     name="address"
                     id="address"
-                    className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5  dark:border-gray-600 dark:placeholder-gray-400  dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    className="shadow-sm border border-gray-300 text-gray-900 sm:text-sm rounded-lg outline-none block w-full p-2.5  placeholder-gray-400"
                     placeholder="Your address"
                     required
                     value={user?.address}
@@ -610,7 +613,7 @@ function TrainerProfile() {
                     type="text"
                     name="phoneNumber"
                     id="phoneNumber"
-                    className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5  dark:border-gray-600 dark:placeholder-gray-400  dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    className="shadow-sm border border-gray-300 text-gray-900 sm:text-sm rounded-lg outline-none block w-full p-2.5  placeholder-gray-400"
                     placeholder="Your Phone Number"
                     required
                     value={user?.phoneNumber}
@@ -632,7 +635,7 @@ function TrainerProfile() {
                     type="text"
                     name="AreaofExpertise"
                     id="AreaofExpertise"
-                    className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5  dark:border-gray-600 dark:placeholder-gray-400  dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    className="shadow-sm border border-gray-300 text-gray-900 sm:text-sm rounded-lg outline-none block w-full p-2.5  placeholder-gray-400"
                     placeholder="Your Area of Expertise"
                     required
                     value={user?.AreaofExpertise}
@@ -654,7 +657,7 @@ function TrainerProfile() {
                     type="text"
                     name="experienceLevel"
                     id="experienceLevel"
-                    className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5  dark:border-gray-600 dark:placeholder-gray-400  dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    className="shadow-sm border border-gray-300 text-gray-900 sm:text-sm rounded-lg outline-none block w-full p-2.5  placeholder-gray-400"
                     placeholder="Your Experience Level"
                     required
                     value={user?.experienceLevel}
@@ -676,7 +679,7 @@ function TrainerProfile() {
                     type="text"
                     name="bio"
                     id="bio"
-                    className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5  dark:border-gray-600 dark:placeholder-gray-400  dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    className="shadow-sm border border-gray-300 text-gray-900 sm:text-sm rounded-lg outline-none block w-full p-2.5  placeholder-gray-400"
                     placeholder="Your Phone Number"
                     required
                     value={user?.bio}
@@ -689,7 +692,7 @@ function TrainerProfile() {
                 </div>
                 <div class="col-span-6 sm:col-full">
                   <button
-                    className="py-2 px-6 text-sm font-medium text-gray-900 focus:outline-none  rounded-lg border border-gray-300 hover:bg-gray-100  focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700   "
+                    className="py-2 px-6 text-sm font-medium text-[#168c9e] focus:outline-none  rounded-lg border border-gray-300 hover:bg-gray-100  focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700   "
                     type="submit"
                   >
                     Update

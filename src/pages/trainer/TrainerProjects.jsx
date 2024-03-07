@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 
 function Projects() {
   const [projects, setProjects] = useState(null);
+  const [stats, setStats] = useState(null);
   let [searchParams, setSearchParams] = useSearchParams();
 
   const [search, setSearch] = useState({
@@ -32,6 +33,7 @@ function Projects() {
       });
       console.log(res.data);
       setProjects(res.data.projects);
+      setStats(res.data.stat);
     } catch (error) {
       console.log(error);
     }
@@ -60,13 +62,17 @@ function Projects() {
               ? searchParams.get("end").toLowerCase().trim()
               : ""
           ) &&
-        project.status
-          .toLowerCase()
-          .startsWith(
-            searchParams.get("status")
-              ? searchParams.get("status").toLowerCase().trim()
-              : ""
-          ) &&
+        (project.TrainersProjects[0]
+          ? project.TrainersProjects[0].status
+              .toLowerCase()
+              .startsWith(
+                searchParams.get("status")
+                  ? searchParams.get("status").toLowerCase().trim()
+                  : ""
+              )
+          : searchParams.get("status")
+          ? false
+          : true) &&
         project.priority
           .toLowerCase()
           .startsWith(
@@ -90,11 +96,11 @@ function Projects() {
   }, []);
   return (
     <div className="">
-      <div class="px-4 relative mx-auto text-gray-600 mb-2  py-6">
+      <div class="px-4 relative mx-auto text-gray-600   mt-3 mb-6">
         <h1 className=" font-bold text-2xl">
           Discover Engaging Projects and Apply as a Trainer Today!
         </h1>
-        <section className="mb-3 mt-5 flex items-start justify-between relative ">
+        <section className="mt-2 flex items-start justify-between relative">
           <div className="absolute top-3 left-0  flex items-center pl-3 pointer-events-none">
             <svg
               className="w-5 h-5 text-gray-500 dark:text-gray-400"
@@ -208,32 +214,69 @@ function Projects() {
             </section>
           </section> */}
         </section>
-        <div className="flex justify-between">
-          {/* <section>
-            <select
-              onChange={handleSearchChange}
-              name="priority"
-              id="status"
-              className="border-2 mr-4 border-gray-300 text-gray-700  h-10 px-5 pr-16 rounded-lg text-base focus:outline-none"
-            >
-              <option value="">Filter by priority </option>
-              <option value="Low">Low</option>
-              <option value="High">High</option>
-              <option value="Intermediate">Intermediate</option>
-            </select>
-            <input
-              className="border-2 w-60 border-gray-300 text-gray-700  h-10 px-5 pr-16 rounded-lg text-base focus:outline-none"
-              type="text"
-              name="location"
-              placeholder="location"
-              onChange={handleSearchChange}
-            />
-          </section> */}
-
-          {/* <section>{filterProjects(projects)?.length} found</section> */}
-        </div>
+        <section className="flex items-center gap-x-6 mt-3">
+          <div
+            className={`cursor-pointer px-5 py-3  rounded-lg ${
+              !searchParams.get("status")
+                ? "bg-[#168c9e] hover:bg-[#1badc4] text-white font-bold"
+                : "hover:bg-white bg-gray-400 text-white hover:text-[#168c9e]"
+            }`}
+            onClick={() => {
+              const sp = new URLSearchParams(searchParams);
+              sp.delete("status");
+              setSearchParams(sp);
+            }}
+          >
+            All ({projects?.length})
+          </div>
+          <div
+            className={`cursor-pointer px-5 py-3  rounded-lg ${
+              searchParams.get("status") === "Done"
+                ? "bg-[#168c9e] hover:bg-[#1badc4] text-white font-bold"
+                : "hover:bg-white bg-gray-400 text-white hover:text-[#168c9e]"
+            }`}
+            onClick={() => {
+              const sp = new URLSearchParams(searchParams);
+              sp.delete("status");
+              sp.append("status", "Done");
+              setSearchParams(sp);
+            }}
+          >
+            Completed ({stats?.completed})
+          </div>
+          <div
+            className={`cursor-pointer px-5 py-3  rounded-lg ${
+              searchParams.get("status") === "In Progress"
+                ? "bg-[#168c9e] hover:bg-[#1badc4] text-white font-bold"
+                : "hover:bg-white bg-gray-400 text-white hover:text-[#168c9e]"
+            }`}
+            onClick={() => {
+              const sp = new URLSearchParams(searchParams);
+              sp.delete("status");
+              sp.append("status", "In Progress");
+              setSearchParams(sp);
+            }}
+          >
+            In-Progress ({stats?.inProgress})
+          </div>
+          <div
+            className={`cursor-pointer px-5 py-3  rounded-lg ${
+              searchParams.get("status") === "Rejected"
+                ? "bg-[#168c9e] hover:bg-[#1badc4] text-white font-bold"
+                : "hover:bg-white bg-gray-400 text-white hover:text-[#168c9e]"
+            }`}
+            onClick={() => {
+              const sp = new URLSearchParams(searchParams);
+              sp.delete("status");
+              sp.append("status", "Rejected");
+              setSearchParams(sp);
+            }}
+          >
+            Rejected ({stats?.rejected})
+          </div>
+        </section>
       </div>
-      <div className="grid grid-cols-4 py-2  gap-y-8 justify-items-center ">
+      <div className="grid grid-cols-4   gap-y-8 justify-items-center ">
         {filterProjects(projects)?.map((project) => {
           return (
             <section
@@ -242,7 +285,7 @@ function Projects() {
             >
               <img
                 src={`${project.imageURL}`}
-                className=" w-full h-[250px] rounded-md mb-2 "
+                className=" w-full h-[250px] rounded-t-md mb-2 "
                 alt=""
               />
               <section className="px-3 mb-3">
@@ -252,7 +295,7 @@ function Projects() {
                     {project.priority}
                   </section>
                 </section>
-                <section className="text-base">
+                <section className="text-sm">
                   <span className="text-gray-900 mr-2">Start Date:</span>
                   <span className="text-[#21c2db] group-hover:text-[#168c9e] group-hover:font-bold">
                     {project.startDate}
@@ -262,6 +305,22 @@ function Projects() {
                   <span className="text-gray-900 mr-2">End Date:</span>
                   <span className="text-[#21c2db] group-hover:text-[#168c9e] group-hover:font-bold">
                     {project.endDate}
+                  </span>{" "}
+                </section>
+                <section className={`text-sm`}>
+                  <span className="text-gray-900 mr-2">
+                    Application Status:
+                  </span>
+                  <span
+                    className={`  ${
+                      project.TrainersProjects[0]
+                        ? "text-[#168c9e]"
+                        : "text-gray-400"
+                    } ${searchParams.get("status") ? "font-bold" : ""}`}
+                  >
+                    {project.TrainersProjects[0]
+                      ? project.TrainersProjects[0].status
+                      : "No Application"}
                   </span>{" "}
                 </section>
                 <section

@@ -1,9 +1,10 @@
-import { Outlet, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 function Header() {
   const [user, setUser] = useState(null);
+  const navigate = useNavigate();
   const verifyRequest = async () => {
     try {
       const res = await axios.get("http://localhost:3000/api/auth/verify", {
@@ -23,7 +24,7 @@ function Header() {
     verifyRequest();
   }, []);
   return (
-    <div className="bg-gray-200 h-screen">
+    <div className="bg-gray-200 h-screen relative">
       <nav
         id="main_navbar"
         class="sticky top-0 z-50 flex items-center justify-between gap-8 px-2 py-2  shadow  text-white border-b bg-[#168c9e] md:px-2"
@@ -33,10 +34,17 @@ function Header() {
             iCog-ACC
           </span>
         </a>
-        <div class="flex items-center justify-center gap-x-4 ">
-          <section className="cursor-pointer text-lg hover:text-gray-300">
+        <div class="flex items-center justify-center gap-x-10 ">
+          <NavLink
+            to="/projects"
+            className={({ isActive }) =>
+              isActive
+                ? "cursor-pointer text-lg text-gray-300"
+                : "cursor-pointer text-lg hover:text-gray-300"
+            }
+          >
             Projects
-          </section>
+          </NavLink>
           <section className="cursor-pointer text-lg hover:text-gray-300">
             Projects
           </section>
@@ -78,7 +86,12 @@ function Header() {
               </div>
             </div>
           </div>
-          <span className="text-lg tracking-wide">{user?.email}</span>
+          <span
+            className="text-lg tracking-wide hover:underline"
+            onClick={() => navigate("/profile")}
+          >
+            {user?.email}
+          </span>
           <section className="w-[40px] h-[40px]  rounded-[50%] ">
             <img
               src={user?.imageURL}
