@@ -259,7 +259,14 @@ function TrainerProjectDetail() {
                     <div class="px-4 py-2">{project?.priority}</div>
                   </div>
                 </div>
-                <div className="px-4 text-base mt-6 ">
+
+                <div
+                  className={`px-4 text-base mt-6 ${
+                    project?.TrainersProjects[0]?.status === "Done"
+                      ? "hidden"
+                      : "block"
+                  } `}
+                >
                   {project?.description}
                 </div>
                 <div className="px-4 text-base mt-6">
@@ -275,7 +282,13 @@ function TrainerProjectDetail() {
                         {project?.TrainersProjects[0]?.status}
                       </span>
                     </h1>
-                    <section className="text-[#168c93]">
+                    <section
+                      className={`text-[#168c93] ${
+                        project?.TrainersProjects[0]?.status === "Done"
+                          ? "hidden"
+                          : "block"
+                      }`}
+                    >
                       {
                         getAppliedAt(project?.TrainersProjects[0]?.createdAt)
                           .day
@@ -291,12 +304,722 @@ function TrainerProjectDetail() {
                           .year
                       }
                     </section>
+                    <section
+                      className={`flex ${
+                        project?.TrainersProjects[0]?.Trainer
+                          ?.TrainersRatings[0]
+                          ? "block"
+                          : "hidden"
+                      }`}
+                    >
+                      {
+                        <>
+                          {project?.TrainersProjects[0]?.Trainer
+                            ?.TrainersRatings[0]?.rating === 0 && (
+                            <>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="#888888"
+                                  d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                />
+                              </svg>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="#888888"
+                                  d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                />
+                              </svg>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="#888888"
+                                  d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                />
+                              </svg>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="#888888"
+                                  d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                />
+                              </svg>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="#888888"
+                                  d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                />
+                              </svg>
+                            </>
+                          )}
+                          {project?.TrainersProjects[0]?.Trainer
+                            ?.TrainersRatings[0]?.rating > 0 &&
+                            project?.TrainersProjects[0]?.Trainer
+                              ?.TrainersRatings[0]?.rating < 1 && (
+                              <>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="32"
+                                  height="32"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    fill="orange"
+                                    d="M12 8.125v7.8l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325zM7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                  />
+                                </svg>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="32"
+                                  height="32"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    fill="#888888"
+                                    d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                  />
+                                </svg>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="32"
+                                  height="32"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    fill="#888888"
+                                    d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                  />
+                                </svg>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="32"
+                                  height="32"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    fill="#888888"
+                                    d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                  />
+                                </svg>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="32"
+                                  height="32"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    fill="#888888"
+                                    d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                  />
+                                </svg>
+                              </>
+                            )}
+                          {project?.TrainersProjects[0]?.Trainer
+                            ?.TrainersRatings[0]?.rating === 1 && (
+                            <>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="orange"
+                                  d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                />
+                              </svg>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="#888888"
+                                  d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                />
+                              </svg>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="#888888"
+                                  d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                />
+                              </svg>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="#888888"
+                                  d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                />
+                              </svg>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="#888888"
+                                  d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                />
+                              </svg>
+                            </>
+                          )}
+                          {project?.TrainersProjects[0]?.Trainer
+                            ?.TrainersRatings[0]?.rating > 1 &&
+                            project?.TrainersProjects[0]?.Trainer
+                              ?.TrainersRatings[0]?.rating < 2 && (
+                              <>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="32"
+                                  height="32"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    fill="orange"
+                                    d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                  />
+                                </svg>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="32"
+                                  height="32"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    fill="orange"
+                                    d="M12 8.125v7.8l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325zM7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                  />
+                                </svg>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="32"
+                                  height="32"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    fill="#888888"
+                                    d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                  />
+                                </svg>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="32"
+                                  height="32"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    fill="#888888"
+                                    d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                  />
+                                </svg>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="32"
+                                  height="32"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    fill="#888888"
+                                    d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                  />
+                                </svg>
+                              </>
+                            )}
+                          {project?.TrainersProjects[0]?.Trainer
+                            ?.TrainersRatings[0]?.rating === 2 && (
+                            <>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="orange"
+                                  d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                />
+                              </svg>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="orange"
+                                  d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                />
+                              </svg>{" "}
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="#888888"
+                                  d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                />
+                              </svg>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="#888888"
+                                  d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                />
+                              </svg>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="#888888"
+                                  d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                />
+                              </svg>
+                            </>
+                          )}
+                          {project?.TrainersProjects[0]?.Trainer
+                            ?.TrainersRatings[0]?.rating > 2 &&
+                            project?.TrainersProjects[0]?.Trainer
+                              ?.TrainersRatings[0]?.rating < 3 && (
+                              <>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="32"
+                                  height="32"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    fill="orange"
+                                    d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                  />
+                                </svg>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="32"
+                                  height="32"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    fill="orange"
+                                    d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                  />
+                                </svg>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="32"
+                                  height="32"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    fill="orange"
+                                    d="M12 8.125v7.8l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325zM7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                  />
+                                </svg>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="32"
+                                  height="32"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    fill="#888888"
+                                    d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                  />
+                                </svg>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="32"
+                                  height="32"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    fill="#888888"
+                                    d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                  />
+                                </svg>
+                              </>
+                            )}
+                          {project?.TrainersProjects[0]?.Trainer
+                            ?.TrainersRatings[0]?.rating === 3 && (
+                            <>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="orange"
+                                  d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                />
+                              </svg>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="orange"
+                                  d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                />
+                              </svg>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="orange"
+                                  d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                />
+                              </svg>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="#888888"
+                                  d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                />
+                              </svg>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="#888888"
+                                  d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                />
+                              </svg>
+                            </>
+                          )}
+                          {project?.TrainersProjects[0]?.Trainer
+                            ?.TrainersRatings[0]?.rating === 4 && (
+                            <>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="orange"
+                                  d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                />
+                              </svg>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="orange"
+                                  d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                />
+                              </svg>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="orange"
+                                  d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                />
+                              </svg>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="orange"
+                                  d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                />
+                              </svg>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="#888888"
+                                  d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                />
+                              </svg>
+                            </>
+                          )}
+                          {project?.TrainersProjects[0]?.Trainer
+                            ?.TrainersRatings[0]?.rating === 5 && (
+                            <>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="orange"
+                                  d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                />
+                              </svg>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="orange"
+                                  d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                />
+                              </svg>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="orange"
+                                  d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                />
+                              </svg>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="orange"
+                                  d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                />
+                              </svg>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="orange"
+                                  d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                />
+                              </svg>
+                            </>
+                          )}
+                          {project?.TrainersProjects[0]?.Trainer
+                            ?.TrainersRatings[0]?.rating > 3 &&
+                            project?.TrainersProjects[0]?.Trainer
+                              ?.TrainersRatings[0]?.rating < 4 && (
+                              <>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="32"
+                                  height="32"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    fill="orange"
+                                    d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                  />
+                                </svg>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="32"
+                                  height="32"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    fill="orange"
+                                    d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                  />
+                                </svg>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="32"
+                                  height="32"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    fill="orange"
+                                    d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                  />
+                                </svg>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="32"
+                                  height="32"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    fill="orange"
+                                    d="M12 8.125v7.8l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325zM7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                  />
+                                </svg>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="32"
+                                  height="32"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    fill="#888888"
+                                    d="m8.85 17.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm-1.525 2.098l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102zM12 13.25"
+                                  />
+                                </svg>
+                              </>
+                            )}
+                          {project?.TrainersProjects[0]?.Trainer
+                            ?.TrainersRatings[0]?.rating > 4 &&
+                            project?.TrainersProjects[0]?.Trainer
+                              ?.TrainersRatings[0]?.rating < 5 && (
+                              <>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="32"
+                                  height="32"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    fill="orange"
+                                    d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                  />
+                                </svg>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="32"
+                                  height="32"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    fill="orange"
+                                    d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                  />
+                                </svg>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="32"
+                                  height="32"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    fill="orange"
+                                    d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                  />
+                                </svg>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="32"
+                                  height="32"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    fill="orange"
+                                    d="m7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                  />
+                                </svg>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="32"
+                                  height="32"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    fill="orange"
+                                    d="M12 8.125v7.8l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325zM7.325 19.923l1.24-5.313l-4.123-3.572l5.431-.47L12 5.557l2.127 5.01l5.43.47l-4.122 3.572l1.24 5.313L12 17.102z"
+                                  />
+                                </svg>
+                              </>
+                            )}
+                        </>
+                      }
+                    </section>
+                    <section
+                      className={`flex text-red-800 ${
+                        !project?.TrainersProjects[0]?.Trainer
+                          ?.TrainersRatings[0] &&
+                        project?.TrainersProjects[0]?.status === "Done"
+                          ? "block"
+                          : "hidden"
+                      }`}
+                    >
+                      Rating not given yet
+                    </section>
                   </div>
-                  <section className="mt-3">
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                    Magnam voluptatibus fuga, repellendus perspiciatis deserunt
-                    inventore dolores laborum saepe consectetur necessitatibus?
-                  </section>
+                  <div
+                    className={`flex mt-4 text-lg ${
+                      project?.TrainersProjects[0]?.status === "Done"
+                        ? "block"
+                        : "hidden"
+                    }`}
+                  >
+                    {
+                      project?.TrainersProjects[0]?.Trainer?.TrainersRatings[0]
+                        ?.ratingRationale
+                    }
+                  </div>
+                  <div
+                    className={`flex mt-4 text-lg ${
+                      !project?.TrainersProjects[0]?.Trainer?.TrainersRatings[0]
+                        ? "block"
+                        : "hidden"
+                    }`}
+                  >
+                    {project?.TrainersProjects[0]?.description}
+                  </div>
                 </div>
               </div>
               <div className="flex">

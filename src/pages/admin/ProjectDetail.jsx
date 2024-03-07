@@ -9,6 +9,7 @@ function ProjectDetail() {
   const [project, setProject] = useState(null);
   const [ratingRationale, setRatingRationale] = useState("");
   const [showDrawer, setShowDrawer] = useState(false);
+  const [ratingLoading, setRatingLoading] = useState(false);
 
   const [existingSearch, setExistingSearch] = useState({
     email: "",
@@ -28,6 +29,7 @@ function ProjectDetail() {
   const [imageURL, setImageURL] = useState("");
   const [image, setImage] = useState("");
   const [fileInputError, setFileInputError] = useState(false);
+  const [trainerRating, setTrainerRating] = useState(null);
 
   const navigate = useNavigate();
   const deleteProject = async () => {
@@ -67,6 +69,7 @@ function ProjectDetail() {
     }
     setDeleteLoading(false);
   };
+
   const searchTrainers = () => {
     const { email, status } = newSearch;
 
@@ -313,6 +316,8 @@ function ProjectDetail() {
   };
 
   const createRating = async (rating) => {
+    setRatingLoading(true);
+
     try {
       const res = await axios.post(
         `http://localhost:3000/api/rating`,
@@ -383,8 +388,10 @@ function ProjectDetail() {
         transition: Flip,
       });
     }
+    setRatingLoading(false);
   };
   const updateRating = async (rating) => {
+    setRatingLoading(true);
     try {
       const res = await axios.patch(
         `http://localhost:3000/api/rating/project/${trainerApplication.Trainer.id}/${id}`,
@@ -467,11 +474,11 @@ function ProjectDetail() {
       });
       console.log(error);
     }
+    setRatingLoading(false);
   };
 
-  const manageRating = async (rating) => {
-    console.log(trainerApplication?.Trainer?.TrainersRatings[0], rating);
-    if (!ratingRationale.trim()) {
+  const manageRating = async () => {
+    if (!trainerRating.rating) {
       toast.error("Rating Rationale is required!", {
         position: "top-right",
         autoClose: 2000,
@@ -487,16 +494,12 @@ function ProjectDetail() {
     }
 
     if (!trainerApplication?.Trainer?.TrainersRatings[0]) {
-      await createRating(rating);
-      return;
-    }
-
-    if (rating === trainerApplication?.Trainer?.TrainersRatings[0].rating) {
+      await createRating(trainerRating.rating);
       return;
     }
 
     // if(rating !== trainerApplication?.Trainer?.TrainersRatings[0]){
-    await updateRating(rating);
+    await updateRating(trainerRating.rating);
     // }
   };
 
@@ -520,7 +523,7 @@ function ProjectDetail() {
   };
 
   const { worked, working, applied, rejected } = returnTrainerProjects();
-
+  console.log(trainerRating);
   useEffect(() => {
     getProject();
   }, [id]);
@@ -553,6 +556,7 @@ function ProjectDetail() {
             setShowDrawer(false);
             setTrainerApplication(null);
             setRatingRationale("");
+            setTrainerRating(null);
           }}
           type="button"
           data-drawer-hide="drawer-contact"
@@ -1384,18 +1388,7 @@ function ProjectDetail() {
               <section className="  font-medium text-gray-200  mb-2 ">
                 Why should we hire your for this project?
               </section>
-              Lorem ipsum dolor sit amet consectetur, adipisicing elit. Pariatur
-              repellendus soluta magnam quidem? Recusandae tempore sequi rem
-              pariatur aspernatur ut fugiat alias consectetur voluptatum! Iste
-              accusantium, tenetur qui placeat adipisci beatae quibusdam
-              similique, et aspernatur ducimus, aliquid quos commodi dolorem.
-              Enim eum aperiam vel doloremque ut obcaecati dolorem velit iste.
-              Lorem ipsum dolor sit amet consectetur, adipisicing elit. Pariatur
-              repellendus soluta magnam quidem? Recusandae tempore sequi rem
-              pariatur aspernatur ut fugiat alias consectetur voluptatum! Iste
-              accusantium, tenetur qui placeat adipisci beatae quibusdam
-              similique, et aspernatur ducimus, aliquid quos commodi dolorem.
-              Enim eum aperiam vel doloremque ut obcaecati dolorem velit iste.
+              {trainerApplication?.description}
             </div>
 
             <div
@@ -1411,72 +1404,102 @@ function ProjectDetail() {
                 </span>
                 ?
               </h5>
-              <section className="flex gap-x-3 mb-8">
-                <div
-                  onClick={() => manageRating(1)}
-                  className={`${
-                    trainerApplication?.Trainer?.TrainersRatings[0]?.rating ===
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  manageRating(trainerRating);
+                }}
+              >
+                <section className="flex gap-x-3 mb-8">
+                  <div
+                    onClick={() =>
+                      setTrainerRating({ ...trainerRating, rating: 1 })
+                    }
+                    className={`${
+                      trainerRating?.rating === 1
+                        ? "bg-green-600 hover:bg-green-700"
+                        : "bg-gray-700 hover:bg-gray-600"
+                    } w-16 h-14 text-4xl  rounded  cursor-pointer flex items-center justify-center`}
+                  >
                     1
-                      ? "bg-green-600 hover:bg-green-700"
-                      : "bg-gray-700 hover:bg-gray-600"
-                  } w-16 h-14 text-4xl  rounded  cursor-pointer flex items-center justify-center`}
-                >
-                  1
-                </div>
-                <div
-                  onClick={() => manageRating(2)}
-                  className={`${
-                    trainerApplication?.Trainer?.TrainersRatings[0]?.rating ===
+                  </div>
+                  <div
+                    onClick={() =>
+                      setTrainerRating({ ...trainerRating, rating: 2 })
+                    }
+                    className={`${
+                      trainerRating?.rating === 2
+                        ? "bg-green-600 hover:bg-green-700"
+                        : "bg-gray-700 hover:bg-gray-600"
+                    } w-16 h-14 text-4xl  rounded cursor-pointer hover:bg-gray-600  flex items-center justify-center`}
+                  >
                     2
-                      ? "bg-green-600 hover:bg-green-700"
-                      : "bg-gray-700 hover:bg-gray-600"
-                  } w-16 h-14 text-4xl  rounded cursor-pointer hover:bg-gray-600  flex items-center justify-center`}
-                >
-                  2
-                </div>
-                <div
-                  onClick={() => manageRating(3)}
-                  className={`${
-                    trainerApplication?.Trainer?.TrainersRatings[0]?.rating ===
+                  </div>
+                  <div
+                    onClick={() =>
+                      setTrainerRating({ ...trainerRating, rating: 3 })
+                    }
+                    className={`${
+                      trainerRating?.rating === 3
+                        ? "bg-green-600 hover:bg-green-700"
+                        : "bg-gray-700 hover:bg-gray-600"
+                    } w-16 h-14 text-4xl  rounded cursor-pointer hover:bg-gray-600  flex items-center justify-center`}
+                  >
                     3
-                      ? "bg-green-600 hover:bg-green-700"
-                      : "bg-gray-700 hover:bg-gray-600"
-                  } w-16 h-14 text-4xl  rounded cursor-pointer hover:bg-gray-600  flex items-center justify-center`}
-                >
-                  3
-                </div>
-                <div
-                  onClick={() => manageRating(4)}
-                  className={`${
-                    trainerApplication?.Trainer?.TrainersRatings[0]?.rating ===
+                  </div>
+                  <div
+                    onClick={() =>
+                      setTrainerRating({ ...trainerRating, rating: 4 })
+                    }
+                    className={`${
+                      trainerRating?.rating === 4
+                        ? "bg-green-600 hover:bg-green-700"
+                        : "bg-gray-700 hover:bg-gray-600"
+                    } w-16 h-14 text-4xl  rounded cursor-pointer hover:bg-gray-600  flex items-center justify-center`}
+                  >
                     4
-                      ? "bg-green-600 hover:bg-green-700"
-                      : "bg-gray-700 hover:bg-gray-600"
-                  } w-16 h-14 text-4xl  rounded cursor-pointer hover:bg-gray-600  flex items-center justify-center`}
-                >
-                  4
-                </div>
-                <div
-                  onClick={() => manageRating(5)}
-                  className={`${
-                    trainerApplication?.Trainer?.TrainersRatings[0]?.rating ===
+                  </div>
+                  <div
+                    onClick={() =>
+                      setTrainerRating({ ...trainerRating, rating: 5 })
+                    }
+                    className={`${
+                      trainerRating?.rating === 5
+                        ? "bg-green-600 hover:bg-green-700"
+                        : "bg-gray-700 hover:bg-gray-600"
+                    } w-16 h-14 text-4xl  rounded cursor-pointer hover:bg-gray-600  flex items-center justify-center`}
+                  >
                     5
-                      ? "bg-green-600 hover:bg-green-700"
-                      : "bg-gray-700 hover:bg-gray-600"
-                  } w-16 h-14 text-4xl  rounded cursor-pointer hover:bg-gray-600  flex items-center justify-center`}
-                >
-                  5
-                </div>
-              </section>
-              <section>
-                <textarea
-                  id="rating-rationale"
-                  placeholder="Write Your Rational For The Above Rating"
-                  value={ratingRationale}
-                  onChange={(e) => setRatingRationale(e.target.value)}
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                ></textarea>
-              </section>
+                  </div>
+                </section>
+                <section>
+                  <textarea
+                    id="rating-rationale"
+                    placeholder="Write Your Rational For The Above Rating"
+                    value={ratingRationale}
+                    required
+                    onChange={(e) => setRatingRationale(e.target.value)}
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                  ></textarea>
+                </section>
+                <section className="flex items-end ">
+                  <button
+                    type="submit"
+                    className={`${
+                      ratingLoading ? "hidden" : "block"
+                    } bg-gray-600 mt-4 py-3 text-center text-base mx-auto px-10 rounded hover:bg-gray-700 `}
+                  >
+                    Save
+                  </button>
+                  <section
+                    className={`${
+                      ratingLoading ? "block" : "hidden"
+                    }  mt-4 py-3 text-center text-base mx-auto px-10 rounded bg-gray-700 `}
+                  >
+                    Saving...
+                  </section>
+                </section>
+              </form>
             </div>
           </div>
         </div>
@@ -2162,7 +2185,6 @@ function ProjectDetail() {
           </div>
         </div>
       </div>
-
       <div className="my-4"></div>
       <div class="flex flex-col bg-gray-800 pt-5 my-2 border-t mb-10 border-gray-400 ">
         <h1 className="font-bold text-2xl mb-3 px-3 text-gray-400">
@@ -2276,7 +2298,6 @@ function ProjectDetail() {
                         key={item.id}
                         class="hover:bg-gray-100 dark:hover:bg-gray-700"
                         onClick={() => {
-                          console.log(item.Trainer.TrainersRatings);
                           // return;
                           setTrainerApplication(item);
                           setRatingRationale(
@@ -2284,6 +2305,8 @@ function ProjectDetail() {
                               ? item.Trainer.TrainersRatings[0].ratingRationale
                               : ""
                           );
+                          console.log(item?.Trainer?.TrainersRatings);
+                          setTrainerRating(item?.Trainer?.TrainersRatings[0]);
                           setShowDrawer(true);
                         }}
                       >
@@ -3129,6 +3152,9 @@ function ProjectDetail() {
                         onClick={() => {
                           setTrainerApplication(item);
                           setShowDrawer(true);
+                          setTrainerRating(
+                            trainerApplication?.Trainer?.TrainersRatings[0]
+                          );
                         }}
                       >
                         <td class="flex items-center p-4 mr-12 space-x-6 whitespace-nowrap">
