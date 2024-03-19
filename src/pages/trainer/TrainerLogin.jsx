@@ -1,20 +1,23 @@
 import axios from "axios";
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { toast, ToastContainer, Flip } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function TrainerLogin() {
   const [input, setInput] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  console.log(loading);
   const loginUser = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const res = await axios.post(
         "http://localhost:3000/api/auth/trainer/login",
         input
       );
-      console.log(res.data);
+
       localStorage.setItem("token", res.data.access_token);
       navigate("/projects");
     } catch (error) {
@@ -43,6 +46,7 @@ function TrainerLogin() {
         });
       }
     }
+    setLoading(false);
   };
 
   const handleInputChange = (e) => {
@@ -52,11 +56,11 @@ function TrainerLogin() {
     });
   };
   return (
-    <div class="flex min-h-screen flex-col justify-center  px-6 py-12 lg:px-8">
+    <div class="flex min-h-screen flex-col justify-center  px-6 py-12 lg:px-8 ">
       <ToastContainer />
 
       <div class="sm:mx-auto sm:w-full sm:max-w-sm">
-        <h2 class="mt-10 text-center text-3xl font-bold leading-9 tracking-tight text-gray-700">
+        <h2 class="mt-10 text-center text-3xl font-bold leading-9 tracking-tight text-[#168c9e]">
           Explore Exciting Projects
         </h2>
       </div>
@@ -117,10 +121,23 @@ function TrainerLogin() {
           <div>
             <button
               type="submit"
-              class="flex w-full justify-center rounded-md bg-gray-800 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-gray-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600"
+              className={`flex w-full justify-center rounded-md bg-[#168c9e] px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-[#1cb0c7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600 ${
+                loading ? "hidden" : "block"
+              }`}
             >
               Sign in
             </button>
+            <button
+              type="submit"
+              class={`flex w-full justify-center rounded-md text-gray-600 bg-gray-200 px-3 py-1.5 text-sm  leading-6  cursor-not-allowed ${
+                loading ? "block" : "hidden"
+              }`}
+            >
+              Loading....
+            </button>
+            <p className="text-sm mt-4 text-end text-gray-400 cursor-pointer hover:underline hover:text-gray-700">
+              <NavLink to={"/login"}>Login as an Admin</NavLink>
+            </p>
           </div>
         </form>
       </div>
