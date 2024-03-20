@@ -8,13 +8,13 @@ function TrainerLogin() {
   const [input, setInput] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  console.log(loading);
+
   const loginUser = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
       const res = await axios.post(
-        "http://localhost:3000/api/auth/trainer/login",
+        `${import.meta.env.VITE_API}/api/auth/trainer/login`,
         input
       );
 

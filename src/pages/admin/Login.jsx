@@ -11,10 +11,11 @@ function Login() {
   const navigate = useNavigate();
   const loginUser = async (e) => {
     e.preventDefault();
+
     setLoading(true);
     try {
       const res = await axios.post(
-        "http://localhost:3000/api/auth/admin/login",
+        `${import.meta.env.VITE_API}/api/auth/admin/login`,
         input
       );
 

@@ -24,7 +24,7 @@ function Header() {
     verifyRequest();
   }, []);
   return (
-    <div className="bg-gray-200 h-screen relative">
+    <div className="bg-gray-200 min-h-screen relative">
       <nav
         id="main_navbar"
         class="sticky top-0 z-50 flex items-center justify-between gap-8 px-2 py-2  shadow  text-white border-b bg-[#168c9e] md:px-2"
