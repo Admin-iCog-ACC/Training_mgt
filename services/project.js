@@ -5,9 +5,37 @@ const Trainer = require("../models/TrainerModel");
 const Admin = require("../models/AdminModel");
 const TrainersRating = require("../models/TrainersRating");
 const TrainersProjects = require("../models/TrainersProjects");
-const { where } = require("sequelize");
+const { Op } = require("sequelize");
+const sequelize = require("sequelize");
 require("dotenv").config();
+const constructSearchQuery = (query, role) => {
+  let searchQuery = {};
+  if (query.status) {
+    searchQuery = {
+      ...searchQuery,
+      status: role === "trainer" ? "In Progress" : query.status,
+    };
+  }
 
+  if (query.location) {
+    searchQuery = { ...searchQuery, location: query.location };
+  }
+
+  if (query.priority) {
+    searchQuery = { ...searchQuery, priority: query.priority };
+  }
+
+  if (query.startDate) {
+    searchQuery = { ...searchQuery, startDate: query.startDate };
+  }
+
+  if (query.endDate) {
+    searchQuery = { ...searchQuery, endDate: query.endDate };
+  }
+
+  console.log(searchQuery);
+  return searchQuery;
+};
 const uploadProjectImageService = async (req, res) => {
   const data = req.body;
   const { id } = req.params;
@@ -33,6 +61,10 @@ const uploadProjectImageService = async (req, res) => {
   }
 };
 const getAllProjectsServices = async (req, res) => {
+  const { applicationStatus, page, limit } = req.query;
+
+  currentPage = page ? parseInt(page) : 0;
+  currentLimit = limit ? parseInt(limit) : 16;
   if (req.role === "HR") {
     const projects = await ProjectModel.findAll({
       include: Trainer,
@@ -41,15 +73,34 @@ const getAllProjectsServices = async (req, res) => {
     return res.status(200).json({ projects: projects });
   }
   if (req.role === "trainer") {
-    const projects = await ProjectModel.findAll({
+    const total = await ProjectModel.count({
+      where: {
+        status: "In Progress",
+      },
+    });
+    const projects = await ProjectModel.findAndCountAll({
+      offset: currentPage,
+      limit: currentLimit,
       include: [
         {
           model: TrainersProjects,
-          where: { TrainerId: req.trainerId },
-          required: false,
+          where: applicationStatus
+            ? { TrainerId: req.trainerId, status: applicationStatus }
+            : { TrainerId: req.trainerId },
+          required: applicationStatus ? true : false,
         },
       ],
       order: [["createdAt", "DESC"]],
+      where: req.query.title
+        ? {
+            ...constructSearchQuery(req.query, "trainer"),
+            title: sequelize.where(
+              sequelize.fn("LOWER", sequelize.col("title")),
+              "LIKE",
+              req.query.title.toLowerCase() + "%"
+            ),
+          }
+        : constructSearchQuery(req.query, "trainer"),
     });
     const rejected = await TrainersProjects.count({
       where: { TrainerId: req.trainerId, status: "Rejected" },
@@ -61,9 +112,17 @@ const getAllProjectsServices = async (req, res) => {
       where: { TrainerId: req.trainerId, status: "In Progress" },
     });
 
-    return res
-      .status(200)
-      .json({ projects: projects, stat: { rejected, completed, inProgress } });
+    return res.status(200).json({
+      projects: projects.rows,
+      stat: {
+        rejected,
+        completed,
+        inProgress,
+        total,
+        all: projects.count,
+        current: projects.rows.length,
+      },
+    });
   }
   const adminId = req.adminId;
   const projects = await ProjectModel.findAll({
@@ -89,6 +148,11 @@ const getProjectServices = async (req, res) => {
               required: false,
               where: { ProjectId: id },
             },
+            {
+              model: TrainersProjects,
+              required: false,
+              where: { ProjectId: id },
+            },
           ],
         },
       },
@@ -103,15 +167,19 @@ const getProjectServices = async (req, res) => {
   if (!project) {
     return res.status(404).json({ msg: "Project not found." });
   }
-
   if (req.requestedBy === "trainer") {
-    project = await ProjectModel.findByPk(id, {
+    console.log(req.trainerId);
+    const project = await ProjectModel.findByPk(id, {
       include: [
         Admin,
         {
           model: TrainersProjects,
           include: {
             model: Trainer,
+
+            where: {
+              id: req.trainerId,
+            },
             include: [
               {
                 model: TrainersRating,

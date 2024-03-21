@@ -102,6 +102,7 @@ const createTrainerServices = async (req, res) => {
   const AdminId = req.admin.id;
   try {
     const newPassword = generatePassword();
+    console.log(newPassword);
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
     const trainer = await TrainerModel.create({

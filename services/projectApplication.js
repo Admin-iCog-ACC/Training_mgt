@@ -42,7 +42,7 @@ const createApplicationService = async (req, res) => {
 const manageApplicationService = async (req, res) => {
   try {
     const { TrainerId, ProjectId } = req.params;
-    const { status } = req.body;
+    const { status, statusRationale } = req.body;
     const application = await trainersProjects.findOne({
       where: { TrainerId: TrainerId, ProjectId: ProjectId },
     });
@@ -53,6 +53,7 @@ const manageApplicationService = async (req, res) => {
       });
     }
     application.status = status;
+    application.statusRationale = statusRationale;
     await application.save();
 
     return res.status(200).json({ msg: "status updated" });

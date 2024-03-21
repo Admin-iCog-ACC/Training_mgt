@@ -8,8 +8,8 @@ require("dotenv").config();
 
 const connectToDB = async () => {
   const sequelize = new Sequelize(
-    // `postgres://${process.env.DBuser}:${process.env.DBpassword}@${process.env.DBhost}:${process.env.DBport}/${process.env.DB}`
-    process.env.connection_string
+    `postgres://${process.env.DBuser}:${process.env.DBpassword}@${process.env.DBhost}:${process.env.DBport}/${process.env.DB}`
+    // process.env.connection_string
   );
 
   try {

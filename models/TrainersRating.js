@@ -5,8 +5,8 @@ const Project = require("../models/ProjectModel");
 require("dotenv").config();
 
 const sequelize = new Sequelize(
-  // `postgres://${process.env.DBuser}:${process.env.DBpassword}@${process.env.DBhost}:${process.env.DBport}/${process.env.DB}`
-  process.env.connection_string
+  `postgres://${process.env.DBuser}:${process.env.DBpassword}@${process.env.DBhost}:${process.env.DBport}/${process.env.DB}`
+  // process.env.connection_string
 
   // "postgres://postgres:password@localhost:5432/Trainers"
 );

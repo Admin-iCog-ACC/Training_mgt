@@ -55,6 +55,7 @@ app.get("/api/announceProject/:id", async (req, res) => {
 });
 
 connectToDB();
+
 swagger(app);
 
 app.listen(3000, () => console.log("App running on port 3000"));
