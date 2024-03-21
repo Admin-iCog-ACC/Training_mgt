@@ -20,7 +20,7 @@ function TrainerProfile() {
     setUserPhotoDeleting(true);
     try {
       await axios.delete(
-        `http://localhost:3000/api/deleteFile/${user.imageID}`,
+        `${import.meta.env.VITE_API}/api/deleteFile/${user.imageID}`,
         {
           headers: {
             authorization: `"Bearer ${localStorage.getItem("token")}`,
@@ -28,7 +28,7 @@ function TrainerProfile() {
         }
       );
       const res = await axios.patch(
-        `http://localhost:3000/api/admin/${user.id}`,
+        `${import.meta.env.VITE_API}/api/admin/${user.id}`,
         { ...user, imageURL: null, imageID: null },
         {
           headers: {
@@ -107,7 +107,7 @@ function TrainerProfile() {
     e.preventDefault();
     try {
       const res = await axios.patch(
-        `http://localhost:3000/api/trainer/${user.id}`,
+        `${import.meta.env.VITE_API}/api/trainer/${user.id}`,
         user,
         {
           headers: {
@@ -173,7 +173,7 @@ function TrainerProfile() {
   const updateUserPassword = async (oldPassword, newPassword) => {
     try {
       const res = await axios.patch(
-        `http://localhost:3000/api/trainer/password/${user.id}`,
+        `${import.meta.env.VITE_API}/api/trainer/password/${user.id}`,
         { oldPassword, newPassword },
         {
           headers: {
@@ -245,7 +245,7 @@ function TrainerProfile() {
     setPhotoLoading(true);
     try {
       const res = await axios.patch(
-        `http://localhost:3000/api/admin/uploadImage/${user.id}`,
+        `${import.meta.env.VITE_API}/api/admin/uploadImage/${user.id}`,
         { profileImage: image },
         {
           headers: {
@@ -340,11 +340,14 @@ function TrainerProfile() {
 
   const verifyRequest = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/auth/verify", {
-        headers: {
-          authorization: `Bearer ${localStorage.getItem("token")} `,
-        },
-      });
+      const res = await axios.get(
+        `${import.meta.env.VITE_API}/api/auth/verify`,
+        {
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("token")} `,
+          },
+        }
+      );
       console.log(res.data);
 
       const value = res.data;

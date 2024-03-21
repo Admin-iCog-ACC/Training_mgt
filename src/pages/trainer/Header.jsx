@@ -7,11 +7,14 @@ function Header() {
   const navigate = useNavigate();
   const verifyRequest = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/auth/verify", {
-        headers: {
-          authorization: `Bearer ${localStorage.getItem("token")} `,
-        },
-      });
+      const res = await axios.get(
+        `${import.meta.env.VITE_API}/api/auth/verify`,
+        {
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("token")} `,
+          },
+        }
+      );
       console.log(res.data);
       setUser(res.data);
     } catch (error) {

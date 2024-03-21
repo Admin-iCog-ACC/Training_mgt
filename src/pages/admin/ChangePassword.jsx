@@ -17,11 +17,14 @@ function ChangePassword() {
 
   const getUser = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/auth/verify", {
-        headers: {
-          authorization: `Bearer ${localStorage.getItem("token")} `,
-        },
-      });
+      const res = await axios.get(
+        `${import.meta.env.VITE_API}/api/auth/verify`,
+        {
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("token")} `,
+          },
+        }
+      );
       console.log(res.data);
 
       const value = res.data;
@@ -38,7 +41,7 @@ function ChangePassword() {
     setDigitSending(true);
     try {
       const res = await axios.post(
-        "http://localhost:3000/api/auth/send_password_code",
+        `${import.meta.env.VITE_API}/api/auth/send_password_code`,
         {
           email,
         }
@@ -77,7 +80,7 @@ function ChangePassword() {
     setPasswordUpdating(true);
     try {
       const res = await axios.post(
-        "http://localhost:3000/api/auth/update/password",
+        `${import.meta.env.VITE_API}/api/auth/update/password`,
         {
           password: password.new,
           recoveryDigits: `${firstDigit}${secondDigit}${thirdDigit}${fourthDigit}`,

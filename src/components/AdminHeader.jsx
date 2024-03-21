@@ -99,13 +99,19 @@ export default function AdminHeader() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post("http://localhost:3000/api/project", input, {
-        headers: {
-          authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const res = await axios.post(
+        `${import.meta.env.VITE_API}/api/project`,
+        input,
+        {
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
       await axios.get(
-        `http://localhost:3000/api/announceProject/${res.data.project.id}`,
+        `${import.meta.env.VITE_API}/api/announceProject/${
+          res.data.project.id
+        }`,
         {
           headers: {
             authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -143,11 +149,14 @@ export default function AdminHeader() {
 
   const verifyRequest = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/auth/verify", {
-        headers: {
-          authorization: `Bearer ${localStorage.getItem("token")} `,
-        },
-      });
+      const res = await axios.get(
+        `${import.meta.env.VITE_API}/api/auth/verify`,
+        {
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("token")} `,
+          },
+        }
+      );
       console.log(res.data);
 
       const value = res.data;
@@ -162,11 +171,14 @@ export default function AdminHeader() {
 
   const deleteUser = async () => {
     try {
-      await axios.delete("http://localhost:3000/api/auth/delete/account", {
-        headers: {
-          authorization: `Bearer ${localStorage.getItem("token")} `,
-        },
-      });
+      await axios.delete(
+        `${import.meta.env.VITE_API}/api/auth/delete/account`,
+        {
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("token")} `,
+          },
+        }
+      );
 
       localStorage.removeItem("token");
       navigate("/login");

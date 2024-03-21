@@ -17,7 +17,7 @@ function TrainerRegistration() {
 
     try {
       const res = await axios.post(
-        `http://localhost:3000/api/auth/verify_registration_token`,
+        `${import.meta.env.VITE_API}/api/auth/verify_registration_token`,
         { token },
         {
           headers: {
@@ -53,7 +53,7 @@ function TrainerRegistration() {
     setFormLoading(true);
     try {
       const res = await axios.post(
-        `http://localhost:3000/api/trainer/activate_trainer_account`,
+        `${import.meta.env.VITE_API}/api/trainer/activate_trainer_account`,
         { token, password: form.password }
       );
       console.log(res.data);

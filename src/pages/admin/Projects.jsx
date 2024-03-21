@@ -19,7 +19,7 @@ export default function Projects() {
 
   const fetchProjects = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/project", {
+      const res = await axios.get(`${import.meta.env.VITE_API}/api/project`, {
         headers: {
           authorization: `Bearer ${localStorage.getItem("token")}`,
         },

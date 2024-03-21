@@ -22,14 +22,16 @@ function TrainerDetail() {
   const deleteTrainer = async () => {
     setDeleteLoading(true);
     try {
-      await axios.delete(`http://localhost:3000/api/trainer/${id}`, {
+      await axios.delete(`${import.meta.env.VITE_API}/api/trainer/${id}`, {
         headers: {
           authorization: `"Bearer ${localStorage.getItem("token")}`,
         },
       });
       if (trainer.profileImageId) {
         await axios.delete(
-          `http://localhost:3000/api/deleteFile/${trainer.profileImageId}`,
+          `${import.meta.env.VITE_API}/api/deleteFile/${
+            trainer.profileImageId
+          }`,
           {
             headers: {
               authorization: `"Bearer ${localStorage.getItem("token")}`,
@@ -39,7 +41,7 @@ function TrainerDetail() {
       }
       if (trainer.CVId) {
         await axios.delete(
-          `http://localhost:3000/api/deleteFile/${trainer.CVId}`,
+          `${import.meta.env.VITE_API}/api/deleteFile/${trainer.CVId}`,
           {
             headers: {
               authorization: `"Bearer ${localStorage.getItem("token")}`,

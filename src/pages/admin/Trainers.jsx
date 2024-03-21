@@ -28,7 +28,7 @@ function Trainers() {
   const navigate = useNavigate();
   const fetchTrainers = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/trainer", {
+      const res = await axios.get(`${import.meta.env.VITE_API}/api/trainer`, {
         headers: {
           authorization: `Bearer ${localStorage.getItem("token")} `,
         },
@@ -56,11 +56,15 @@ function Trainers() {
     setRegisterLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:3000/api/trainer", input, {
-        headers: {
-          authorization: `Bearer ${localStorage.getItem("token")} `,
-        },
-      });
+      const res = await axios.post(
+        `${import.meta.env.VITE_API}/api/trainer`,
+        input,
+        {
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("token")} `,
+          },
+        }
+      );
 
       console.log(res.data.trainer);
       const newTrainer = res.data.trainer;
@@ -134,7 +138,7 @@ function Trainers() {
     try {
       for (let i = 0; i < excelTrainers.length; i++) {
         const res = await axios.post(
-          "http://localhost:3000/api/trainer/send_registration_link",
+          `${import.meta.env.VITE_API}/api/trainer/send_registration_link`,
           excelTrainers[i],
           {
             headers: {

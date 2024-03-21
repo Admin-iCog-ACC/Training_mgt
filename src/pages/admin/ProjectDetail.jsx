@@ -37,13 +37,13 @@ function ProjectDetail() {
   const deleteProject = async () => {
     setDeleteLoading(true);
     try {
-      await axios.delete(`http://localhost:3000/api/project/${id}`, {
+      await axios.delete(`${import.meta.env.VITE_API}/api/project/${id}`, {
         headers: {
           authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
       await axios.delete(
-        `http://localhost:3000/api/deleteFile/${project.imageID}`,
+        `${import.meta.env.VITE_API}/api/deleteFile/${project.imageID}`,
         {
           headers: {
             authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -133,7 +133,7 @@ function ProjectDetail() {
     e.preventDefault();
     try {
       const res = await axios.patch(
-        `http://localhost:3000/api/project/${id}`,
+        `${import.meta.env.VITE_API}/api/project/${id}`,
         updateProject,
         {
           headers: {
@@ -164,12 +164,11 @@ function ProjectDetail() {
     setTrainerDeleteLoading(true);
     try {
       const res = await axios.patch(
-        `http://localhost:3000/api/application/${toBeDeleted?.id}/${id}`,
+        `${import.meta.env.VITE_API}/api/application/${toBeDeleted?.id}/${id}`,
         { status: toBeDeleted.statusToBeSet, statusRationale },
         {
           headers: {
-            authorization:
-              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiYWRtaW4iOnRydWUsImVtYWlsIjoiYXJzZW5hbGd1bm5lcjYzMjZAZ21haWwuY29tIiwiaWF0IjoxNzA2ODAxMTQ2fQ.iBqM6CbSQtS7rDQfzLbVUf0FdkPqx3JKDXpet1LbEks",
+            authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
@@ -236,11 +235,14 @@ function ProjectDetail() {
   };
   const getProject = async () => {
     try {
-      const res = await axios.get(`http://localhost:3000/api/project/${id}`, {
-        headers: {
-          authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const res = await axios.get(
+        `${import.meta.env.VITE_API}/api/project/${id}`,
+        {
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
       console.log(res.data.project);
       setProject(res.data.project);
     } catch (error) {
@@ -309,7 +311,7 @@ function ProjectDetail() {
     setProjectPhotoUpdateLoading(true);
     try {
       const res = await axios.patch(
-        `http://localhost:3000/api/project/uploadImage/${project.id}`,
+        `${import.meta.env.VITE_API}/api/project/uploadImage/${project.id}`,
         { imageURL: image },
         {
           headers: {
@@ -355,7 +357,7 @@ function ProjectDetail() {
 
     try {
       const res = await axios.post(
-        `http://localhost:3000/api/rating`,
+        `${import.meta.env.VITE_API}/api/rating`,
         {
           trainerId: trainerApplication.Trainer.id,
           projectId: id,
@@ -429,7 +431,9 @@ function ProjectDetail() {
     setRatingLoading(true);
     try {
       const res = await axios.patch(
-        `http://localhost:3000/api/rating/project/${trainerApplication.Trainer.id}/${id}`,
+        `${import.meta.env.VITE_API}/api/rating/project/${
+          trainerApplication.Trainer.id
+        }/${id}`,
         {
           rating,
           ratingRationale,

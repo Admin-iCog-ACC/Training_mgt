@@ -43,7 +43,7 @@ function Profile() {
     e.preventDefault();
     try {
       const res = await axios.patch(
-        `http://localhost:3000/api/admin/${user.id}`,
+        `${import.meta.env.VITE_API}/api/admin/${user.id}`,
         user,
         {
           headers: {
@@ -138,7 +138,7 @@ function Profile() {
   const updateUserPassword = async (oldPassword, newPassword) => {
     try {
       const res = await axios.patch(
-        `http://localhost:3000/api/admin/password/${user.id}`,
+        `${import.meta.env.VITE_API}/api/admin/password/${user.id}`,
         { oldPassword, newPassword },
         {
           headers: {
@@ -210,7 +210,7 @@ function Profile() {
     setPhotoLoading(true);
     try {
       const res = await axios.patch(
-        `http://localhost:3000/api/admin/uploadImage/${user.id}`,
+        `${import.meta.env.VITE_API}/api/admin/uploadImage/${user.id}`,
         { profileImage: image },
         {
           headers: {
@@ -279,11 +279,14 @@ function Profile() {
 
   const verifyRequest = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/auth/verify", {
-        headers: {
-          authorization: `Bearer ${localStorage.getItem("token")} `,
-        },
-      });
+      const res = await axios.get(
+        `${import.meta.env.VITE_API}/api/auth/verify`,
+        {
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("token")} `,
+          },
+        }
+      );
       console.log(res.data);
 
       const value = res.data;
@@ -321,7 +324,7 @@ function Profile() {
     setUserPhotoDeleting(true);
     try {
       await axios.delete(
-        `http://localhost:3000/api/deleteFile/${user.imageID}`,
+        `${import.meta.env.VITE_API}/api/deleteFile/${user.imageID}`,
         {
           headers: {
             authorization: `"Bearer ${localStorage.getItem("token")}`,
@@ -329,7 +332,7 @@ function Profile() {
         }
       );
       const res = await axios.patch(
-        `http://localhost:3000/api/admin/${user.id}`,
+        `${import.meta.env.VITE_API}/api/admin/${user.id}`,
         { ...user, imageURL: null, imageID: null },
         {
           headers: {

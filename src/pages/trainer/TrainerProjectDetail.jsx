@@ -12,11 +12,14 @@ function TrainerProjectDetail() {
   const [applied, setApplied] = useState();
   const getProject = async () => {
     try {
-      const res = await axios.get(`http://localhost:3000/api/project/${id}`, {
-        headers: {
-          authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const res = await axios.get(
+        `${import.meta.env.VITE_API}/api/project/${id}`,
+        {
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
       console.log(res.data);
       setProject(res.data.project);
       setApplied(res.data.project.TrainersProjects[0] ? true : false);
@@ -62,7 +65,7 @@ function TrainerProjectDetail() {
     try {
       setApplyLoading(true);
       const res = await axios.post(
-        `http://localhost:3000/api/application`,
+        `${import.meta.env.VITE_API}/api/application`,
         { ProjectId: id, description: description },
         {
           headers: {

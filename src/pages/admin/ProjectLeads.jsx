@@ -14,7 +14,7 @@ function ProjectLeads() {
     setDeleteLoading(true);
     try {
       const res = await axios.post(
-        `http://localhost:3000/api/auth/deactivate/account/${id}`,
+        `${import.meta.env.VITE_API}/api/auth/deactivate/account/${id}`,
         { active },
         {
           headers: {
@@ -52,7 +52,7 @@ function ProjectLeads() {
   };
   const getAllAdmins = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/admin", {
+      const res = await axios.get(`${import.meta.env.VITE_API}/api/admin`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },

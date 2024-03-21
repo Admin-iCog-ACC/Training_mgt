@@ -17,11 +17,15 @@ function ProjectLeadRegistration() {
     e.preventDefault();
     setRegistering(true);
     try {
-      const res = await axios.post("http://localhost:3000/api/admin", user, {
-        headers: {
-          authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const res = await axios.post(
+        `${import.meta.env.VITE_API}/api/admin`,
+        user,
+        {
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
       console.log(res.data);
       toast.success("Project lead registered!", {
         position: "top-right",
