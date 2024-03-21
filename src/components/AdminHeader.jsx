@@ -181,7 +181,7 @@ export default function AdminHeader() {
 
   return (
     <>
-      <div className="h-screen bg-gray-900 text-white flex flex-col ">
+      <div className="min-h-screen bg-gray-900 text-white flex flex-col ">
         <ToastContainer />
         <div
           id="drawer-contact"
@@ -921,7 +921,7 @@ export default function AdminHeader() {
               </section>
             </section>
           </div>
-          <div className="p-3 flex-1 h-[1000px] overflow-y-auto">
+          <div className="p-3 flex-1  overflow-y-auto">
             <Outlet context={{ showDrawer, user, setUser, setShowDrawer }} />
           </div>
         </div>

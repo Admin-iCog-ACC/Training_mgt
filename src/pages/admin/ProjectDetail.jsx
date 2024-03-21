@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { toast, ToastContainer, Flip } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -10,12 +10,14 @@ function ProjectDetail() {
   const [ratingRationale, setRatingRationale] = useState("");
   const [showDrawer, setShowDrawer] = useState(false);
   const [ratingLoading, setRatingLoading] = useState(false);
+  let [searchParams, setSearchParams] = useSearchParams();
 
   const [existingSearch, setExistingSearch] = useState({
     email: "",
     status: "",
   });
   const [newSearch, setNewSearch] = useState({ email: "", status: "" });
+  const [statusRationale, setStatusRationale] = useState("");
   const [toBeDeleted, setToBeDeleted] = useState(null);
   const [trainerApplication, setTrainerApplication] = useState(null);
   const [updateProject, setUpdateProject] = useState(null);
@@ -72,27 +74,53 @@ function ProjectDetail() {
 
   const searchTrainers = () => {
     const { email, status } = newSearch;
-
-    return project?.TrainersProjects?.filter(
-      (item) =>
-        item?.Trainer?.email
-          .toLowerCase()
-          .startsWith(email.toLowerCase().trim()) &&
-        (item?.status === "Rejected" || item?.status === "In Progress") &&
-        item?.status.toLowerCase().startsWith(status.toLocaleLowerCase().trim())
-    );
+    const page = searchParams.get("page")
+      ? parseInt(searchParams.get("page"))
+      : 0;
+    const limit = searchParams.get("limit")
+      ? parseInt(searchParams.get("limit"))
+      : 20;
+    const total = project?.TrainersProjects?.filter(
+      (item) => item.status === "Rejected" || item.status === "In Progress"
+    ).length;
+    return {
+      projects: project?.TrainersProjects?.filter(
+        (item) =>
+          item?.Trainer?.email
+            .toLowerCase()
+            .startsWith(email.toLowerCase().trim()) &&
+          (item?.status === "Rejected" || item?.status === "In Progress") &&
+          item?.status
+            .toLowerCase()
+            .startsWith(status.toLocaleLowerCase().trim())
+      ).slice(page * limit, page * limit + limit),
+      total,
+    };
   };
   const searchExistingTrainers = () => {
     const { email, status } = existingSearch;
-
-    return project?.TrainersProjects?.filter(
-      (item) =>
-        item?.Trainer?.email
-          .toLowerCase()
-          .startsWith(email.toLowerCase().trim()) &&
-        (item?.status === "Accepted" || item?.status === "Done") &&
-        item?.status.toLowerCase().startsWith(status.toLocaleLowerCase().trim())
-    );
+    const page = searchParams.get("page")
+      ? parseInt(searchParams.get("page"))
+      : 0;
+    const limit = searchParams.get("limit")
+      ? parseInt(searchParams.get("limit"))
+      : 20;
+    const total = project?.TrainersProjects?.filter(
+      (item) => item.status === "Done" || item.status === "Accepted"
+    ).length;
+    return {
+      projects: project?.TrainersProjects?.filter(
+        (item) =>
+          item?.Trainer?.email
+            .toLowerCase()
+            .startsWith(email.toLowerCase().trim()) &&
+          (item?.status === "Accepted" || item?.status === "Done") &&
+          item?.status
+            .toLowerCase()
+            .startsWith(status.toLocaleLowerCase().trim())
+      ).slice(page * limit, page * limit + limit),
+      total,
+    };
   };
   function formatDate(dateString) {
     const date = new Date(dateString);
@@ -133,14 +161,11 @@ function ProjectDetail() {
     }
   };
   const manageTrainer = async () => {
-    console.log(project);
-    console.log(toBeDeleted);
-
     setTrainerDeleteLoading(true);
     try {
       const res = await axios.patch(
         `http://localhost:3000/api/application/${toBeDeleted?.id}/${id}`,
-        { status: toBeDeleted.statusToBeSet },
+        { status: toBeDeleted.statusToBeSet, statusRationale },
         {
           headers: {
             authorization:
@@ -172,6 +197,16 @@ function ProjectDetail() {
         {
           ...project.TrainersProjects[index],
           status: toBeDeleted.statusToBeSet,
+          statusRationale: statusRationale,
+          Trainer: {
+            ...project.TrainersProjects[index].Trainer,
+            TrainersProjects: [
+              {
+                ...project.TrainersProjects[index].Trainer.TrainersProjects[0],
+                status: toBeDeleted.statusToBeSet,
+              },
+            ],
+          },
         },
         ...project.TrainersProjects.slice(
           index + 1,
@@ -508,6 +543,7 @@ function ProjectDetail() {
     var worked = 0;
     var applied = 0;
     var rejected = 0;
+    console.log(trainerApplication?.Trainer);
     trainerApplication?.Trainer?.TrainersProjects?.map((application) => {
       if (application.status === "In Progress") {
         applied++;
@@ -1287,9 +1323,6 @@ function ProjectDetail() {
                 </section>
                 <section className="text-center font-bold text-xl">
                   {trainerApplication?.Trainer?.rating}
-                  <span className="font-normal ml-1 text-gray-400">
-                    ({trainerApplication?.Trainer?.numRating})
-                  </span>
                 </section>
               </div>
             </div>
@@ -1382,18 +1415,29 @@ function ProjectDetail() {
             </div>
             <div
               className={`${
-                trainerApplication?.status === "Done" && "hidden"
+                trainerApplication?.status === "Done" ||
+                trainerApplication?.status === "Rejected"
+                  ? "hidden"
+                  : "block"
               } text-base text-gray-400`}
             >
               <section className="  font-medium text-gray-200  mb-2 ">
-                Why should we hire your for this project?
+                Why should we hire you for this project?
               </section>
               {trainerApplication?.description}
             </div>
-
             <div
               className={`${
-                trainerApplication?.status !== "Done" && "hidden"
+                trainerApplication?.status === "Rejected" ? "block" : "hidden"
+              }`}
+            >
+              {trainerApplication?.statusRationale}
+            </div>
+            <div
+              className={`${
+                (trainerApplication?.status !== "Done" ||
+                  trainerApplication?.status === "Rejected") &&
+                "hidden"
               } mt-6`}
             >
               <h5 className="inline-flex items-center mb-6 text-base font-semibold text-gray-500 uppercase dark:text-gray-400">
@@ -1953,7 +1997,7 @@ function ProjectDetail() {
           toBeDeleted ? "block" : "hidden"
         }`}
       >
-        <div class="relative p-4 w-full max-w-md max-h-full">
+        <div class="relative  w-full max-w-md max-h-full">
           <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
             <button
               type="button"
@@ -2008,11 +2052,39 @@ function ProjectDetail() {
                   This action can not be reverted!
                 </section>
               </h3>
+
+              <div
+                className={`my-6 ${
+                  toBeDeleted?.statusToBeSet === "Rejected" ? "block" : "hidden"
+                }`}
+              >
+                <textarea
+                  name=""
+                  id=""
+                  cols="40"
+                  rows="10"
+                  placeholder="Why is this trainer is being rejected?"
+                  onChange={(e) => {
+                    setStatusRationale(e.target.value);
+                  }}
+                  value={statusRationale}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                ></textarea>
+              </div>
               <div className="flex justify-center align-center">
                 <button
                   data-modal-hide="popup-modal"
+                  onClick={() => {
+                    if (
+                      !statusRationale.trim() &&
+                      toBeDeleted?.statusToBeSet === "Rejected"
+                    ) {
+                      return;
+                    }
+                    manageTrainer();
+                    setStatusRationale("");
+                  }}
                   type="button"
-                  onClick={manageTrainer}
                   class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center me-2"
                 >
                   {!trainerDeleteLoading && "Yes, I'm sure"}
@@ -2038,7 +2110,7 @@ function ProjectDetail() {
                         fill="currentFill"
                       />
                     </svg>
-                    <span>Rejecting...</span>
+                    <span>Loading...</span>
                   </div>
                 </button>
                 <button
@@ -2186,7 +2258,49 @@ function ProjectDetail() {
         </div>
       </div>
       <div className="my-4"></div>
-      <div class="flex flex-col bg-gray-800 pt-5 my-2 border-t mb-10 border-gray-400 ">
+      <div className="flex gap-4 my-6">
+        <section
+          onClick={() => {
+            const sp = new URLSearchParams(searchParams);
+            sp.delete("trainers");
+            sp.append("trainers", "new");
+            setSearchParams(sp);
+          }}
+          className={`bg-gray-600 px-4 py-3 rounded cursor-pointer hover:bg-gray-700 ${
+            searchParams.get("trainers")
+              ? searchParams.get("trainers") === "new"
+                ? "bg-gray-800  border border-gray-600"
+                : ""
+              : "bg-gray-800  border border-gray-600"
+          }`}
+        >
+          Show New Trainers
+        </section>
+        <section
+          onClick={() => {
+            const sp = new URLSearchParams(searchParams);
+            sp.delete("trainers");
+            sp.append("trainers", "existing");
+            setSearchParams(sp);
+          }}
+          className={`bg-gray-600 px-4 py-3 rounded cursor-pointer hover:bg-gray-700 ${
+            searchParams.get("trainers") === "existing"
+              ? "bg-gray-800  border border-gray-600"
+              : ""
+          }`}
+        >
+          Show Existing Trainers
+        </section>
+      </div>
+      <div
+        className={`flex flex-col bg-gray-800 pt-5 my-2 border-t mb-10 border-gray-400 ${
+          !searchParams.get("trainers")
+            ? "hidden"
+            : searchParams.get("trainers") === "existing"
+            ? "block"
+            : "hidden"
+        }`}
+      >
         <h1 className="font-bold text-2xl mb-3 px-3 text-gray-400">
           Browse and Manage Existing Trainers Here
         </h1>
@@ -2208,8 +2322,8 @@ function ProjectDetail() {
                   value={existingSearch.email}
                 />
                 <span className="text-sm">
-                  {searchExistingTrainers()?.length} item
-                  {searchExistingTrainers()?.length > 1 ? "s" : null}
+                  {searchExistingTrainers()?.projects?.length} item
+                  {searchExistingTrainers()?.projects?.length > 1 ? "s" : null}
                 </span>
               </div>
               <select
@@ -2229,7 +2343,7 @@ function ProjectDetail() {
             </form>
           </div>
         </div>
-        <div class="overflow-x-auto">
+        <div class={`overflow-x-auto `}>
           <div class="inline-block min-w-full align-middle">
             <div class="">
               <table class="min-w-full divide-y divide-gray-200 table-fixed dark:divide-gray-600">
@@ -2292,7 +2406,7 @@ function ProjectDetail() {
                   </tr>
                 </thead>
                 <tbody class=" divide-y divide-gray-200  dark:bg-gray-800 dark:divide-gray-700">
-                  {searchExistingTrainers()?.map((item) => {
+                  {searchExistingTrainers()?.projects?.map((item) => {
                     return (
                       <tr
                         key={item.id}
@@ -3037,11 +3151,143 @@ function ProjectDetail() {
                   })}
                 </tbody>
               </table>
+              <section
+                className={`text-end pr-12 ${
+                  searchExistingTrainers()?.total === 0 ? "hidden" : "block"
+                }`}
+              >
+                {(searchParams.get("page")
+                  ? parseInt(searchParams.get("page"))
+                  : 0) *
+                  (searchParams.get("limit")
+                    ? parseInt(searchParams.get("limit"))
+                    : 20)}{" "}
+                -{" "}
+                {(searchParams.get("page")
+                  ? parseInt(searchParams.get("page"))
+                  : 0) *
+                  (searchParams.get("limit")
+                    ? parseInt(searchParams.get("limit"))
+                    : 20) +
+                  (searchParams.get("limit")
+                    ? parseInt(searchParams.get("limit"))
+                    : 20) >
+                searchExistingTrainers()?.total
+                  ? searchExistingTrainers()?.total
+                  : (searchParams.get("page")
+                      ? parseInt(searchParams.get("page"))
+                      : 0) *
+                      (searchParams.get("limit")
+                        ? parseInt(searchParams.get("limit"))
+                        : 20) +
+                    (searchParams.get("limit")
+                      ? parseInt(searchParams.get("limit"))
+                      : 20)}{" "}
+                out of {searchExistingTrainers()?.total}
+              </section>
+              <section
+                className={`flex justify-end items-center gap-4 ${
+                  searchExistingTrainers()?.total === 0 ? "hidden" : "block"
+                }`}
+              >
+                <section
+                  className={`w-12 h-12 group  rounded-full flex items-center justify-center `}
+                  onClick={() => {
+                    const sp = new URLSearchParams(searchParams);
+
+                    sp.delete("page");
+                    sp.append(
+                      "page",
+                      searchParams.get("page")
+                        ? parseInt(searchParams.get("page")) - 1
+                        : 0
+                    );
+                    setSearchParams(sp);
+                  }}
+                >
+                  <svg
+                    className={`w-5 h-5 rtl:rotate-180 `}
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 6 10"
+                  >
+                    <path
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 1 1 5l4 4"
+                    />
+                  </svg>
+                </section>
+                <section>
+                  <select
+                    name="limit"
+                    id="limit"
+                    className="text-[#168c9e] px-3 py-2 bg-white rounded border border-[#168c9e] outline-none"
+                    onChange={(e) => {
+                      const sp = new URLSearchParams(searchParams);
+                      sp.delete("limit");
+                      sp.append("limit", e.target.value);
+                      setSearchParams(sp);
+                    }}
+                    value={
+                      searchParams.get("limit") ? searchParams.get("limit") : 16
+                    }
+                  >
+                    <option value={20}>20</option>
+
+                    <option value={40}>40</option>
+                    <option value={60}>60</option>
+                    <option value={1}>1</option>
+                  </select>
+                </section>
+                <section
+                  className={`w-12 h-12 group  rounded-full flex items-center justify-center `}
+                  onClick={() => {
+                    const sp = new URLSearchParams(searchParams);
+
+                    sp.delete("page");
+                    sp.append(
+                      "page",
+                      searchParams.get("page")
+                        ? parseInt(searchParams.get("page")) + 1
+                        : 1
+                    );
+                    setSearchParams(sp);
+                  }}
+                >
+                  <svg
+                    className={`w-5 h-5 rtl:rotate-180`}
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 6 10"
+                  >
+                    <path
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="m1 9 4-4-4-4"
+                    />
+                  </svg>
+                </section>
+              </section>
             </div>
           </div>
         </div>
       </div>
-      <div class="flex flex-col border pt-5 my-2 border-gray-700">
+      <div
+        class={`flex flex-col border pt-5 my-2 border-gray-700 ${
+          !searchParams.get("trainers")
+            ? "block"
+            : searchParams.get("trainers") === "new"
+            ? "block"
+            : "hidden"
+        }`}
+      >
         <h1 className="font-bold text-2xl mb-3 px-3">Here Are New Trainers</h1>
         <div class="sm:flex mb-3 px-3">
           <div class="items-center hidden sm:flex sm:divide-x w-full sm:divide-gray-100 sm:mb-0 dark:divide-gray-700">
@@ -3061,8 +3307,8 @@ function ProjectDetail() {
                   value={newSearch.email}
                 />
                 <span className="text-sm">
-                  {searchTrainers()?.length} item
-                  {searchTrainers()?.length > 1 ? "s" : null}
+                  {searchTrainers()?.projects?.length} item
+                  {searchTrainers()?.projects?.length > 1 ? "s" : null}
                 </span>
               </div>
               <select
@@ -3144,7 +3390,7 @@ function ProjectDetail() {
                   </tr>
                 </thead>
                 <tbody class=" divide-y divide-gray-200  dark:bg-gray-800 dark:divide-gray-700">
-                  {searchTrainers()?.map((item) => {
+                  {searchTrainers()?.projects?.map((item) => {
                     return (
                       <tr
                         key={item.id}
@@ -3925,6 +4171,130 @@ function ProjectDetail() {
                   })}
                 </tbody>
               </table>
+              <section
+                className={`text-end pr-12 ${
+                  searchTrainers()?.total === 0 ? "hidden" : "block"
+                }`}
+              >
+                {(searchParams.get("page")
+                  ? parseInt(searchParams.get("page"))
+                  : 0) *
+                  (searchParams.get("limit")
+                    ? parseInt(searchParams.get("limit"))
+                    : 20)}{" "}
+                -{" "}
+                {(searchParams.get("page")
+                  ? parseInt(searchParams.get("page"))
+                  : 0) *
+                  (searchParams.get("limit")
+                    ? parseInt(searchParams.get("limit"))
+                    : 20) +
+                  (searchParams.get("limit")
+                    ? parseInt(searchParams.get("limit"))
+                    : 20) >
+                searchTrainers()?.total
+                  ? searchTrainers()?.total
+                  : (searchParams.get("page")
+                      ? parseInt(searchParams.get("page"))
+                      : 0) *
+                      (searchParams.get("limit")
+                        ? parseInt(searchParams.get("limit"))
+                        : 20) +
+                    (searchParams.get("limit")
+                      ? parseInt(searchParams.get("limit"))
+                      : 20)}{" "}
+                out of {searchTrainers()?.total}
+              </section>
+              <section
+                className={`flex justify-end items-center gap-4 ${
+                  searchTrainers()?.total === 0 ? "hidden" : "block"
+                }`}
+              >
+                <section
+                  className={`w-12 h-12 group  rounded-full flex items-center justify-center `}
+                  onClick={() => {
+                    const sp = new URLSearchParams(searchParams);
+
+                    sp.delete("page");
+                    sp.append(
+                      "page",
+                      searchParams.get("page")
+                        ? parseInt(searchParams.get("page")) - 1
+                        : 0
+                    );
+                    setSearchParams(sp);
+                  }}
+                >
+                  <svg
+                    className={`w-5 h-5 rtl:rotate-180 `}
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 6 10"
+                  >
+                    <path
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 1 1 5l4 4"
+                    />
+                  </svg>
+                </section>
+                <section>
+                  <select
+                    name="limit"
+                    id="limit"
+                    className="text-[#168c9e] px-3 py-2 bg-white rounded border border-[#168c9e] outline-none"
+                    onChange={(e) => {
+                      const sp = new URLSearchParams(searchParams);
+                      sp.delete("limit");
+                      sp.append("limit", e.target.value);
+                      setSearchParams(sp);
+                    }}
+                    value={
+                      searchParams.get("limit") ? searchParams.get("limit") : 16
+                    }
+                  >
+                    <option value={20}>20</option>
+
+                    <option value={40}>40</option>
+                    <option value={60}>60</option>
+                    <option value={1}>1</option>
+                  </select>
+                </section>
+                <section
+                  className={`w-12 h-12 group  rounded-full flex items-center justify-center `}
+                  onClick={() => {
+                    const sp = new URLSearchParams(searchParams);
+
+                    sp.delete("page");
+                    sp.append(
+                      "page",
+                      searchParams.get("page")
+                        ? parseInt(searchParams.get("page")) + 1
+                        : 1
+                    );
+                    setSearchParams(sp);
+                  }}
+                >
+                  <svg
+                    className={`w-5 h-5 rtl:rotate-180`}
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 6 10"
+                  >
+                    <path
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="m1 9 4-4-4-4"
+                    />
+                  </svg>
+                </section>
+              </section>
             </div>
           </div>
         </div>

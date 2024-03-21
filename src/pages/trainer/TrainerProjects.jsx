@@ -119,8 +119,7 @@ function Projects() {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
-  const array = new Array(5);
-  console.log(array.length);
+
   return (
     <>
       <div
