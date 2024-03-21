@@ -82,11 +82,6 @@ function Projects() {
   };
 
   const fetchProjects = async (query, page, limit) => {
-    console.log(
-      `${import.meta.env.VITE_API}/api/project${query}${
-        query.length > 1 ? "&" : ""
-      }page=${page ? page : 0}&limit=${limit ? limit : 16}`
-    );
     try {
       const res = await axios.get(
         `${import.meta.env.VITE_API}/api/project${query}${
@@ -106,59 +101,6 @@ function Projects() {
     }
   };
 
-  const filterProjects = (projects) => {
-    const { title, priority, status, start, end, location } = search;
-    const filteredProjects = projects?.filter(
-      (project) =>
-        project.title
-          .toLowerCase()
-          .startsWith(
-            searchParams.get("title")
-              ? searchParams.get("title").toLowerCase().trim()
-              : ""
-          ) &&
-        project.startDate
-          .toLowerCase()
-          .startsWith(
-            searchParams.get("start") ? searchParams.get("start").trim() : ""
-          ) &&
-        project.endDate
-          .toLowerCase()
-          .startsWith(
-            searchParams.get("end")
-              ? searchParams.get("end").toLowerCase().trim()
-              : ""
-          ) &&
-        (project.TrainersProjects[0]
-          ? project.TrainersProjects[0].status
-              .toLowerCase()
-              .startsWith(
-                searchParams.get("status")
-                  ? searchParams.get("status").toLowerCase().trim()
-                  : ""
-              )
-          : searchParams.get("status")
-          ? false
-          : true) &&
-        project.priority
-          .toLowerCase()
-          .startsWith(
-            searchParams.get("priority")
-              ? searchParams.get("priority").toLowerCase().trim()
-              : ""
-          ) &&
-        project.location
-          .toLowerCase()
-          .startsWith(
-            searchParams.get("location")
-              ? searchParams.get("location").toLowerCase().trim()
-              : ""
-          )
-    );
-
-    return projects;
-    return filteredProjects;
-  };
   useEffect(() => {
     const sp = new URLSearchParams(searchParams);
 
@@ -177,7 +119,8 @@ function Projects() {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
-
+  const array = new Array(5);
+  console.log(array.length);
   return (
     <>
       <div
@@ -847,8 +790,8 @@ function Projects() {
           </div>
         </section>
       </div>
-      <div className="relative ">
-        <div class="px-4 relative mx-auto text-gray-600   mt-3">
+      <div className=" ">
+        <div class="px-4 relative  mt-3">
           <h1 className=" font-bold text-2xl">
             Discover Engaging Projects and Apply as a Trainer Today!
           </h1>
@@ -1059,6 +1002,46 @@ function Projects() {
           No Project Found
         </div>
         <div className="grid grid-cols-4   gap-y-8 justify-items-center ">
+          {[1, 2, 3, 4, 5, 7, 8].map((value, index) => {
+            return (
+              <div
+                role="status"
+                key={index}
+                className={`${
+                  projects ? "hidden" : "block"
+                } p-4 border bg-white rounded shadow animate-pulse w-[450px]`}
+              >
+                <div className="flex items-center justify-center h-48 mb-4 bg-gray-200 rounded ">
+                  <svg
+                    className="w-10 h-10 text-gray-200 dark:text-gray-600"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 16 20"
+                  >
+                    <path d="M14.066 0H7v5a2 2 0 0 1-2 2H0v11a1.97 1.97 0 0 0 1.934 2h12.132A1.97 1.97 0 0 0 16 18V2a1.97 1.97 0 0 0-1.934-2ZM10.5 6a1.5 1.5 0 1 1 0 2.999A1.5 1.5 0 0 1 10.5 6Zm2.221 10.515a1 1 0 0 1-.858.485h-8a1 1 0 0 1-.9-1.43L5.6 10.039a.978.978 0 0 1 .936-.57 1 1 0 0 1 .9.632l1.181 2.981.541-1a.945.945 0 0 1 .883-.522 1 1 0 0 1 .879.529l1.832 3.438a1 1 0 0 1-.031.988Z" />
+                    <path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.98 2.98 0 0 0 .13 5H5Z" />
+                  </svg>
+                </div>
+                <div className="flex justify-between">
+                  <div className="h-2.5 bg-gray-200 rounded-full  w-48 mb-4"></div>
+                  <div className="h-2.5 bg-gray-200 rounded-full  w-6 mb-4"></div>
+                </div>
+                <div className="h-2 w-36 bg-gray-200 rounded-full  mb-2.5"></div>
+                <div className="h-2 w-36 bg-gray-200 rounded-full  mb-2.5"></div>
+                <div className="h-2 w-36 bg-gray-200 rounded-full "></div>
+                <div className="h-2  bg-gray-200  rounded-full mt-4"></div>
+                <div className="h-2  bg-gray-200  rounded-full mt-2"></div>
+                <div className="h-2  bg-gray-200  rounded-full mt-2"></div>
+                <div className="h-2  bg-gray-200  rounded-full mt-2"></div>
+                <div className="h-2  bg-gray-200  rounded-full mt-2"></div>
+                <div className="h-2  bg-gray-200  rounded-full mt-2"></div>
+
+                <span className="sr-only">Loading...</span>
+              </div>
+            );
+          })}
+
           {projects?.map((project) => {
             return (
               <section
@@ -1135,7 +1118,7 @@ function Projects() {
         </div>
         <div
           className={`${
-            stats?.current === 0 ? "hidden" : "block"
+            stats?.current === 0 || !projects ? "hidden" : "block"
           } mt-4 flex flex-col items-end`}
         >
           <section className="px-3">
