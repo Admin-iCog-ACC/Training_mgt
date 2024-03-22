@@ -11,6 +11,7 @@ const bcrypt = require("bcrypt");
 const TrainersRating = require("../models/TrainersRating");
 const jwt = require("jsonwebtoken");
 const { verifyRegistrationToken } = require("../auth");
+const Admin = require("../models/AdminModel");
 const uploadTrainerImageService = async (req, res) => {
   const data = req.body;
   const { id } = req.params;
@@ -102,7 +103,22 @@ const createTrainerServices = async (req, res) => {
   const AdminId = req.admin.id;
   try {
     const newPassword = generatePassword();
-    console.log(newPassword);
+    const checkTrainer = await TrainerModel.findOne({
+      where: {
+        email: data.email,
+      },
+    });
+    if (checkTrainer) {
+      return res.status(400).json({ msg: "User already exists" });
+    }
+    const checkAdmin = await Admin.findOne({
+      where: {
+        email: data.email,
+      },
+    });
+    if (checkAdmin) {
+      return res.status(400).json({ msg: "user already exists" });
+    }
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
     const trainer = await TrainerModel.create({
@@ -201,6 +217,15 @@ const sendTrainerRegistrationLinkService = async (req, res) => {
   const admin = req.admin;
   const AdminId = req.admin.id;
   try {
+    const checkAdmin = await Admin.findOne({
+      where: {
+        email: data.email,
+      },
+    });
+    if (checkAdmin) {
+      return res.status(400).json({ msg: "user already exists" });
+    }
+
     const checkTrainer = await TrainerModel.findOne({
       where: { email: data.email },
     });
@@ -230,6 +255,7 @@ const sendTrainerRegistrationLinkService = async (req, res) => {
         });
       }
     }
+
     const trainer = await TrainerModel.create({
       ...data,
       AdminId,

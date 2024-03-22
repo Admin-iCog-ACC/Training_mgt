@@ -34,10 +34,10 @@ const getAllAdminsServices = async (req, res) => {
 };
 
 const createAdminServices = async (req, res) => {
-  // const { status, value, admin } = await verifyRequest(req, res);
-  // if (status === 401 || !admin) {
-  //   return res.status(401).json({ msg: "Unauthorized" });
-  // }
+  const { status, value, admin } = await verifyRequest(req, res);
+  if (status === 401 || !admin) {
+    return res.status(401).json({ msg: "Unauthorized" });
+  }
   const data = req.body;
 
   const checkAdmin = await AdminModel.findOne({
@@ -50,8 +50,17 @@ const createAdminServices = async (req, res) => {
   });
   if (checkAdmin) {
     return res.status(400).json({
-      msg: "Email and/or phone number already used!",
+      msg: "user already exists",
     });
+  }
+
+  const checkTrainer = await Trainer.findOne({
+    where: {
+      email: data.email,
+    },
+  });
+  if (checkTrainer) {
+    return res.status(400).json({ msg: "user already exists" });
   }
   const newPassword = generatePassword();
 
