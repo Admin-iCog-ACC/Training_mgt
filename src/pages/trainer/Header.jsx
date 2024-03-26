@@ -5,6 +5,9 @@ import axios from "axios";
 function Header() {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+
+  const [open, setOpen] = useState(false);
+
   const verifyRequest = async () => {
     try {
       const res = await axios.get(
@@ -27,114 +30,181 @@ function Header() {
     verifyRequest();
   }, []);
   return (
-    <div className="bg-gray-200 min-h-screen relative">
+    <div className="bg-gray-200 h-screen relative flex">
       <nav
         id="main_navbar"
-        class="sticky top-0 z-50 flex items-center justify-between gap-8 px-2 py-2  shadow  text-white border-b bg-[#168c9e] md:px-2"
+        className={`text-white  bg-[#168c9e]  flex flex-col transition-all ease-in-out delay-150 duration-300 ${
+          open ? "w-[313px]" : "w-[100px]"
+        }`}
       >
-        <a href="/" class="flex items-center shrink-0 gap-x-3">
-          <span class="hidden md:flex text-2xl mt-0.5 font-bold ">
-            iCog-ACC
-          </span>
-        </a>
-        <div class="flex items-center justify-center gap-x-10 ">
-          <NavLink
-            to="/projects"
-            className={({ isActive }) =>
-              isActive
-                ? "cursor-pointer text-lg text-gray-300"
-                : "cursor-pointer text-lg hover:text-gray-300"
-            }
-          >
-            Projects
-          </NavLink>
-          <section className="cursor-pointer text-lg hover:text-gray-300">
-            Projects
-          </section>
-          <section className="cursor-pointer text-lg hover:text-gray-300">
-            Projects
-          </section>
+        <div
+          className={` text-4xl mt-4 font-bold text-center transition-all ease-in-out delay-150 duration-300 overflow-auto ${
+            open ? "h-auto opacity-100" : "h-0 opacity-0"
+          }`}
+        >
+          iCog-ACC
         </div>
-        <div class="hidden lg:flex items-center gap-2 cursor-pointer relative group">
-          <div className="absolute hidden   py-2.5  px-2.5 -left-10  bg-white border    shadow top-14 cursor-auto group-hover:block">
-            <div className="flex gap-x-6">
-              <section className="w-[70px] h-[70px]  rounded-[50%] ">
-                <img
-                  src={user?.imageURL}
-                  alt=""
-                  className={` w-full h-full rounded-[50%] ${
-                    user?.imageURL ? "block" : "hidden"
-                  }`}
-                />
-                <svg
-                  viewBox="0 0 512 512"
-                  // fill="currentColor"
-                  height="1em"
-                  width="1em"
-                  className={`inline w-full h-full transition duration-100 transform cursor-pointer rounded-[50%]   ${
-                    user?.imageURL ? "hidden" : "block"
-                  }`}
-                >
-                  <path d="M258.9 48C141.92 46.42 46.42 141.92 48 258.9c1.56 112.19 92.91 203.54 205.1 205.1 117 1.6 212.48-93.9 210.88-210.88C462.44 140.91 371.09 49.56 258.9 48zm126.42 327.25a4 4 0 01-6.14-.32 124.27 124.27 0 00-32.35-29.59C321.37 329 289.11 320 256 320s-65.37 9-90.83 25.34a124.24 124.24 0 00-32.35 29.58 4 4 0 01-6.14.32A175.32 175.32 0 0180 259c-1.63-97.31 78.22-178.76 175.57-179S432 158.81 432 256a175.32 175.32 0 01-46.68 119.25z" />
-                  <path d="M256 144c-19.72 0-37.55 7.39-50.22 20.82s-19 32-17.57 51.93C191.11 256 221.52 288 256 288s64.83-32 67.79-71.24c1.48-19.74-4.8-38.14-17.68-51.82C293.39 151.44 275.59 144 256 144z" />
-                </svg>
-              </section>
-              <div className=" flex flex-col justify-center">
-                <section className="text-lg text-[#168c9e] font-bold">
-                  {user?.firstName} {user?.lastName}
-                </section>
-                <section className="text-base text-gray-400 font-medium">
-                  {user?.role ? user?.role : "Trainer"}
-                </section>
-              </div>
-            </div>
-          </div>
-          <span
-            className="text-lg tracking-wide hover:underline"
-            onClick={() => navigate("/profile")}
-          >
-            {user?.email}
-          </span>
-          <section className="w-[40px] h-[40px]  rounded-[50%] ">
-            <img
-              src={user?.imageURL}
-              className={` w-full h-full rounded-[50%] ${
-                user?.imageURL ? "block" : "hidden"
-              }`}
-              alt=""
-            />
-            <svg
-              viewBox="0 0 512 512"
-              fill="currentColor"
-              height="1em"
-              width="1em"
-              className={`inline w-full h-full transition duration-100 transform cursor-pointer rounded-[50%]  ${
-                user?.imageURL ? "hidden" : "block"
-              }`}
-            >
-              <path d="M258.9 48C141.92 46.42 46.42 141.92 48 258.9c1.56 112.19 92.91 203.54 205.1 205.1 117 1.6 212.48-93.9 210.88-210.88C462.44 140.91 371.09 49.56 258.9 48zm126.42 327.25a4 4 0 01-6.14-.32 124.27 124.27 0 00-32.35-29.59C321.37 329 289.11 320 256 320s-65.37 9-90.83 25.34a124.24 124.24 0 00-32.35 29.58 4 4 0 01-6.14.32A175.32 175.32 0 0180 259c-1.63-97.31 78.22-178.76 175.57-179S432 158.81 432 256a175.32 175.32 0 01-46.68 119.25z" />
-              <path d="M256 144c-19.72 0-37.55 7.39-50.22 20.82s-19 32-17.57 51.93C191.11 256 221.52 288 256 288s64.83-32 67.79-71.24c1.48-19.74-4.8-38.14-17.68-51.82C293.39 151.44 275.59 144 256 144z" />
-            </svg>
-          </section>
+        <div
+          className={` text-4xl  font-bold text-center  transition-all ease-in-out delay-150 duration-300 overflow-auto ${
+            !open ? "h-auto opacity-100" : "h-0 opacity-0"
+          }`}
+        >
+          iCog
         </div>
 
-        <div class="flex lg:hidden" dusk="mobile_menu_button">
-          <button
-            class="flex items-center p-1 navbar-burger "
-            id="navbar_burger"
+        <nav
+          className={`flex flex-col mt-10 flex-1 gap-y-10 justify-center  transition-all ease-in-out delay-150 duration-300 ${
+            open ? "pr-4" : ""
+          }`}
+        >
+          <NavLink
+            to="/projects"
+            className={`flex   items-center  cursor-pointer py-4 transition-all ease-in-out delay-200  duration-300 hover:bg-[#01bfd4]  ${
+              open
+                ? "rounded rounded-r-full gap-x-7 pl-10"
+                : "gap-x-0 justify-center"
+            }`}
+            style={({ isActive }) => {
+              return {
+                background: isActive ? "#01bfd4" : "",
+              };
+            }}
           >
-            <svg
-              class="block w-6 h-6 fill-current"
-              viewBox="0 0 20 20"
-              xmlns="http://www.w3.org/2000/svg"
+            <div className="flex ">
+              <svg
+                viewBox="0 0 1024 1024"
+                fill="white"
+                className={`w-[44px] h-[44px] `}
+              >
+                <path d="M880 112H144c-17.7 0-32 14.3-32 32v736c0 17.7 14.3 32 32 32h736c17.7 0 32-14.3 32-32V144c0-17.7-14.3-32-32-32zM368 744c0 4.4-3.6 8-8 8h-80c-4.4 0-8-3.6-8-8V280c0-4.4 3.6-8 8-8h80c4.4 0 8 3.6 8 8v464zm192-280c0 4.4-3.6 8-8 8h-80c-4.4 0-8-3.6-8-8V280c0-4.4 3.6-8 8-8h80c4.4 0 8 3.6 8 8v184zm192 72c0 4.4-3.6 8-8 8h-80c-4.4 0-8-3.6-8-8V280c0-4.4 3.6-8 8-8h80c4.4 0 8 3.6 8 8v256z" />
+              </svg>
+            </div>
+            <div
+              className={`text-2xl transition-all  ease-in-out delay-150 duration-300 overflow-auto ${
+                open ? "h-auto w-auto  opacity-100" : "h-0 w-0 opacity-0"
+              }`}
             >
-              <title>Hamberger menu</title>
-              <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z"></path>
-            </svg>
-          </button>
+              Projects
+            </div>
+          </NavLink>
+          <NavLink
+            to="/projectsd"
+            className={`flex   items-center  cursor-pointer py-4 transition-all ease-in-out delay-200  duration-300 hover:bg-[#01bfd4]  ${
+              open
+                ? "rounded rounded-r-full gap-x-7 pl-10"
+                : "gap-x-0 justify-center"
+            }`}
+            style={({ isActive }) => {
+              return {
+                background: isActive ? "#01bfd4" : "",
+              };
+            }}
+          >
+            <div className="flex ">
+              <svg
+                viewBox="0 0 1024 1024"
+                fill="white"
+                className={`w-[44px] h-[44px] `}
+              >
+                <path d="M880 112H144c-17.7 0-32 14.3-32 32v736c0 17.7 14.3 32 32 32h736c17.7 0 32-14.3 32-32V144c0-17.7-14.3-32-32-32zM368 744c0 4.4-3.6 8-8 8h-80c-4.4 0-8-3.6-8-8V280c0-4.4 3.6-8 8-8h80c4.4 0 8 3.6 8 8v464zm192-280c0 4.4-3.6 8-8 8h-80c-4.4 0-8-3.6-8-8V280c0-4.4 3.6-8 8-8h80c4.4 0 8 3.6 8 8v184zm192 72c0 4.4-3.6 8-8 8h-80c-4.4 0-8-3.6-8-8V280c0-4.4 3.6-8 8-8h80c4.4 0 8 3.6 8 8v256z" />
+              </svg>
+            </div>
+            <div
+              className={`text-2xl transition-all  ease-in-out delay-150 duration-300 overflow-auto ${
+                open ? "h-auto w-auto  opacity-100" : "h-0 w-0 opacity-0"
+              }`}
+            >
+              Your Projects
+            </div>
+          </NavLink>
+          <NavLink
+            to="/ratings"
+            className={`flex   items-center  cursor-pointer py-4 transition-all ease-in-out delay-200  duration-300 hover:bg-[#01bfd4]  ${
+              open
+                ? "rounded rounded-r-full gap-x-7 pl-10"
+                : "gap-x-0 justify-center"
+            }`}
+            style={({ isActive }) => {
+              return {
+                background: isActive ? "#01bfd4" : "",
+              };
+            }}
+          >
+            <div className="flex ">
+              <svg
+                viewBox="0 0 1024 1024"
+                fill="white"
+                className={`w-[44px] h-[44px] `}
+              >
+                <path d="M880 112H144c-17.7 0-32 14.3-32 32v736c0 17.7 14.3 32 32 32h736c17.7 0 32-14.3 32-32V144c0-17.7-14.3-32-32-32zM368 744c0 4.4-3.6 8-8 8h-80c-4.4 0-8-3.6-8-8V280c0-4.4 3.6-8 8-8h80c4.4 0 8 3.6 8 8v464zm192-280c0 4.4-3.6 8-8 8h-80c-4.4 0-8-3.6-8-8V280c0-4.4 3.6-8 8-8h80c4.4 0 8 3.6 8 8v184zm192 72c0 4.4-3.6 8-8 8h-80c-4.4 0-8-3.6-8-8V280c0-4.4 3.6-8 8-8h80c4.4 0 8 3.6 8 8v256z" />
+              </svg>
+            </div>
+            <div
+              className={`text-2xl transition-all  ease-in-out delay-150 duration-300 overflow-auto ${
+                open ? "h-auto w-auto  opacity-100" : "h-0 w-0 opacity-0"
+              }`}
+            >
+              Your Projects
+            </div>
+          </NavLink>
+        </nav>
+        <div
+          className="bg-red-900"
+          onClick={() => {
+            setOpen(!open);
+          }}
+        >
+          Change
         </div>
       </nav>
-      <Outlet />
+
+      <div className="flex-1 flex flex-col h-full overflow-auto">
+        <div className=" z-40 sticky top-0 bg-white  flex items-center  pr-6 justify-end text-2xl">
+          <div className="flex items-center gap-x-4 relative group  h-full my-4">
+            <div className="absolute group-hover:flex hidden w-[200px] -left-10 text-lg  bg-gray-100 shadow-lg z-30  flex-col gap-y-4 top-16 py-2 ">
+              <section
+                className=" border-b py-3 cursor-pointer px-2 hover:bg-gray-200"
+                onClick={() => navigate("/profile")}
+              >
+                {" "}
+                Profile
+              </section>
+              <section
+                className="border-t  py-3 cursor-pointer px-2 hover:bg-gray-200"
+                onClick={() => {
+                  localStorage.removeItem("token");
+                  navigate("/trainer_login");
+                }}
+              >
+                {" "}
+                Logout
+              </section>
+            </div>
+            <section
+              className="hover:underline cursor-pointer"
+              onClick={() => {
+                navigate("/profile");
+              }}
+            >
+              Hi, {user?.firstName}
+            </section>
+            <section className="bg-[#01bfd4] rounded-full w-[40px] h-[40px] flex items-center justify-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  fill="white"
+                  d="M12 11.385q-1.237 0-2.119-.882T9 8.385q0-1.238.881-2.12q.881-.88 2.119-.88t2.119.88q.881.882.881 2.12q0 1.237-.881 2.118T12 11.385m-7 7.23V16.97q0-.619.36-1.158q.361-.54.97-.838q1.416-.679 2.833-1.018q1.418-.34 2.837-.34q1.42 0 2.837.34q1.417.34 2.832 1.018q.61.298.97.838q.361.539.361 1.158v1.646z"
+                />
+              </svg>
+            </section>
+          </div>
+        </div>
+        <Outlet />
+      </div>
     </div>
   );
 }

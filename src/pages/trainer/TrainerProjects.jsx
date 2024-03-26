@@ -121,7 +121,7 @@ function Projects() {
   }, []);
 
   return (
-    <>
+    <div className="">
       <div
         className={` absolute left-0 top-0 right-0 bottom-0 min-h-screen  z-50 flex items-center justify-center ${
           searchParams.get("filter") ? "block" : "hidden"
@@ -789,14 +789,51 @@ function Projects() {
           </div>
         </section>
       </div>
-      <div className=" ">
-        <div class="px-4 relative  mt-3">
+      <div className=" w-3/4 mx-auto">
+        <div
+          className="rounded-2xl flex flex-col items-center gap-y-8 text-4xl py-12 my-10"
+          style={{
+            background:
+              "linear-gradient(90.14deg, rgba(0, 141, 158, 0.7) -3.68%, rgba(0, 141, 158, 0.586507) 10.07%, rgba(0, 141, 158, 0.399) 32.78%, rgba(0, 141, 158, 0.448202) 96.13%, rgba(0, 141, 158, 0.7) 112.08%)",
+          }}
+        >
+          <section className="w-2/4 text-center text-white ">
+            Discover Engaging Projects and Apply as a Trainer Today!
+          </section>
+          <form className="flex gap-x-6 items-center h-[50px] px-4 w-1/2 ">
+            <div className="flex items-center bg-white rounded-full h-full flex-1  pl-3">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="40"
+                height="40"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  fill="#168c9e"
+                  d="m19.485 20.154l-6.262-6.262q-.75.639-1.725.989q-.975.35-1.96.35q-2.402 0-4.066-1.663q-1.664-1.664-1.664-4.065T5.47 5.436q1.663-1.667 4.064-1.667q2.402 0 4.068 1.664q1.666 1.664 1.666 4.067q0 1.042-.369 2.017q-.37.975-.97 1.668l6.262 6.261zM9.538 14.23q1.99 0 3.361-1.37q1.37-1.37 1.37-3.361q0-1.99-1.37-3.36q-1.37-1.37-3.36-1.37q-1.99 0-3.361 1.37q-1.37 1.37-1.37 3.36q0 1.99 1.37 3.36q1.37 1.37 3.36 1.37"
+                />
+              </svg>
+              <input
+                placeholder="Discover Engaging New Projects"
+                type="text"
+                required
+                name="title"
+                className="h-full flex-1 px-3 rounded-r-full text-xl placeholder-[#168c9e] outline-none "
+                onChange={(e) => handleSearchChange(e)}
+                value={
+                  searchParams.get("title") ? searchParams.get("title") : ""
+                }
+              />
+            </div>
+          </form>
+        </div>
+        {/* <div class="px-4 relative  mt-3">
           <h1 className=" font-bold text-2xl">
             Discover Engaging Projects and Apply as a Trainer Today!
           </h1>
-        </div>
-        <div
-          className={`sticky top-12 bg-gray-200 z-40 px-4  py-3 mb-4 ${
+        </div> */}
+        {/* <div
+          className={`sticky top-16 bg-gray-200 z-40 px-4  py-3 mb-4 ${
             hasShadow ? "shadow-xl" : ""
           }`}
         >
@@ -992,6 +1029,165 @@ function Projects() {
               Rejected ({stats?.rejected})
             </div>
           </section>
+        </div> */}
+
+        <div>
+          <section className="mb-10 flex justify-between">
+            <div>
+              <button
+                onClick={() => {
+                  const sp = new URLSearchParams(searchParams);
+                  sp.delete("filter");
+                  sp.append("filter", true);
+                  setSearchParams(sp);
+                  document.body.style.overflow = "hidden";
+                }}
+                className={`border border-[#168c9e] h-[50px] bg-white  group flex gap-x-4 items-center text-[#168c9e] text-lg tracking-wide px-4 py-1 rounded-xl cursor-pointer   hover:bg-gray-100 `}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  className="block "
+                >
+                  <path
+                    fill="#168c9e"
+                    d="M11.058 17q-.213 0-.357-.144q-.143-.144-.143-.357q0-.212.143-.356q.144-.143.357-.143h1.865q.213 0 .356.144t.144.357q0 .212-.144.356q-.143.143-.356.143zm-3.75-4.5q-.213 0-.357-.144q-.143-.144-.143-.357t.143-.356q.144-.143.357-.143h9.365q.213 0 .356.144q.144.144.144.357t-.144.356q-.143.143-.356.143zM4.5 8q-.213 0-.356-.144T4 7.499q0-.212.144-.356Q4.288 7 4.5 7h15q.213 0 .356.144q.144.144.144.357q0 .212-.144.356Q19.713 8 19.5 8z"
+                  />
+                </svg>
+                Filters
+              </button>
+            </div>
+          </section>
+
+          <div className="grid grid-cols-3 gap-y-8 gap-x-6 justify-items-stretch ">
+            {[1, 2, 3, 4, 5, 7, 8].map((value, index) => {
+              return (
+                <div
+                  role="status"
+                  key={index}
+                  className={`${
+                    projects ? "hidden" : "block"
+                  } p-4 border bg-white rounded shadow animate-pulse w-[450px]`}
+                >
+                  <div className="flex items-center justify-center h-48 mb-4 bg-gray-200 rounded ">
+                    <svg
+                      className="w-10 h-10 text-gray-200 dark:text-gray-600"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="currentColor"
+                      viewBox="0 0 16 20"
+                    >
+                      <path d="M14.066 0H7v5a2 2 0 0 1-2 2H0v11a1.97 1.97 0 0 0 1.934 2h12.132A1.97 1.97 0 0 0 16 18V2a1.97 1.97 0 0 0-1.934-2ZM10.5 6a1.5 1.5 0 1 1 0 2.999A1.5 1.5 0 0 1 10.5 6Zm2.221 10.515a1 1 0 0 1-.858.485h-8a1 1 0 0 1-.9-1.43L5.6 10.039a.978.978 0 0 1 .936-.57 1 1 0 0 1 .9.632l1.181 2.981.541-1a.945.945 0 0 1 .883-.522 1 1 0 0 1 .879.529l1.832 3.438a1 1 0 0 1-.031.988Z" />
+                      <path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.98 2.98 0 0 0 .13 5H5Z" />
+                    </svg>
+                  </div>
+                  <div className="flex justify-between">
+                    <div className="h-2.5 bg-gray-200 rounded-full  w-48 mb-4"></div>
+                    <div className="h-2.5 bg-gray-200 rounded-full  w-6 mb-4"></div>
+                  </div>
+                  <div className="h-2 w-36 bg-gray-200 rounded-full  mb-2.5"></div>
+                  <div className="h-2 w-36 bg-gray-200 rounded-full  mb-2.5"></div>
+                  <div className="h-2 w-36 bg-gray-200 rounded-full "></div>
+                  <div className="h-2  bg-gray-200  rounded-full mt-4"></div>
+                  <div className="h-2  bg-gray-200  rounded-full mt-2"></div>
+                  <div className="h-2  bg-gray-200  rounded-full mt-2"></div>
+                  <div className="h-2  bg-gray-200  rounded-full mt-2"></div>
+                  <div className="h-2  bg-gray-200  rounded-full mt-2"></div>
+                  <div className="h-2  bg-gray-200  rounded-full mt-2"></div>
+
+                  <span className="sr-only">Loading...</span>
+                </div>
+              );
+            })}
+            {projects?.map((project) => {
+              return (
+                <section
+                  key={project.id}
+                  className="bg-white group text-gray-500 hover:text-gray-900 hover:shadow-lg  rounded-lg transition  group  hover:-translate-y-2"
+                >
+                  <img
+                    src={`${project.imageURL}`}
+                    className=" w-full h-[250px] rounded-t-md mb-2 "
+                    alt=""
+                  />
+                  <section className="px-3 mb-3">
+                    <section className="flex justify-between items-center">
+                      <h1 className={` font-bold text-2xl`}>{project.title}</h1>
+                      <section className="text-[#21c2db] group-hover:text-[#168c9e] group-hover:font-bold">
+                        {project.priority}
+                      </section>
+                    </section>
+                    <section className="text-sm">
+                      <span className="text-gray-900 mr-2">Start Date:</span>
+                      <span className="text-[#21c2db] group-hover:text-[#168c9e] group-hover:font-bold">
+                        {project.startDate}
+                      </span>{" "}
+                    </section>
+                    <section className="text-sm ">
+                      <span className="text-gray-900 mr-2">End Date:</span>
+                      <span className="text-[#21c2db] group-hover:text-[#168c9e] group-hover:font-bold">
+                        {project.endDate}
+                      </span>{" "}
+                    </section>
+                    <section className={`text-sm`}>
+                      <span className="text-gray-900 mr-2">
+                        Application Status:
+                      </span>
+                      <span
+                      // className={`  ${
+                      //   project?.TrainersProjects[0]
+                      //     ? "text-[#168c9e]"
+                      //     : "text-gray-400"
+                      // } ${searchParams.get("status") ? "font-bold" : ""}`}
+                      >
+                        {project?.TrainersProjects[0]
+                          ? project?.TrainersProjects[0].status
+                          : "No Application"}
+                      </span>{" "}
+                    </section>
+                    <section
+                      className={`${
+                        search.location ? "block" : "hidden"
+                      } text-sm`}
+                    >
+                      <span className="text-gray-900 mr-2">Location:</span>
+                      <span className="text-[#21c2db] group-hover:text-[#168c9e] group-hover:font-bold">
+                        {project.location}
+                      </span>{" "}
+                    </section>
+                  </section>
+                  <section className="px-1 ">
+                    <p className="text-base  text-center  duration-200 ease-out ">
+                      {project.overview}
+                    </p>
+                  </section>
+                  <section className="flex justify-end items-center  px-3 my-3 font-bold text-lg tracking-wide ">
+                    <section
+                      className=" text-sm text-[#21c2db] hover:text-[#168c9e] hover:underline cursor-pointer"
+                      onClick={() => navigate(`/projects/${project.id}`)}
+                    >
+                      View Details
+                    </section>
+                    <section className="flex">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="22"
+                        height="22"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          fill="#168c9e"
+                          d="M10.537 12L5.942 7.4l.708-.708L11.958 12L6.65 17.308l-.708-.708zm6.1 0l-4.595-4.6l.708-.708L18.058 12l-5.308 5.308l-.708-.708z"
+                        />
+                      </svg>
+                    </section>
+                  </section>
+                </section>
+              );
+            })}
+          </div>
         </div>
         <div
           className={`${
@@ -1000,123 +1196,8 @@ function Projects() {
         >
           No Project Found
         </div>
-        <div className="grid grid-cols-4   gap-y-8 justify-items-center ">
-          {[1, 2, 3, 4, 5, 7, 8].map((value, index) => {
-            return (
-              <div
-                role="status"
-                key={index}
-                className={`${
-                  projects ? "hidden" : "block"
-                } p-4 border bg-white rounded shadow animate-pulse w-[450px]`}
-              >
-                <div className="flex items-center justify-center h-48 mb-4 bg-gray-200 rounded ">
-                  <svg
-                    className="w-10 h-10 text-gray-200 dark:text-gray-600"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    viewBox="0 0 16 20"
-                  >
-                    <path d="M14.066 0H7v5a2 2 0 0 1-2 2H0v11a1.97 1.97 0 0 0 1.934 2h12.132A1.97 1.97 0 0 0 16 18V2a1.97 1.97 0 0 0-1.934-2ZM10.5 6a1.5 1.5 0 1 1 0 2.999A1.5 1.5 0 0 1 10.5 6Zm2.221 10.515a1 1 0 0 1-.858.485h-8a1 1 0 0 1-.9-1.43L5.6 10.039a.978.978 0 0 1 .936-.57 1 1 0 0 1 .9.632l1.181 2.981.541-1a.945.945 0 0 1 .883-.522 1 1 0 0 1 .879.529l1.832 3.438a1 1 0 0 1-.031.988Z" />
-                    <path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.98 2.98 0 0 0 .13 5H5Z" />
-                  </svg>
-                </div>
-                <div className="flex justify-between">
-                  <div className="h-2.5 bg-gray-200 rounded-full  w-48 mb-4"></div>
-                  <div className="h-2.5 bg-gray-200 rounded-full  w-6 mb-4"></div>
-                </div>
-                <div className="h-2 w-36 bg-gray-200 rounded-full  mb-2.5"></div>
-                <div className="h-2 w-36 bg-gray-200 rounded-full  mb-2.5"></div>
-                <div className="h-2 w-36 bg-gray-200 rounded-full "></div>
-                <div className="h-2  bg-gray-200  rounded-full mt-4"></div>
-                <div className="h-2  bg-gray-200  rounded-full mt-2"></div>
-                <div className="h-2  bg-gray-200  rounded-full mt-2"></div>
-                <div className="h-2  bg-gray-200  rounded-full mt-2"></div>
-                <div className="h-2  bg-gray-200  rounded-full mt-2"></div>
-                <div className="h-2  bg-gray-200  rounded-full mt-2"></div>
-
-                <span className="sr-only">Loading...</span>
-              </div>
-            );
-          })}
-
-          {projects?.map((project) => {
-            return (
-              <section
-                key={project.id}
-                className="bg-white group text-gray-500 hover:text-gray-900 hover:shadow-lg w-[450px] rounded-lg transition  group  hover:-translate-y-2"
-              >
-                <img
-                  src={`${project.imageURL}`}
-                  className=" w-full h-[250px] rounded-t-md mb-2 "
-                  alt=""
-                />
-                <section className="px-3 mb-3">
-                  <section className="flex justify-between items-center">
-                    <h1 className={` font-bold text-2xl`}>{project.title}</h1>
-                    <section className="text-[#21c2db] group-hover:text-[#168c9e] group-hover:font-bold">
-                      {project.priority}
-                    </section>
-                  </section>
-                  <section className="text-sm">
-                    <span className="text-gray-900 mr-2">Start Date:</span>
-                    <span className="text-[#21c2db] group-hover:text-[#168c9e] group-hover:font-bold">
-                      {project.startDate}
-                    </span>{" "}
-                  </section>
-                  <section className="text-sm ">
-                    <span className="text-gray-900 mr-2">End Date:</span>
-                    <span className="text-[#21c2db] group-hover:text-[#168c9e] group-hover:font-bold">
-                      {project.endDate}
-                    </span>{" "}
-                  </section>
-                  <section className={`text-sm`}>
-                    <span className="text-gray-900 mr-2">
-                      Application Status:
-                    </span>
-                    <span
-                      className={`  ${
-                        project.TrainersProjects[0]
-                          ? "text-[#168c9e]"
-                          : "text-gray-400"
-                      } ${searchParams.get("status") ? "font-bold" : ""}`}
-                    >
-                      {project.TrainersProjects[0]
-                        ? project.TrainersProjects[0].status
-                        : "No Application"}
-                    </span>{" "}
-                  </section>
-                  <section
-                    className={`${
-                      search.location ? "block" : "hidden"
-                    } text-sm`}
-                  >
-                    <span className="text-gray-900 mr-2">Location:</span>
-                    <span className="text-[#21c2db] group-hover:text-[#168c9e] group-hover:font-bold">
-                      {project.location}
-                    </span>{" "}
-                  </section>
-                </section>
-                <section className="px-1 ">
-                  <p className="text-base  text-center  duration-200 ease-out ">
-                    {project.overview}
-                  </p>
-                </section>
-                <section className="text-center my-3 font-bold text-lg tracking-wide ">
-                  <span
-                    className=" text-sm text-[#21c2db] hover:text-[#168c9e] hover:underline cursor-pointer"
-                    onClick={() => navigate(`/projects/${project.id}`)}
-                  >
-                    Detail Here
-                  </span>
-                </section>
-              </section>
-            );
-          })}
-        </div>
         <div
-          className={`${
+          className={`my-4  ${
             stats?.current === 0 || !projects ? "hidden" : "block"
           } mt-4 flex flex-col items-end`}
         >
@@ -1282,7 +1363,7 @@ function Projects() {
           </section>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

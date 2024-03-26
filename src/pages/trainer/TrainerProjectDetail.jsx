@@ -209,26 +209,77 @@ function TrainerProjectDetail() {
       <div>
         <ToastContainer />
         <div class="md:flex no-wrap   mt-8   ">
-          <div class="w-full md:w-9/12 mx-auto shadow-sm border bg-white  rounded ">
+          <div class="w-full md:w-[1300px] px-10 py-12 mx-auto shadow-sm  bg-white  rounded ">
             <div class=" p-3 shadow-sm rounded-sm">
               <div class="flex items-center justify-between  space-x-2 font-semibold text-gray-900 leading-8 mb-3 px-4 ">
                 <section className="flex items-center">
-                  <img
-                    class="h-14 w-14 rounded-lg cursor-pointer"
-                    src={project?.imageURL}
-                    alt=""
-                  />
-                  <span class="tracking-wide text-3xl text-[#168c9e] ml-2">
+                  <span class="tracking-wide text-3xl text-[#168c9e]">
                     {project?.title}
                   </span>
                 </section>
-                <section className="font-normal text-[#168c9e]">
-                  {getTimeDifference(project?.createdAt).date}
-                  {getTimeDifference(project?.createdAt).unit}
-                </section>
               </div>
 
-              <div class="text-gray-700 my-8">
+              <div className="flex gap-x-28">
+                <div className="w-1/2">
+                  <img
+                    className="w-full h-96 rounded-lg cursor-pointer"
+                    src={project?.imageURL}
+                    alt=""
+                  />
+                  <div className="text-xl mt-4">{project?.description}</div>
+                </div>
+                <div className="w-1/2">
+                  <div className="flex gap-x-16 justify-start mb-5">
+                    <div className="px-4 py-2 font-normal text-[#727272] text-2xl">
+                      Start Date
+                    </div>
+                    <div className="px-4 py-2 font-medium text-[#404040] text-2xl">
+                      {project?.startDate}
+                    </div>
+                  </div>
+                  <div className="flex gap-x-16 justify-start mb-5">
+                    <div className="px-4 py-2 font-normal text-[#727272] text-2xl">
+                      End Date
+                    </div>
+                    <div className="px-4 py-2 font-medium text-[#404040] text-2xl">
+                      {project?.endDate}
+                    </div>
+                  </div>
+                  <div className="flex gap-x-16 justify-start mb-5">
+                    <div className="px-4 py-2 font-normal text-[#727272] text-2xl">
+                      Budget
+                    </div>
+                    <div className="px-4 py-2 font-medium text-[#404040] text-2xl">
+                      {project?.budget}
+                    </div>
+                  </div>
+                  <div className="flex gap-x-16 justify-start mb-5">
+                    <div className="px-4 py-2 font-normal text-[#727272] text-2xl">
+                      Location
+                    </div>
+                    <div className="px-4 py-2 font-medium text-[#404040] text-2xl">
+                      {project?.location}
+                    </div>
+                  </div>
+                  <div className="flex gap-x-16 justify-start mb-5">
+                    <div className="px-4 py-2 font-normal text-[#727272] text-2xl">
+                      Span
+                    </div>
+                    <div className="px-4 py-2 font-medium text-[#404040] text-2xl">
+                      {project?.span}
+                    </div>
+                  </div>
+                  <div className="flex gap-x-16 justify-start mb-5">
+                    <div className="px-4 py-2 font-normal text-[#727272] text-2xl">
+                      Priority
+                    </div>
+                    <div className="px-4 py-2 font-medium text-[#404040] text-2xl">
+                      {project?.priority}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* <div class="text-gray-700 my-8">
                 <div class="grid md:grid-cols-2 text-base">
                   <div class="grid grid-cols-2">
                     <div class="px-4 py-2  font-semibold">Title</div>
@@ -273,7 +324,7 @@ function TrainerProjectDetail() {
                 >
                   {project?.description}
                 </div>
-              </div>
+              </div> */}
               <div className="flex">
                 <button
                   onClick={() => setOpenApply(true)}
@@ -289,7 +340,7 @@ function TrainerProjectDetail() {
         </div>
       </div>
       <div
-        className={`w-full md:w-9/12 mx-auto shadow-sm border bg-white  text-gray-500 rounded py-10  ${
+        className={`w-full md:w-[1300px] px-12 py-10 mx-auto shadow-sm border bg-white  text-gray-500 rounded   ${
           project?.TrainersProjects[0] ? "block" : "hidden"
         } px-5 text-base mt-6`}
       >
