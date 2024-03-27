@@ -44,7 +44,7 @@ function TrainerProfile() {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        theme: "dark",
+
         transition: Flip,
       });
       setTimeout(() => {
@@ -73,7 +73,7 @@ function TrainerProfile() {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        theme: "dark",
+
         transition: Flip,
       });
       return;
@@ -125,7 +125,7 @@ function TrainerProfile() {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        theme: "dark",
+
         transition: Flip,
       });
     } catch (error) {
@@ -138,7 +138,7 @@ function TrainerProfile() {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          theme: "dark",
+
           transition: Flip,
         });
       } else if (error.response.status === 404) {
@@ -150,7 +150,7 @@ function TrainerProfile() {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          theme: "dark",
+
           transition: Flip,
         });
       } else {
@@ -162,7 +162,7 @@ function TrainerProfile() {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          theme: "dark",
+
           transition: Flip,
         });
       }
@@ -191,7 +191,7 @@ function TrainerProfile() {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        theme: "dark",
+
         transition: Flip,
       });
       setPasswordInfo({
@@ -209,7 +209,7 @@ function TrainerProfile() {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          theme: "dark",
+
           transition: Flip,
         });
       } else if (error.response.status === 404) {
@@ -221,7 +221,7 @@ function TrainerProfile() {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          theme: "dark",
+
           transition: Flip,
         });
       } else {
@@ -233,7 +233,7 @@ function TrainerProfile() {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          theme: "dark",
+
           transition: Flip,
         });
       }
@@ -263,7 +263,7 @@ function TrainerProfile() {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        theme: "dark",
+
         transition: Flip,
       });
       setTimeout(() => {
@@ -298,7 +298,7 @@ function TrainerProfile() {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          theme: "dark",
+
           transition: Flip,
         });
       } else if (error.response.status === 404) {
@@ -310,7 +310,7 @@ function TrainerProfile() {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          theme: "dark",
+
           transition: Flip,
         });
       } else {
@@ -322,7 +322,7 @@ function TrainerProfile() {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          theme: "dark",
+
           transition: Flip,
         });
       }
