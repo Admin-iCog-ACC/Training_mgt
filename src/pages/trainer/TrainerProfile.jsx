@@ -8,6 +8,7 @@ function TrainerProfile() {
   const [updateProfile, setUpdateProfile] = useState(false);
   const [fileInputError, setFileInputError] = useState(false);
   const [photoLoading, setPhotoLoading] = useState(false);
+  const [openImageUpload, setOpenImageUpload] = useState(false);
   const [image, setImage] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [passwordInfo, setPasswordInfo] = useState({
@@ -16,11 +17,12 @@ function TrainerProfile() {
     confirmPassword: "",
   });
   const [userPhotoDeleting, setUserPhotoDeleting] = useState(false);
+
   const deletePhoto = async () => {
     setUserPhotoDeleting(true);
     try {
       await axios.delete(
-        `${import.meta.env.VITE_API}/api/deleteFile/${user.imageID}`,
+        `${import.meta.env.VITE_API}/api/deleteFile/${user.profileImageId}`,
         {
           headers: {
             authorization: `"Bearer ${localStorage.getItem("token")}`,
@@ -28,8 +30,8 @@ function TrainerProfile() {
         }
       );
       const res = await axios.patch(
-        `${import.meta.env.VITE_API}/api/admin/${user.id}`,
-        { ...user, imageURL: null, imageID: null },
+        `${import.meta.env.VITE_API}/api/trainer/${user.id}`,
+        { ...user, profileImage: null, profileImageId: null },
         {
           headers: {
             authorization: `Bearer ${localStorage.getItem("token")} `,
@@ -49,12 +51,10 @@ function TrainerProfile() {
       });
       setTimeout(() => {
         setUser((prev) => {
-          return { ...prev, imageID: null, imageURL: null };
-        });
-        setHeaderUser((prev) => {
-          return { ...prev, imageID: null, imageURL: null };
+          return { ...prev, profileImageId: null, profileImage: null };
         });
       }, 4000);
+      console.log(res.data);
     } catch (error) {
       console.log(error);
     }
@@ -245,7 +245,7 @@ function TrainerProfile() {
     setPhotoLoading(true);
     try {
       const res = await axios.patch(
-        `${import.meta.env.VITE_API}/api/admin/uploadImage/${user.id}`,
+        `${import.meta.env.VITE_API}/api/trainer/uploadImage/${user.id}`,
         { profileImage: image },
         {
           headers: {
@@ -254,7 +254,8 @@ function TrainerProfile() {
         }
       );
 
-      const { imageURL, imageID, createdAt, updatedAt } = res.data.admin;
+      const { profileImage, profileImageId, createdAt, updatedAt } =
+        res.data.trainer;
       toast.success("Photo successfully uploaded!", {
         position: "top-right",
         autoClose: 1999,
@@ -267,28 +268,22 @@ function TrainerProfile() {
         transition: Flip,
       });
       setTimeout(() => {
-        setHeaderUser({
-          ...result.user,
-          imageURL,
-          imageID,
-          createdAt,
-          updatedAt,
-          admin: true,
-        });
         setUser({
-          ...result.user,
-          imageURL,
-          imageID,
+          ...user,
+          profileImage,
+          profileImageId,
           createdAt,
           updatedAt,
-          admin: true,
+          admin: false,
         });
 
-        setUpdateProfile(false);
+        setOpenImageUpload(false);
         setImageUrl("");
         setImage("");
       }, 4000);
     } catch (error) {
+      console.log(error);
+      // return;
       if (error.response.status === 400) {
         toast.error("Incorrect old password!", {
           position: "top-right",
@@ -366,21 +361,136 @@ function TrainerProfile() {
   return (
     <>
       <ToastContainer />
+      <div
+        id="crud-modal"
+        tabindex="-1"
+        aria-hidden="true"
+        style={{ background: "rgba(0,0,0,0.5)" }}
+        className={` overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] min-h-full ${
+          openImageUpload ? "flex" : "hidden"
+        }`}
+      >
+        <div className="relative p-4 w-full max-w-md max-h-full">
+          <div className="relative bg-white rounded-lg shadow text-[#168c9e]">
+            <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+              <h3 className="text-lg font-semibold ">Update Admin Profile</h3>
+              <button
+                type="button"
+                className="bg-transparent hover:bg-gray-200 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
+                onClick={() => {
+                  setOpenImageUpload(false);
+                  // setUpdateProfile(false);
+                  setImage("");
+                  setImageUrl("");
+                }}
+              >
+                <svg
+                  className="w-3 h-3"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 14 14"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+                  />
+                </svg>
+              </button>
+            </div>
 
+            <form className="p-4 md:p-5">
+              <div className="flex items-center justify-center w-full">
+                <img src={imageUrl} alt="" />
+                <label
+                  for="dropzone-file"
+                  className={`${
+                    imageUrl ? "hidden" : "flex"
+                  } flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800  hover:bg-gray-100 `}
+                >
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <svg
+                      className="w-8 h-8 mb-4 "
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 20 16"
+                    >
+                      <path
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                      />
+                    </svg>
+                    <p className="mb-2 text-sm ">
+                      <span className="font-semibold">Click to upload</span> or
+                      drag and drop
+                    </p>
+                    <p className="text-xs ">
+                      SVG, PNG, JPG or GIF (MAX. 800x400px)
+                    </p>
+                  </div>
+                  <input
+                    id="dropzone-file"
+                    type="file"
+                    className="hidden"
+                    onChange={handleFileInput}
+                  />
+                </label>
+              </div>
+
+              <button
+                type="button"
+                onClick={updateUserPhoto}
+                className=" mt-3 inline-flex items-center bg-gray-200 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center hover:b"
+              >
+                <svg
+                  className={`me-1 -ms-1 w-5 h-5 ${
+                    photoLoading ? "hidden" : "block"
+                  }`}
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                    clip-rule="evenodd"
+                  ></path>
+                </svg>
+                {photoLoading ? "Uploading...." : "Upload Photo"}
+              </button>
+              <div
+                className={`text-sm mt-1 text-red-500 ${
+                  fileInputError ? "block" : "hidden"
+                }`}
+              >
+                Invalid File type
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
       <div className="grid grid-cols-4 px-20 py-8 gap-x-5 text-gray-900  ">
         <div className="col-span-1 ">
           <div className="p-4 mb-4  border bg-white rounded-lg  2xl:col-span-2  sm:p-6">
             <div className="items-center sm:flex xl:block 2xl:flex sm:space-x-4 xl:space-x-0 2xl:space-x-4">
               <img
                 className={`mb-4 rounded-lg w-28 h-28 sm:mb-0 xl:mb-4 2xl:mb-0 ${
-                  user?.imageURL ? "block" : "hidden"
+                  user?.profileImage ? "block" : "hidden"
                 }`}
-                src={user?.imageURL}
+                src={user?.profileImage}
                 alt={user?.firstName}
               />
+
               <div
                 className={`mb-4 border  bg-gray-200  rounded-full w-28 h-28 sm:mb-0 xl:mb-4 2xl:mb-0 ${
-                  user?.imageURL ? "hidden" : "block"
+                  user?.profileImage ? "hidden" : "block"
                 } `}
               ></div>
               <div>
@@ -393,7 +503,7 @@ function TrainerProfile() {
                 <div className="flex items-center space-x-4">
                   <button
                     type="button"
-                    onClick={() => setUpdateProfile(true)}
+                    onClick={() => setOpenImageUpload(true)}
                     class="inline-flex  border border-[#168c9e] text-[#168c9e]   items-center px-3 py-2 text-sm font-medium text-center  rounded-lg  hover:bg-gray-100"
                   >
                     <svg
@@ -411,10 +521,10 @@ function TrainerProfile() {
                     type="button"
                     onClick={deletePhoto}
                     className={`${
-                      user?.imageURL ? "block" : "hidden"
-                    } py-2 px-3 text-sm font-medium text-gray-900 focus:outline-none  rounded-lg border border-gray-200 hover:bg-gray-100  focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700  `}
+                      user?.profileImage ? "block" : "hidden"
+                    } inline-flex  border border-[#168c9e] text-[#168c9e]   items-center px-3 py-2 text-sm font-medium text-center  rounded-lg  hover:bg-gray-100  `}
                   >
-                    {userPhotoDeleting ? "Deleting.." : "Delete picture"}
+                    {userPhotoDeleting ? "Deleting.." : "Delete"}
                   </button>
                 </div>
               </div>

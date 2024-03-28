@@ -188,7 +188,11 @@ function Header() {
             >
               Hi, {user?.firstName}
             </section>
-            <section className="bg-[#01bfd4] rounded-full w-[40px] h-[40px] flex items-center justify-center">
+            <section
+              className={`bg-[#01bfd4] rounded-full w-[40px] h-[40px] flex items-center justify-center ${
+                user?.profileImage ? "hidden" : "block"
+              }`}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="32"
@@ -200,6 +204,19 @@ function Header() {
                   d="M12 11.385q-1.237 0-2.119-.882T9 8.385q0-1.238.881-2.12q.881-.88 2.119-.88t2.119.88q.881.882.881 2.12q0 1.237-.881 2.118T12 11.385m-7 7.23V16.97q0-.619.36-1.158q.361-.54.97-.838q1.416-.679 2.833-1.018q1.418-.34 2.837-.34q1.42 0 2.837.34q1.417.34 2.832 1.018q.61.298.97.838q.361.539.361 1.158v1.646z"
                 />
               </svg>
+            </section>
+            <section
+              className={`rounded-full w-[40px] h-[40px] flex items-center justify-center ${
+                user?.profileImage ? "block" : "hidden"
+              }`}
+            >
+              <img
+                src={user?.profileImage}
+                alt={user?.firstName}
+                className={`rounded-full w-[40px] h-[40px] flex items-center justify-center ${
+                  user?.profileImage ? "block" : "hidden"
+                }`}
+              />
             </section>
           </div>
         </div>
